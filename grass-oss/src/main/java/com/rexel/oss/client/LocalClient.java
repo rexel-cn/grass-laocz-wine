@@ -49,9 +49,9 @@ public class LocalClient extends AbstractOSSClient {
     /**
      * 判断文件地址保存文件
      *
-     * @param path
-     * @return
-     * @throws IOException
+     * @param path path
+     * @return File
+     * @throws IOException e
      */
     private File getAbsoluteFile(String path) throws IOException {
         String basePath = uploadFilePath;
@@ -68,9 +68,9 @@ public class LocalClient extends AbstractOSSClient {
     /**
      * 文件上传
      *
-     * @param inputStream
-     * @param path
-     * @return
+     * @param inputStream inputStream
+     * @param path path
+     * @return 结果
      */
     @Override
     public String upload(InputStream inputStream, String path) {
@@ -83,11 +83,25 @@ public class LocalClient extends AbstractOSSClient {
         return domain + "/" + path;
     }
 
+    /**
+     * 文件上传
+     *
+     * @param multipartFile multipartFile
+     * @param bucketName bucketName
+     * @param path path
+     * @return 结果
+     */
     @Override
     public String upload(MultipartFile multipartFile, String bucketName, String path) {
         return null;
     }
 
+    /**
+     * 删除文件
+     *
+     * @param filename 文件的路径
+     * @param bucketName bucketName
+     */
     @Override
     public void delete(String filename, String bucketName) {
         String basePath = uploadFilePath;
@@ -98,11 +112,11 @@ public class LocalClient extends AbstractOSSClient {
     }
 
     /**
-     * @param bucketName
+     * 删除文件
+     *
+     * @param bucketName bucketName
      */
     @Override
     public void delete(String bucketName) {
-
     }
-
 }

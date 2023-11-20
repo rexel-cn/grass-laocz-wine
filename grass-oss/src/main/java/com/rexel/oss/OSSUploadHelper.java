@@ -17,9 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Date;
 
@@ -38,10 +36,10 @@ public class OSSUploadHelper {
 
     public static final String[] MEDIA_EXTENSION = {"swf", "flv", "mp3", "wav", "wma", "wmv", "mid", "avi", "mpg",
             "asf", "rm", "rmvb"};
-    //文件大小限制
+    // 文件大小限制
     // 默认大小 50M
     public static final long DEFAULT_MAX_SIZE = 52428800;
-    //允许扩展名
+    // 允许扩展名
     public static final String[] DEFAULT_ALLOWED_EXTENSION = {
             // 图片
             "blob", "bmp", "gif", "jpg", "jpeg", "png",
@@ -58,7 +56,6 @@ public class OSSUploadHelper {
     private String ossBaseDir = DEFAULT_BASE_DIR;
     private long maxSize = DEFAULT_MAX_SIZE;
     private boolean needDatePath = false;
-    //OSS上传客户端
     private String clientType = Constants.CLIENT_LOCAL;
     private IOSSClient ossClient;
 
@@ -74,7 +71,9 @@ public class OSSUploadHelper {
         allowedExtension = extension.split(",");
         clientType = propertiesUtil.getString("upload.client.type");
         this.ossClient = OSSClientFactory.build(clientType);
-        this.ossClient.init();
+        if (this.ossClient != null) {
+            this.ossClient.init();
+        }
     }
 
     public void init(OssConfig ossConfig) {
@@ -85,56 +84,54 @@ public class OSSUploadHelper {
         allowedExtension = extension.split(",");
         clientType = ossConfig.getClientType();
         this.ossClient = OSSClientFactory.build(clientType);
-        this.ossClient.init(ossConfig);
+        if (this.ossClient != null) {
+            this.ossClient.init(ossConfig);
+        }
     }
 
     /**
      * 以默认配置进行文件上传
      *
-     * @param request 当前请求
      * @param file    上传的文件
      *                添加出错信息
-     * @return
-     * @throws IOException
-     * @throws FileNameLengthLimitExceededException
-     * @throws InvalidExtensionException
-     * @throws FileSizeLimitExceededException
+     * @return 结果
+     * @throws IOException e
+     * @throws FileNameLengthLimitExceededException e
+     * @throws InvalidExtensionException e
+     * @throws FileSizeLimitExceededException e
      */
-    public String upload(HttpServletRequest request, MultipartFile file, String baseDir)
+    public String upload(MultipartFile file, String baseDir)
             throws FileSizeLimitExceededException, InvalidExtensionException, FileNameLengthLimitExceededException,
             IOException {
-        return upload(request, file, baseDir, allowedExtension);
+        return upload(file, baseDir, allowedExtension);
     }
 
-
     public String upload(MultipartFile file, String baseDir, String tenantId) throws FileSizeLimitExceededException, FileNameLengthLimitExceededException, IOException, InvalidExtensionException {
-        return upload(null, file, baseDir, allowedExtension, maxSize, needDatePath, tenantId);
+        return upload(file, baseDir, allowedExtension, maxSize, needDatePath, tenantId);
     }
 
 
     /**
      * 以默认配置进行文件上传
      *
-     * @param request          当前请求
      * @param file             上传的文件
      *                         添加出错信息
      * @param allowedExtension 允许上传的文件类型
-     * @return
-     * @throws IOException
-     * @throws FileNameLengthLimitExceededException
-     * @throws InvalidExtensionException
-     * @throws FileSizeLimitExceededException
+     * @return 结果
+     * @throws IOException e
+     * @throws FileNameLengthLimitExceededException e
+     * @throws InvalidExtensionException e
+     * @throws FileSizeLimitExceededException e
      */
-    public String upload(HttpServletRequest request, MultipartFile file, String baseDir, String[] allowedExtension)
+    public String upload(MultipartFile file, String baseDir, String[] allowedExtension)
             throws FileSizeLimitExceededException, InvalidExtensionException, FileNameLengthLimitExceededException,
             IOException {
-        return upload(request, file, baseDir, allowedExtension, maxSize, needDatePath, null);
+        return upload(file, baseDir, allowedExtension, maxSize, needDatePath, null);
     }
 
     /**
      * 文件上传
      *
-     * @param request          当前请求 从请求中提取 应用上下文根
      * @param baseDir          相对应用的基目录
      * @param file             上传的文件
      * @param allowedExtension 允许的文件类型 null 表示允许所有
@@ -146,13 +143,13 @@ public class OSSUploadHelper {
      * @throws FileNameLengthLimitExceededException 文件名太长
      * @throws IOException                          比如读写文件出错时
      */
-    public String upload(HttpServletRequest request, MultipartFile file, String baseDir,
+    public String upload(MultipartFile file, String baseDir,
                          String[] allowedExtension, long maxSize, boolean needDatePath, String tenantId)
             throws InvalidExtensionException, FileSizeLimitExceededException, IOException,
             FileNameLengthLimitExceededException {
-        int fileNamelength = file.getOriginalFilename().length();
-        if (fileNamelength > OSSUploadHelper.DEFAULT_FILE_NAME_LENGTH) {
-            throw new FileNameLengthLimitExceededException(file.getOriginalFilename(), fileNamelength,
+        int fileNameLength = file.getOriginalFilename().length();
+        if (fileNameLength > OSSUploadHelper.DEFAULT_FILE_NAME_LENGTH) {
+            throw new FileNameLengthLimitExceededException(file.getOriginalFilename(), fileNameLength,
                     OSSUploadHelper.DEFAULT_FILE_NAME_LENGTH);
         }
         assertAllowed(file, allowedExtension, maxSize);
@@ -168,69 +165,53 @@ public class OSSUploadHelper {
     /**
      * 以默认配置进行文件上传
      *
-     * @param request   当前请求
      * @param remoteUrl 上传的文件
      *                  添加出错信息
-     * @return
-     * @throws IOException
-     * @throws FileNameLengthLimitExceededException
-     * @throws InvalidExtensionException
-     * @throws FileSizeLimitExceededException
+     * @return 结果
+     * @throws IOException e
+     * @throws InvalidExtensionException e
      */
-    public String remote(HttpServletRequest request, String remoteUrl, String baseDir)
-            throws FileSizeLimitExceededException, InvalidExtensionException, FileNameLengthLimitExceededException,
-            IOException {
-        return remote(request, remoteUrl, baseDir, allowedExtension);
+    public String remote(String remoteUrl, String baseDir) throws InvalidExtensionException, IOException {
+        return remote(remoteUrl, baseDir, allowedExtension);
     }
 
     /**
      * 以默认配置进行文件上传
      *
-     * @param request          当前请求
      * @param remoteUrl        上传的文件
      *                         添加出错信息
      * @param allowedExtension 允许上传的文件类型
-     * @return
-     * @throws IOException
-     * @throws FileNameLengthLimitExceededException
-     * @throws InvalidExtensionException
-     * @throws FileSizeLimitExceededException
+     * @return 结果
+     * @throws IOException e
+     * @throws InvalidExtensionException e
      */
-    public String remote(HttpServletRequest request, String remoteUrl, String baseDir, String[] allowedExtension)
-            throws FileSizeLimitExceededException, InvalidExtensionException, FileNameLengthLimitExceededException,
-            IOException {
-        return remote(request, remoteUrl, baseDir, allowedExtension, maxSize, true);
+    public String remote(String remoteUrl, String baseDir, String[] allowedExtension)
+            throws InvalidExtensionException, IOException {
+        return remote(remoteUrl, baseDir, allowedExtension, true);
     }
 
     /**
      * 文件上传
      *
-     * @param request                   当前请求 从请求中提取 应用上下文根
      * @param baseDir                   相对应用的基目录
      * @param remoteUrl                 上传的文件
      * @param allowedExtension          允许的文件类型 null 表示允许所有
-     * @param maxSize                   最大上传的大小 -1 表示不限制
      * @param needDatePathAndRandomName 是否需要日期目录和随机文件名前缀
      * @return 返回上传成功的文件名
      * @throws InvalidExtensionException            如果MIME类型不允许
-     * @throws FileSizeLimitExceededException       如果超出最大大小
-     * @throws FileNameLengthLimitExceededException 文件名太长
      * @throws IOException                          比如读写文件出错时
      */
-    public String remote(HttpServletRequest request, String remoteUrl, String baseDir,
-                         String[] allowedExtension, long maxSize, boolean needDatePathAndRandomName)
-            throws InvalidExtensionException, FileSizeLimitExceededException, IOException,
-            FileNameLengthLimitExceededException {
+    public String remote(String remoteUrl, String baseDir,
+                         String[] allowedExtension, boolean needDatePathAndRandomName)
+            throws InvalidExtensionException, IOException {
         URL url = new URL(remoteUrl);
-        assertAllowed(remoteUrl, allowedExtension, maxSize);
+        assertAllowed(remoteUrl, allowedExtension);
         String filename = extractFilename(remoteUrl, baseDir, needDatePathAndRandomName);
         filename = StringUtils.trimDiagonal(filename);
         return ossClient.upload(url.openStream(), filename);
     }
 
-    public String extractFilename(String remoteUrl, String baseDir, boolean needDatePathAndRandomName)
-            throws UnsupportedEncodingException {
-        //字符串处理
+    public String extractFilename(String remoteUrl, String baseDir, boolean needDatePathAndRandomName) {
         if (!StringUtils.isEmpty(this.ossBaseDir)) {
             if (!StringUtils.isEmpty(baseDir)) {
                 baseDir = this.ossBaseDir + "/" + baseDir;
@@ -258,13 +239,9 @@ public class OSSUploadHelper {
      *
      * @param remoteUrl        上传的文件
      * @param allowedExtension 文件类型 null 表示允许所有
-     * @param maxSize          最大大小 字节为单位 -1表示不限制
-     * @return
      * @throws InvalidExtensionException      如果MIME类型不允许
-     * @throws FileSizeLimitExceededException 如果超出最大大小
      */
-    public void assertAllowed(String remoteUrl, String[] allowedExtension, long maxSize)
-            throws InvalidExtensionException, FileSizeLimitExceededException {
+    public void assertAllowed(String remoteUrl, String[] allowedExtension) throws InvalidExtensionException {
 
         String extension = FilenameUtils.getExtension(remoteUrl);
         if (allowedExtension != null && !isAllowedExtension(extension, allowedExtension)) {
@@ -294,15 +271,14 @@ public class OSSUploadHelper {
     /**
      * 日期路径 即年/月/日 如2013/01/03
      *
-     * @return
+     * @return 结果
      */
     private String datePath() {
         Date now = new Date();
         return DateFormatUtils.format(now, "yyyy/MM/dd");
     }
 
-    public String extractFilename(MultipartFile file, String baseDir, boolean needDatePathAndRandomName)
-            throws UnsupportedEncodingException {
+    public String extractFilename(MultipartFile file, String baseDir, boolean needDatePathAndRandomName) {
         if (!StringUtils.isEmpty(this.ossBaseDir)) {
             if (!StringUtils.isEmpty(baseDir)) {
                 baseDir = this.ossBaseDir + "/" + baseDir;
@@ -310,10 +286,8 @@ public class OSSUploadHelper {
                 baseDir = this.ossBaseDir;
             }
         }
-        String filename = file.getOriginalFilename();
         //文件名必须重新命名，以时间精确到毫秒命名
-        filename = DateUtils.dateTimeNow() + "."
-                + getExtension(file);
+        String filename = DateUtils.dateTimeNow() + "." + getExtension(file);
         if (needDatePathAndRandomName) {
             filename = datePath() + "/" + filename;
         }
@@ -326,9 +300,9 @@ public class OSSUploadHelper {
     /**
      * 判断MIME类型是否是允许的MIME类型
      *
-     * @param extension
-     * @param allowedExtension
-     * @return
+     * @param extension extension
+     * @param allowedExtension allowedExtension
+     * @return 结果
      */
     public boolean isAllowedExtension(String extension, String[] allowedExtension) {
         for (String str : allowedExtension) {
@@ -338,7 +312,6 @@ public class OSSUploadHelper {
         }
         return false;
     }
-
 
     public void delete(String filename, String bucketName) throws IOException {
         if (StringUtils.isEmpty(filename)) {
@@ -360,7 +333,6 @@ public class OSSUploadHelper {
      * @param file             上传的文件
      * @param allowedExtension 文件类型 null 表示允许所有
      * @param maxSize          最大大小 字节为单位 -1表示不限制
-     * @return
      * @throws InvalidExtensionException      如果MIME类型不允许
      * @throws FileSizeLimitExceededException 如果超出最大大小
      */

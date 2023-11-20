@@ -81,7 +81,7 @@ public class GrassEarlyWarningServiceImpl implements IGrassEarlyWarningService {
      */
     @PostConstruct
     public void startUpEarlyWarning() {
-        refreshMqttListener();
+//        refreshMqttListener();
     }
 
     /**

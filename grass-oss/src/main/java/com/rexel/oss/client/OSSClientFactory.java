@@ -11,8 +11,6 @@ public final class OSSClientFactory {
         IOSSClient ossClient;
         if (Constants.CLIENT_LOCAL.equals(clientType)) {
             ossClient = new LocalClient();
-        } else if (Constants.CLIENTA_ALIYUN.equals(clientType)) {
-            ossClient = new AliyunOSSClient();
         } else if (Constants.CLIENTA_MINIO.equals(clientType)) {
             ossClient = new MInoOSSClient();
         } else {

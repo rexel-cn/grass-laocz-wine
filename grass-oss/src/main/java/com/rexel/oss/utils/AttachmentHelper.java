@@ -43,18 +43,18 @@ public class AttachmentHelper {
     public String upload(HttpServletRequest request, MultipartFile file) throws FileSizeLimitExceededException,
             IOException, FileNameLengthLimitExceededException, InvalidExtensionException {
         String basePath = request.getParameter("directory");
-        return upload(request, file, basePath);
+        return upload(file, basePath);
     }
 
-    public String upload(HttpServletRequest request, MultipartFile file, String directory) throws FileSizeLimitExceededException,
+    public String upload(MultipartFile file, String directory) throws FileSizeLimitExceededException,
             IOException, FileNameLengthLimitExceededException, InvalidExtensionException {
-        return uploadHelper.upload(request, file, directory);
+        return uploadHelper.upload(file, directory);
     }
 
     public String remote(HttpServletRequest request, String remoteUrl) throws FileSizeLimitExceededException,
             IOException, FileNameLengthLimitExceededException, InvalidExtensionException {
         String basePath = request.getParameter("base_path");
-        return uploadHelper.remote(request, remoteUrl, basePath);
+        return uploadHelper.remote(remoteUrl, basePath);
     }
 
     public String upload(MultipartFile file, String directory, String tenantId) throws FileSizeLimitExceededException,

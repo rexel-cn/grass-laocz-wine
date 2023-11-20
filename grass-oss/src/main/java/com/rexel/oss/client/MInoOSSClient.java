@@ -1,8 +1,4 @@
-package com.rexel.oss.client;/**
- * @Author 董海
- * @Date 2022/7/4 14:24
- * @version 1.0
- */
+package com.rexel.oss.client;
 
 import com.rexel.oss.config.MinioConfig;
 import com.rexel.oss.config.OssConfig;

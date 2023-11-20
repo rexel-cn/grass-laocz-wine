@@ -13,10 +13,6 @@ import java.io.InputStream;
  * @description: 常量 * @date: 2017年8月11日 下午9:55:00
  * @copyright: 2017 kjt.gzst.gov.cn Inc. All rights reserved.
  */
-//接口：插入、刪除、修改
-//文件HTTP直接上传
-//用一个虚类来处理公用的
-//一个配置的地方，本系统默认采用阿里云，也就是云上贵州
 public interface IOSSClient {
 
     /**
@@ -27,34 +23,48 @@ public interface IOSSClient {
     /**
      * 客户端初始化
      *
-     * @param propertiesName
+     * @param propertiesName propertiesName
      */
     void init(String propertiesName);
 
     /**
      * 客户端初始化
      *
-     * @param config
+     * @param config config
      */
     void init(OssConfig config);
 
     /**
      * 文件上传
      *
-     * @param inputStream
-     * @param path
+     * @param inputStream inputStream
+     * @param path path
      * @return 返回可以访问的路径
      */
     String upload(InputStream inputStream, String path);
 
+    /**
+     * 文件上传
+     *
+     * @param multipartFile multipartFile
+     * @param bucketName bucketName
+     * @param path path
+     * @return 返回可以访问的路径
+     */
     String upload(MultipartFile multipartFile, String bucketName, String path);
 
     /**
      * 删除文件
      *
      * @param filename 文件的路径
+     * @param bucketName bucketName
      */
     void delete(String filename, String bucketName);
 
+    /**
+     * 删除文件
+     *
+     * @param bucketName bucketName
+     */
     void delete(String bucketName);
 }

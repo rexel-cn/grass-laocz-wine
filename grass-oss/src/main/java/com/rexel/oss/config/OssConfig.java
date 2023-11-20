@@ -26,8 +26,6 @@ public class OssConfig {
     boolean needDatePath = false;
     ;
 
-    private AliyunConfig aliyun;
-
     private MinioConfig minio;
 
     private LocalConfig local;
@@ -38,14 +36,6 @@ public class OssConfig {
 
     public void setMinio(MinioConfig minio) {
         this.minio = minio;
-    }
-
-    public AliyunConfig getAliyun() {
-        return aliyun;
-    }
-
-    public void setAliyun(AliyunConfig aliyun) {
-        this.aliyun = aliyun;
     }
 
     public LocalConfig getLocal() {

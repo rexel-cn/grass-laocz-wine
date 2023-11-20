@@ -96,12 +96,12 @@ public class CommonController {
 
 
     @PostMapping(value = "/common/ossUpload")
-    public AjaxResult upload(HttpServletRequest request, MultipartFile file, @RequestParam(required = false, defaultValue = "") String dir) {
+    public AjaxResult upload(MultipartFile file, @RequestParam(required = false, defaultValue = "") String dir) {
         try {
             if (ObjectUtil.isEmpty(file)) {
                 return AjaxResult.error("上传文件不能为空！");
             }
-            return AjaxResult.success((Object) attachmentHelper.upload(request, file, dir));
+            return AjaxResult.success((Object) attachmentHelper.upload(file, dir));
         } catch (IOException | FileUploadBase.FileSizeLimitExceededException | FileNameLengthLimitExceededException |
                  com.rexel.oss.exception.FileNameLengthLimitExceededException | InvalidExtensionException e) {
             return AjaxResult.error("上传失败");
