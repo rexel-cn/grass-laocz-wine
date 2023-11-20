@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassPointTagInfoMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassPointTagInfo" id="GrassPointTagInfoResult">
+        <result property="id" column="id"/>
+        <result property="tagKey" column="tag_key"/>
+        <result property="tagValue" column="tag_value"/>
+        <result property="tagType" column="tag_type"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassPointTagInfoVo">
+        select id,
+               tag_key,
+               tag_value,
+               tag_type,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_point_tag_info
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_point_tag_info
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassPointTagInfoList" parameterType="com.rexel.system.domain.GrassPointTagInfo"
+            resultMap="GrassPointTagInfoResult">
+        <include refid="selectGrassPointTagInfoVo"/>
+        <where>
+            <if test="tagKey != null  and tagKey != ''">
+                and tag_key = #{tagKey}
+            </if>
+            <if test="tagValue != null  and tagValue != ''">
+                and tag_value = #{tagValue}
+            </if>
+            <if test="tagType != null  and tagType != ''">
+                and tag_type = #{tagType}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="selectTagKV" resultType="com.rexel.system.domain.GrassPointTagInfo">
+        <include refid="selectGrassPointTagInfoVo"/>
+        <where>
+            <if test="tagKey != null  and tagKey != ''">
+                and tag_key = #{tagKey}
+            </if>
+            <if test="tagValue != null  and tagValue != ''">
+                and tag_value = #{tagValue}
+            </if>
+            <if test="tagType != null  and tagType != ''">
+                and tag_type = #{tagType}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+<!--    查询所有的TagKey去重后返回-->
+    <select id="selectTagKey" resultType="java.lang.String">
+        select
+        distinct tag_key
+        from grass_point_tag_info
+        ORDER BY create_time desc
+    </select>
+
+<!--    导出-->
+    <select id="selectExport" resultType="com.rexel.system.domain.vo.PointTagExportVO">
+        SELECT gpt.device_id,
+               gpt.point_id,
+               gpti.tag_key,
+               gpti.tag_value,
+               gpti.tag_type,
+               gpti.remark,
+               gpi.point_name,
+               gpi.device_name,
+               gpi.point_type
+        FROM grass_point_tag_info gpti
+                 LEFT JOIN grass_point_tag_point gpt ON gpti.id = gpt.point_tag_info_id
+                 LEFT JOIN grass_point_info gpi ON gpt.point_id = gpi.point_id and gpi.is_delete = '0'
+            AND gpt.device_id = gpi.device_id AND gpt.point_type = gpi.point_type
+    </select>
+
+</mapper>

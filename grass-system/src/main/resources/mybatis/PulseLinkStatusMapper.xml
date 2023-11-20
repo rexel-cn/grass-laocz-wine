@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.PulseLinkStatusMapper">
+
+    <resultMap type="PulseLinkStatus" id="PulseLinkStatusResult">
+        <result property="id" column="id"/>
+        <result property="machineCode" column="machine_code"/>
+        <result property="linkTime" column="link_time"/>
+        <result property="linkStatus" column="link_status"/>
+    </resultMap>
+
+    <sql id="selectPulseLinkStatusVo">
+        select id, machine_code, link_time, link_status
+        from pulse_link_status
+    </sql>
+    <delete id="deleteByLinkId">
+        DELETE pls
+        FROM
+        pulse_link_status pls
+        INNER JOIN pulse_link_info pli ON pls.machine_code=pli.machine_code
+        <where>
+            <choose>
+                <when test="linkId!=null and linkId!=''">
+                    pli.link_id=#{linkId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </delete>
+
+    <select id="selectPulseLinkStatusList" parameterType="PulseLinkStatus" resultMap="PulseLinkStatusResult">
+        <include refid="selectPulseLinkStatusVo"/>
+        <where>
+            <if test="machineCode != null  and machineCode != ''">
+                and machine_code = #{machineCode}
+            </if>
+            <if test="linkTime != null ">
+                and link_time = #{linkTime}
+            </if>
+            <if test="linkStatus != null  and linkStatus != ''">
+                and link_status = #{linkStatus}
+            </if>
+        </where>
+        ORDER BY link_time desc
+    </select>
+
+</mapper>

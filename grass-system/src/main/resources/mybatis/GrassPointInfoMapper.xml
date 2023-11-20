@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassPointInfoMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassPointInfo" id="GrassPointInfoResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="pointUnique" column="point_unique"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="pointId" column="point_id"/>
+        <result property="pointType" column="point_type"/>
+        <result property="pointName" column="point_name"/>
+        <result property="pointUnit" column="point_unit"/>
+        <result property="variable" column="variable"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="inMin" column="in_min"/>
+        <result property="inMax" column="in_max"/>
+        <result property="outMin" column="out_min"/>
+        <result property="outMax" column="out_max"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="com.rexel.system.domain.vo.PointQueryVO" id="PointQueryVOResult">
+        <result property="id" column="id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="linkDeviceType" column="link_device_type"/>
+        <result property="pointId" column="point_id"/>
+        <result property="pointType" column="point_type"/>
+        <result property="pointName" column="point_name"/>
+        <result property="pointTypeDesc" column="point_type_desc"/>
+        <result property="pointUnit" column="point_unit"/>
+        <result property="pointUnitDesc" column="point_unit_desc"/>
+        <result property="inMin" column="in_min"/>
+        <result property="inMax" column="in_max"/>
+        <result property="outMin" column="out_min"/>
+        <result property="outMax" column="out_max"/>
+        <result property="associateDeviceCount" column="associateDeviceCount"/>
+        <result property="pointTagCount" column="pointTagCount"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectGrassPointInfoVo">
+        select id,
+               tenant_id,
+               point_unique,
+               device_id,
+               device_name,
+               point_id,
+               point_type,
+               point_name,
+               point_unit,
+               variable,
+               is_delete,
+               in_min,
+               in_max,
+               out_min,
+               out_max,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_point_info
+    </sql>
+
+    <insert id="insertGrassPointInfoBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            insert into grass_point_info
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="item.id != null and item.id != ''">id,</if>
+                <if test="item.deviceId != null and item.deviceId != ''">device_id,</if>
+                <if test="item.deviceName != null and item.deviceName != ''">device_name,</if>
+                <if test="item.pointId != null and item.pointId != ''">point_id,</if>
+                <if test="item.pointType != null and item.pointType  != ''">point_type,</if>
+                <if test="item.pointName != null and item.pointName != ''">point_name,</if>
+                <if test="item.pointUnit != null and item.pointUnit != ''">point_unit,</if>
+                <if test="item.inMin != null">in_min,</if>
+                <if test="item.inMax != null">in_max,</if>
+                <if test="item.outMin != null">out_min,</if>
+                <if test="item.outMax != null">out_max,</if>
+                <if test="item.remark != null and item.remark  != ''">remark,</if>
+                <if test="item.createBy != null and item.createBy != ''">create_by,</if>
+                <if test="item.createTime != null">create_time,</if>
+                <if test="item.updateBy != null and item.updateBy != ''">update_by,</if>
+                <if test="item.updateTime != null">update_time,</if>
+            </trim>
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="item.id != null and item.id != ''">#{item.id},</if>
+                <if test="item.deviceId != null and item.deviceId != ''">#{item.deviceId},</if>
+                <if test="item.deviceName != null  and item.deviceName != ''">#{item.deviceName},</if>
+                <if test="item.pointId != null and item.pointId != ''">#{item.pointId},</if>
+                <if test="item.pointType != null and item.pointType  != ''">#{item.pointType},</if>
+                <if test="item.pointName != null and item.pointName != ''">#{item.pointName},</if>
+                <if test="item.pointUnit != null and item.pointUnit != ''">#{item.pointUnit},</if>
+                <if test="item.inMin != null">#{item.inMin},</if>
+                <if test="item.inMax != null">#{item.inMax},</if>
+                <if test="item.outMin != null">#{item.outMin},</if>
+                <if test="item.outMax != null">#{item.outMax},</if>
+                <if test="item.remark != null and item.remark  != ''">#{item.remark},</if>
+                <if test="item.createBy != null and item.createBy != ''">#{item.createBy},</if>
+                <if test="item.createTime != null">#{item.createTime},</if>
+                <if test="item.updateBy != null and item.updateBy != ''">#{item.updateBy},</if>
+                <if test="item.updateTime != null">#{item.updateTime},</if>
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateGrassPointInfoBatchById" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE grass_point_info
+            <set>
+                <if test="item.deviceId != null">device_id = #{item.deviceId},</if>
+                <if test="item.deviceName != null">device_name = #{item.deviceName},</if>
+                <if test="item.pointId != null">point_id = #{item.pointId},</if>
+                <if test="item.pointType != null">point_type = #{item.pointType},</if>
+                <if test="item.pointName != null">point_name = #{item.pointName},</if>
+                <if test="item.pointUnit != null">point_unit = #{item.pointUnit},</if>
+                <if test="item.inMin != null">in_min = #{item.inMin},</if>
+                <if test="item.inMax != null">in_max = #{item.inMax},</if>
+                <if test="item.outMin != null">out_min = #{item.outMin},</if>
+                <if test="item.outMax != null">out_max = #{item.outMax},</if>
+                <if test="item.remark != null">remark = #{item.remark},</if>
+                <if test="item.createBy != null">create_by = #{item.createBy},</if>
+                <if test="item.createTime != null">create_time = #{item.createTime},</if>
+                <if test="item.updateBy != null">update_by = #{item.updateBy},</if>
+                <if test="item.updateTime != null">update_time = #{item.updateTime},</if>
+            </set>
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <update id="updateGrassPointInfoById">
+        UPDATE grass_point_info
+        <set>
+            <if test="pointType != null">point_type = #{pointType},</if>
+            <if test="pointName != null">point_name = #{pointName},</if>
+            <if test="pointUnit != null">point_unit = #{pointUnit},</if>
+            <if test="inMin != null">in_min = #{inMin},</if>
+            <if test="inMax != null">in_max = #{inMax},</if>
+            <if test="outMin != null">out_min = #{outMin},</if>
+            <if test="outMax != null">out_max = #{outMax},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_point_info
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassPointInfoList" parameterType="com.rexel.system.domain.GrassPointInfo"
+            resultMap="GrassPointInfoResult">
+        <include refid="selectGrassPointInfoVo"/>
+        <where>
+            <if test="deviceId != null  and deviceId != ''">
+                and device_id = #{deviceId}
+            </if>
+            <if test="deviceName != null  and deviceName != ''">
+                and device_name = #{deviceName}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and point_id = #{pointId}
+            </if>
+            <if test="pointType != null  and pointType != ''">
+                and point_type = #{pointType}
+            </if>
+            <if test="pointName != null  and pointName != ''">
+                and point_name like concat('%', #{pointName}, '%')
+            </if>
+            <if test="pointUnit != null  and pointUnit != ''">
+                and point_unit = #{pointUnit}
+            </if>
+            <if test="inMin != null ">
+                and in_min = #{inMin}
+            </if>
+            <if test="inMax != null ">
+                and in_max = #{inMax}
+            </if>
+            <if test="outMin != null ">
+                and out_min = #{outMin}
+            </if>
+            <if test="outMax != null ">
+                and out_max = #{outMax}
+            </if>
+            and is_delete = '0'
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="selectGrassPointInfoListByPulse"
+            resultMap="GrassPointInfoResult">
+        <include refid="selectGrassPointInfoVo"/>
+        <where>
+            <choose>
+                <when test="list != null and list.size() > 0">
+                    id in
+                    <foreach item="item" collection="list" open="(" separator="," close=")">
+                        #{item.id}
+                    </foreach>
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="selectByAssetId" resultMap="GrassPointInfoResult">
+        SELECT
+        gpt.id,
+        gpt.tenant_id,
+        gpt.point_unique,
+        gpt.device_id,
+        gdi.device_name,
+        gpt.point_id,
+        gpt.point_type,
+        gpt.point_name,
+        gpt.point_unit,
+        gpt.variable,
+        gpt.is_delete,
+        gpt.in_min,
+        gpt.in_max,
+        gpt.out_max,
+        gpt.out_min,
+        gpt.remark,
+        gpt.create_by,
+        gpt.update_by,
+        gpt.create_time,
+        gpt.update_time
+        FROM
+        grass_asset_point AS gap
+        LEFT JOIN grass_point_info AS gpt ON gap.point_primary_key = gpt.id
+        LEFT JOIN grass_device_info AS gdi ON gpt.device_id= gdi.device_id
+        <where>
+            <if test="id != null ">and gap.asset_id = #{id}</if>
+            and gpt.is_delete = '0'
+        </where>
+    </select>
+
+    <select id="getList" resultMap="PointQueryVOResult"
+            parameterType="com.rexel.system.domain.GrassPointInfo">
+        SELECT
+        gpi.id,
+        gpi.device_id,
+        gdi.device_name,
+        pli.link_device_type,
+        gpi.point_id,
+        gpi.point_type,
+        gpi.point_name,
+        gpi.point_unit,
+        gpi.in_min,
+        gpi.in_max,
+        gpi.out_min,
+        gpi.out_max,
+        gpi.remark,
+        gpi.create_by,
+        gpi.create_time,
+        gpi.update_by,
+        gpi.update_time,
+        sdd_pt.dict_label AS point_type_desc,
+        sdd_pu.dict_label AS point_unit_desc,
+        ( SELECT count( 1 ) FROM grass_asset_point gap WHERE gap.point_primary_key = gpi.id ) AS associateDeviceCount,
+        ( SELECT count( 1 ) FROM grass_point_tag_point gpt WHERE gpt.point_id = gpi.point_id and gpt.device_id =
+        gpi.device_id ) AS pointTagCount
+        FROM
+        grass_point_info gpi
+        LEFT JOIN grass_device_info gdi ON gpi.device_id = gdi.device_id
+        LEFT JOIN pulse_link_info pli ON gdi.link_id = pli.link_id
+        LEFT JOIN sys_dict_data sdd_pt ON gpi.point_type = sdd_pt.dict_value
+        AND sdd_pt.dict_type = 'point_type'
+        LEFT JOIN sys_dict_data sdd_pu ON gpi.point_unit = sdd_pu.dict_value
+        AND sdd_pu.dict_type = 'point_unit'
+        <where>
+            <if test="deviceId != null  and deviceId != ''">
+                and gpi.device_id =#{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and gpi.point_id like concat('%', #{pointId}, '%')
+            </if>
+            <if test="pointName != null  and pointName != ''">
+                and gpi.point_name like concat('%', #{pointName}, '%')
+            </if>
+            <if test="assetId!= null and assetId!='' ">
+                and gpi.id IN (
+                SELECT
+                gap.point_primary_key
+                FROM
+                grass_asset_point gap
+                WHERE
+                gap.asset_id = #{assetId})
+            </if>
+            <if test="assetIds != null and assetIds.size() > 0 ">
+                and gpi.id IN (
+                SELECT
+                gap.point_primary_key
+                FROM
+                grass_asset_point gap
+                INNER JOIN grass_asset ga ON ga.id = gap.asset_id
+                WHERE ga.asset_type_id IN
+                <foreach item="item" collection="assetIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+            <if test="tagKey!=null and tagKey!='' ">
+                AND gpi.point_id IN (
+                SELECT
+                gptp.point_id
+                FROM
+                grass_point_tag_point gptp
+                inner join grass_point_tag_info gpti on gptp.point_tag_info_id = gpti.id
+                WHERE
+                gpti.tag_key = #{tagKey}
+                )
+            </if>
+            and gpi.is_delete = '0'
+        </where>
+        order by gpi.device_id, gpi.point_id
+    </select>
+
+    <select id="dropDown" resultType="com.rexel.system.domain.GrassPointInfo">
+        select
+        id,
+        tenant_id,
+        device_id,
+        point_id,
+        point_name
+        from grass_point_info gpi
+        <where>
+            <if test="deviceId!=null and deviceId!='' ">
+                gpi.device_id = #{deviceId}
+            </if>
+            <if test="assetId!= null and assetId!='' ">
+                and gpi.id IN (
+                SELECT
+                gap.point_primary_key
+                FROM
+                grass_asset_point gap
+                WHERE
+                gap.asset_id = #{assetId})
+            </if>
+            and gpi.is_delete = '0'
+        </where>
+        order by device_id, point_id
+    </select>
+
+    <select id="selectByList" resultType="com.rexel.system.domain.GrassPointInfo">
+        select * from grass_point_info
+        <where>
+            <if test="list !=null and list.size() >0 ">
+                <foreach collection="list" open="(" close=")" item="item" separator="or">
+                    <if test=" item.deviceId != '' and item.pointId != '' ">
+                        ( device_id = #{item.deviceId} and point_id = #{item.pointId} )
+                    </if>
+                </foreach>
+            </if>
+            and is_delete = '0'
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1)
+        from grass_point_info
+        where is_delete = '0'
+    </select>
+
+    <select id="selectByAsset" resultType="com.rexel.system.domain.vo.PointTimeDataVO">
+        SELECT
+        ISNULL( gpus.id ) AS starShow,
+        gap.asset_id AS assetId,
+        gap.point_primary_key AS pointPrimaryKey,
+        gpt.tenant_id,
+        gpt.point_unique,
+        gpt.device_id,
+        gpt.device_name,
+        gpt.point_id,
+        gpt.point_type,
+        gpt.point_name,
+        sdd_unit.dict_label AS point_unit,
+        gpt.variable,
+        gpt.is_delete,
+        gpt.in_min,
+        gpt.out_min,
+        gpt.in_max,
+        gpt.out_max,
+        gpt.remark,
+        gpt.create_time,
+        gpt.create_by,
+        gpt.update_by,
+        gpt.update_time
+        FROM
+        grass_asset_point gap
+        LEFT JOIN grass_point_info gpt ON gap.point_primary_key = gpt.id
+        LEFT JOIN sys_dict_data sdd_unit ON gpt.point_unit = sdd_unit.dict_value
+        AND sdd_unit.dict_type = 'point_unit'
+        LEFT JOIN (
+        SELECT
+        gpu.id,
+        gpu.asset_id,
+        gpu.user_id,
+        gpu.point_primary_key,
+        gpu.top_time,
+        gpu.tenant_id FROM grass_point_user_star gpu
+        <where>
+            <if test="userId!=null">gpu.user_id = #{userId}</if>
+        </where>
+        ) gpus ON gap.point_primary_key = gpus.point_primary_key
+        AND gap.asset_id = gpus.asset_id
+        <where>
+            <if test="id != null ">and gap.asset_id = #{id}</if>
+            <if test="pointId != null and pointId!='' ">and gpt.point_id like concat('%', #{pointId}, '%')</if>
+            <if test="pointName != null and pointName!='' ">and gpt.point_name like concat('%', #{pointName}, '%')</if>
+            and gpt.is_delete = '0'
+        </where>
+        ORDER BY gpus.top_time DESC
+    </select>
+
+    <select id="selectByDeviceIdAndPointId" resultType="com.rexel.system.domain.GrassPointInfo">
+        SELECT
+        gpi.id,
+        gpi.tenant_id,
+        gpi.point_unique,
+        gpi.device_id,
+        gpi.device_name,
+        gpi.point_id,
+        gpi.point_type,
+        gpi.point_name,
+        gpi.point_unit,
+        gpi.variable,
+        gpi.is_delete,
+        gpi.in_min,
+        gpi.in_max,
+        gpi.out_min,
+        gpi.out_max,
+        gpi.remark
+        FROM
+        grass_point_info AS gpi
+        <where>
+            <choose>
+                <when test="list!=null and list.size>0">
+                    (gpi.device_id,gpi.point_id,gpi.point_type) in
+                    <foreach collection="list" open="(" close=")" item="item" separator=",">
+                        <if test=" (item.deviceId!=null and  item.deviceId!= '')
+                        and  (item.pointId!=null and item.pointId != '')
+                        and  (item.pointType!=null and item.pointType != '')  ">
+                            (#{item.deviceId},#{item.pointId},#{item.pointType})
+                        </if>
+                    </foreach>
+                </when>
+                <otherwise>
+                    1=2
+                </otherwise>
+            </choose>
+            and gpi.is_delete = '0'
+        </where>
+        ORDER BY gpi.create_time desc
+    </select>
+
+    <!--    根据测点id和设备id，拿到所有测点-->
+    <select id="selectBatchPointIdsByPointTagInfoId" resultType="com.rexel.system.domain.GrassPointInfo">
+        SELECT
+        gpi.id,
+        gpi.tenant_id,
+        gpi.point_unique,
+        gpi.device_id,
+        gpi.device_name,
+        gpi.point_id,
+        gpi.point_type,
+        gpi.point_name,
+        gpi.point_unit,
+        gpi.variable,
+        gpi.qty,
+        gpi.in_min,
+        gpi.is_delete,
+        gpi.in_max,
+        gpi.out_min,
+        gpi.remark,
+        gpi.out_max,
+        gpi.create_by,
+        gpi.create_time,
+        gpi.update_by,
+        gpi.update_time
+        FROM
+        grass_point_info AS gpi
+        LEFT JOIN grass_point_tag_point AS gptp ON gpi.device_id = gptp.device_id
+        AND gpi.point_id = gptp.point_id
+        AND gpi.point_type = gptp.point_type
+        <where>
+            <choose>
+                <when test="pointTagInfoId!=null">
+                    gptp.point_tag_info_id = #{pointTagInfoId}
+                </when>
+                <otherwise>
+                    1=2
+                </otherwise>
+            </choose>
+            and gpi.is_delete = '0'
+        </where>
+    </select>
+
+    <select id="selectByTag" resultType="com.rexel.system.domain.GrassPointInfo">
+        select
+        gpi.id,
+        gpi.device_name,
+        gpi.device_id,
+        gpi.point_id,
+        gpi.point_name,
+        gpi.point_type,
+        gpi.point_unit,
+        gpi.variable,
+        gpti.tag_key,
+        gpti.tag_type,
+        gpti.tag_value,
+        gpti.remark
+        from
+        grass_point_tag_info gpti
+        LEFT JOIN grass_point_tag_point gptp on gpti.id = gptp.point_tag_info_id
+        LEFT JOIN grass_point_info gpi on gptp.point_id = gpi.point_id
+            and gptp.device_id = gpi.device_id and gptp.point_type = gpi.point_type
+        <where>
+            <if test="tagKey != null and tagKey != ''">and gpti.tag_key = #{tagKey}</if>
+            <if test="tagValue != null and tagValue != ''">and gpti.tag_value = #{tagValue}</if>
+            <if test="tagType != null and tagType != ''">and gpti.tag_type = #{tagType}</if>
+            and gpi.is_delete = '0'
+        </where>
+        ORDER BY gpti.create_time desc
+    </select>
+
+</mapper>

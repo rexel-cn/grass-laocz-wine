@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.PulseLinkInfoMapper">
+
+    <resultMap type="com.rexel.system.domain.PulseLinkInfo" id="PulseLinkInfoResult">
+        <result property="linkId" column="link_id"/>
+        <result property="linkTime" column="link_time"/>
+        <result property="machineCode" column="machine_code"/>
+        <result property="linkDeviceType" column="link_device_type"/>
+        <result property="linkTenant" column="link_tenant"/>
+    </resultMap>
+
+    <sql id="selectPulseLinkInfoVo">
+        select link_id, link_time, machine_code, link_device_type, link_tenant
+        from pulse_link_info
+    </sql>
+
+
+    <select id="selectPulseLinkInfoList" parameterType="com.rexel.system.domain.PulseLinkInfo" resultMap="PulseLinkInfoResult">
+        <include refid="selectPulseLinkInfoVo"/>
+        <where>
+            <if test="linkTime != null ">
+                and link_time = #{linkTime}
+            </if>
+            <if test="machineCode != null  and machineCode != ''">
+                and machine_code = #{machineCode}
+            </if>
+        </where>
+        ORDER BY link_time desc
+    </select>
+    <sql id="create_temporary_link_status">
+        DROP TABLE
+            IF
+            EXISTS link_status;
+        CREATE
+        TEMPORARY TABLE link_status
+        SELECT machine_code,
+               lj_status,
+               last_time
+        FROM (SELECT pls.machine_code,
+                     FIRST_VALUE(pls.link_status) OVER ( PARTITION BY pls.machine_code ORDER BY pls.link_time DESC ) AS lj_status, FIRST_VALUE(pls.link_time) OVER ( PARTITION BY pls.machine_code ORDER BY pls.link_status DESC ) AS last_time
+              FROM pulse_link_status pls) ac
+        GROUP BY machine_code;
+    </sql>
+    <sql id="delete_temporary_link_status">
+        ;
+        DROP TABLE
+            IF
+            EXISTS link_status;
+    </sql>
+    <select id="selectEquipmentVO" resultType="com.rexel.system.domain.vo.EquipmentVO">
+        <include refid="create_temporary_link_status"/>
+        SELECT
+        pli.link_id AS linkId,
+        pli.machine_code AS machineCode,
+        pli.link_time AS linkTime,
+        pli.link_device_type AS linkDeviceType,
+        pli.link_device_name AS linkDeviceName,
+        sdd_link_status.dict_label AS linkStatus,
+        pls.lj_status AS linkStatusCode,
+        pls.last_time AS lastTime,
+        gdi.device_id AS deviceId,
+        gdi.device_name AS deviceName
+        FROM
+        pulse_link_info pli
+        LEFT JOIN link_status pls ON pli.machine_code = pls.machine_code
+        LEFT JOIN grass_device_info gdi ON pli.link_id = gdi.link_id
+        LEFT JOIN sys_dict_data sdd_link_status ON pls.lj_status = sdd_link_status.dict_value
+        AND sdd_link_status.dict_type = 'link_status'
+        <where>
+            <choose>
+                <when test="master!=null and !master ">
+                    ISNULL(gdi.device_id) AND
+
+                    <trim prefix="(" suffix=")">
+                        pli.link_tenant=''
+                        <if test="tenantId!=null and tenantId!='' ">OR pli.link_tenant = #{tenantId}</if>
+                    </trim>
+
+
+                </when>
+                <otherwise>
+                    gdi.device_id IS NOT NULL
+                    <if test="tenantId!=null and tenantId!='' ">AND gdi.tenant_id = #{tenantId}</if>
+                </otherwise>
+            </choose>
+            <if test="linkDeviceType!=null and linkDeviceType!='' ">AND pli.link_device_type=#{linkDeviceType}</if>
+            <if test="deviceName!=null and deviceName!='' ">AND gdi.device_name LIKE concat('%', #{deviceName}, '%')
+            </if>
+            <if test="ljStatus!=null and ljStatus!='' ">AND pls.lj_status = #{ljStatus}</if>
+        </where>
+        ORDER BY pli.link_time DESC
+        <if test="pageNum!=null and pageSize!=null">
+            limit #{pageNum},#{pageSize}
+        </if>
+        <include refid="delete_temporary_link_status"/>
+    </select>
+
+
+    <select id="selectPulseLinkInfoByDeviceId" resultType="com.rexel.system.domain.PulseLinkInfo">
+        SELECT
+        pli.link_id AS linkId,
+        pli.link_time AS linkTime,
+        pli.link_device_type AS linkDeviceType,
+        pli.link_tenant AS linkTenant,
+        pli.machine_code AS machineCode
+        FROM
+        pulse_link_info AS pli
+        INNER JOIN grass_device_info AS gdi ON pli.link_id = gdi.link_id
+        <where>
+            <choose>
+                <when test="deviceId!=null and deviceId!='' ">
+                    gdi.device_id = #{deviceId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="selectLinkDeviceType" resultType="java.lang.String">
+        SELECT DISTINCT link_device_type
+        FROM pulse_link_info
+        WHERE link_device_type IS NOT NULL
+          AND LENGTH(link_device_type) > 0
+    </select>
+    <select id="selectEquipmentVOCount" resultType="java.lang.Long">
+        <include refid="create_temporary_link_status"/>
+        SELECT
+        count(1)
+        FROM
+        pulse_link_info pli
+        LEFT JOIN link_status pls ON pli.machine_code = pls.machine_code
+        LEFT JOIN grass_device_info gdi ON pli.link_id = gdi.link_id
+        LEFT JOIN sys_dict_data sdd_link_status ON pls.lj_status = sdd_link_status.dict_value
+        AND sdd_link_status.dict_type = 'link_status'
+        <where>
+            <choose>
+                <when test="master!=null and !master ">
+                    ISNULL(gdi.device_id) AND
+
+                    <trim prefix="(" suffix=")">
+                        pli.link_tenant=''
+                        <if test="tenantId!=null and tenantId!='' ">OR pli.link_tenant = #{tenantId}</if>
+                    </trim>
+                </when>
+                <otherwise>
+                    gdi.device_id IS NOT NULL
+                    <if test="tenantId!=null and tenantId!='' ">AND gdi.tenant_id = #{tenantId}</if>
+                </otherwise>
+            </choose>
+            <if test="linkDeviceType!=null and linkDeviceType!='' ">AND pli.link_device_type=#{linkDeviceType}</if>
+            <if test="deviceName!=null and deviceName!='' ">AND gdi.device_name LIKE concat('%', #{deviceName}, '%')
+            </if>
+            <if test="ljStatus!=null and ljStatus!='' ">AND pls.lj_status = #{ljStatus}</if>
+        </where>
+        <include refid="delete_temporary_link_status"/>
+    </select>
+
+</mapper>

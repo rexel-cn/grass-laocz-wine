@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassUserMessageMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassUserMessage" id="GrassUserMessageResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="noticeType" column="notice_type"/>
+        <result property="sendContent" column="send_content"/>
+        <result property="policeLevel" column="police_level"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassUserMessageVo">
+        SELECT um.id,
+               um.tenant_id,
+               um.user_id,
+               um.notice_type,
+               um.send_content,
+               um.is_read,
+               um.create_time,
+               um.update_time,
+               sdd.dict_label AS police_level
+        FROM grass_user_message AS um
+                 LEFT JOIN sys_dict_data AS sdd ON sdd.dict_type = 'rules_level'
+            AND sdd.dict_value = um.police_level
+            AND um.tenant_id = sdd.tenant_id
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_user_message
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassUserMessageList" parameterType="com.rexel.system.domain.GrassUserMessage"
+            resultMap="GrassUserMessageResult">
+        <include refid="selectGrassUserMessageVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="userId != null  and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="noticeType != null ">
+                and notice_type = #{noticeType}
+            </if>
+            <if test="sendContent != null  and sendContent != ''">
+                and send_content = #{sendContent}
+            </if>
+            <if test="policeLevel != null  and policeLevel != ''">
+                and police_level = #{policeLevel}
+            </if>
+            <if test="isRead != null ">
+                and is_read = #{isRead}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="selectCountByGrassUserMessage" resultType="java.lang.Integer">
+        select count(1)
+        from grass_user_message
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="userId != null  and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="noticeType != null ">
+                and notice_type = #{noticeType}
+            </if>
+            <if test="sendContent != null  and sendContent != ''">
+                and send_content = #{sendContent}
+            </if>
+            <if test="policeLevel != null  and policeLevel != ''">
+                and police_level = #{policeLevel}
+            </if>
+            <if test="isRead != null ">
+                and is_read = #{isRead}
+            </if>
+        </where>
+    </select>
+
+</mapper>

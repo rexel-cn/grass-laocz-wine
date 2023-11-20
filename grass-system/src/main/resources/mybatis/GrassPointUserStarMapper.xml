@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassPointUserStarMapper">
+
+    <resultMap type="GrassPointUserStar" id="GrassPointUserStarResult">
+        <result property="id" column="id"/>
+        <result property="assetId" column="asset_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="pointPrimaryKey" column="point_primary_key"/>
+        <result property="topTime" column="top_time"/>
+        <result property="tenantId" column="tenant_id"/>
+    </resultMap>
+
+    <sql id="selectGrassPointUserStarVo">
+        select id, asset_id, user_id, point_primary_key, top_time, tenant_id
+        from grass_point_user_star
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                delete from grass_point_user_star
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassPointUserStarList" parameterType="GrassPointUserStar" resultMap="GrassPointUserStarResult">
+        <include refid="selectGrassPointUserStarVo"/>
+        <where>
+            <if test="assetId != null ">
+                and asset_id = #{assetId}
+            </if>
+            <if test="userId != null ">
+                and user_id = #{userId}
+            </if>
+            <if test="pointPrimaryKey != null  and pointPrimaryKey != ''">
+                and point_primary_key = #{pointPrimaryKey}
+            </if>
+            <if test="topTime != null ">
+                and top_time = #{topTime}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

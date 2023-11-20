@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeModeMapper">
+
+    <resultMap type="GrassNoticeMode" id="GrassNoticeModeResult">
+        <result property="noticeTemplateId" column="notice_template_id"/>
+        <result property="noticeMode" column="notice_mode"/>
+    </resultMap>
+
+    <sql id="selectGrassNoticeModeVo">
+        select notice_template_id, notice_mode
+        from grass_notice_mode
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE gnm
+                FROM
+                grass_notice_mode gnm
+                INNER JOIN grass_notice_template gnt ON gnm.notice_template_id = gnt.id
+                <where>
+                    gnt.tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeModeList" parameterType="GrassNoticeMode" resultMap="GrassNoticeModeResult">
+        <include refid="selectGrassNoticeModeVo"/>
+        <where>
+            <if test="noticeTemplateId != null ">
+                and notice_template_id = #{noticeTemplateId}
+            </if>
+            <if test="noticeMode != null ">
+                and notice_mode = #{noticeMode}
+            </if>
+        </where>
+    </select>
+
+</mapper>

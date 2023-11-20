@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassAssetMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassAsset" id="GrassAssetResult">
+        <result property="id" column="id"/>
+        <result property="assetTypeId" column="asset_type_id"/>
+        <result property="assetName" column="asset_name"/>
+        <result property="assetEngName" column="asset_eng_name"/>
+        <result property="assetStatus" column="asset_status"/>
+        <result property="assetStatusDesc" column="asset_status_desc"/>
+        <result property="assetModel" column="asset_model"/>
+        <result property="assetManufacturers" column="asset_manufacturers"/>
+        <result property="purchaseTime" column="purchase_time"/>
+        <result property="pointCount" column="point_count"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassAssetVo">
+        select id,
+               asset_name,
+               asset_type_id,
+               asset_picture_url,
+               parent_id,
+               ancestors,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_asset
+    </sql>
+
+
+    <delete id="deleteToTenant">
+        <choose>
+            <when test="tenantId!=null and tenantId!=''">
+                delete
+                from grass_asset
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="getListPage" parameterType="com.rexel.system.domain.GrassAsset" resultMap="GrassAssetResult">
+        <if test="assetTypeId != null and assetTypeId!='' ">
+            WITH recursive asset_type (id) AS
+            (
+            SELECT gat.id FROM grass_asset_type gat WHERE gat.id = #{assetTypeId}
+            UNION ALL
+            SELECT gat1.id FROM grass_asset_type gat1, asset_type t WHERE gat1.parent_id = t.id
+            )
+        </if>
+        SELECT
+            ga.id,
+            ga.asset_type_id,
+            ga.asset_name,
+            ga.asset_eng_name,
+            ga.asset_status,
+            ga.asset_model,
+            ga.asset_manufacturers,
+            ga.purchase_time,
+            ga.tenant_id,
+            ga.remark,
+            ga.create_by,
+            ga.create_time,
+            ga.update_time,
+            ga.update_by,
+            sd.dict_label AS asset_status_desc,
+            sp.point_count
+        FROM
+            grass_asset AS ga
+            LEFT JOIN sys_dict_data AS sd ON ga.asset_status = sd.dict_value AND sd.dict_type = 'asset_status'
+            LEFT JOIN (
+                SELECT asset_id, COUNT(1) AS point_count FROM grass_asset_point GROUP BY asset_id
+            ) AS sp ON sp.asset_id = ga.id
+        <where>
+            <if test="assetName != null  and assetName != ''">
+                and ga.asset_name like concat('%', #{assetName}, '%')
+            </if>
+            <if test="assetTypeId != null and assetTypeId!='' ">
+                and ga.asset_type_id in (SELECT id FROM asset_type)
+            </if>
+            <if test="assetStatus != null  and assetStatus != ''">
+                and ga.asset_status = #{assetStatus}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and ga.tenant_id = #{tenantId}
+            </if>
+        </where>
+        ORDER BY ga.create_time DESC
+        <if test="pageNum!=null and pageSize!=null">
+            limit #{pageNum},#{pageSize}
+        </if>
+    </select>
+    <select id="getAssetById" resultType="com.rexel.system.domain.GrassAsset">
+        SELECT
+        ga.id,
+        ga.asset_type_id,
+        ga.asset_name,
+        ga.asset_eng_name,
+        sdd.dict_label AS asset_status,
+        ga.asset_model,
+        ga.asset_manufacturers,
+        ga.purchase_time,
+        ga.tenant_id,
+        ga.remark,
+        ga.create_by,
+        ga.create_time,
+        ga.update_by,
+        ga.update_time
+        FROM
+        grass_asset AS ga
+        LEFT JOIN sys_dict_data AS sdd ON ga.asset_status = sdd.dict_value AND sdd.dict_type = 'asset_status'
+        <where>
+            <choose>
+                <when test="id != null">
+                    ga.id = #{id}
+                </when>
+                <otherwise>
+                    1=2
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="exportAssetList" resultType="com.rexel.system.domain.vo.GrassAssetExportVO">
+        SELECT gat.id,
+               gat.parent_id,
+               gat.asset_type_name,
+               ga.asset_name,
+               ga.asset_eng_name,
+               ga.asset_status,
+               ga.asset_manufacturers,
+               ga.asset_model,
+               ga.purchase_time,
+               gpi.device_id,
+               gpi.point_id
+        FROM grass_asset_type AS gat
+                 LEFT JOIN grass_asset ga ON ga.asset_type_id = gat.id
+                 LEFT JOIN grass_asset_point gap ON ga.id = gap.asset_id
+                 LEFT JOIN grass_point_info gpi ON gap.point_primary_key = gpi.id and gpi.is_delete = '0'
+    </select>
+
+    <!--根据assetTypeName和assetName查询assetId-->
+    <select id="selectIdByName" resultType="com.rexel.system.domain.GrassAssetName">
+        SELECT
+        ga.id asset_id,
+        ga.asset_name,
+        gat.asset_type_name
+        FROM
+        grass_asset_type gat
+        LEFT JOIN grass_asset ga on gat.id=ga.asset_type_id
+        WHERE asset_type_name in
+        <foreach collection="rulesVOs" item="item" index="index"
+                 separator="," open="(" close=")">
+            #{item.assetTypeName}
+        </foreach>
+        and asset_name in
+        <foreach collection="rulesVOs" item="item" index="index"
+                 separator="," open="(" close=")">
+            #{item.assetName}
+        </foreach>
+
+    </select>
+    <select id="getAssetByPointPrKey" resultType="com.rexel.system.domain.GrassAsset">
+        SELECT
+        ga.id,
+        ga.asset_name,
+        sdd.dict_label AS asset_status_desc,
+        ga.asset_model,
+        ga.asset_manufacturers,
+        ga.purchase_time
+        FROM
+        grass_asset_point AS gap
+        INNER JOIN grass_asset AS ga ON gap.asset_id = ga.id
+        LEFT JOIN sys_dict_data sdd ON ga.asset_status = sdd.dict_value
+        AND sdd.dict_type = 'asset_status'
+        <where>
+            <choose>
+                <when test="id!=null">
+                    gap.point_primary_key=#{id}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="getAssetIdsByAssetTypeId" resultType="java.lang.String">
+        WITH recursive asset_type (id) AS (SELECT gat.id
+                                           FROM grass_asset_type gat
+                                           WHERE gat.id = #{assetTypeId}
+                                           UNION ALL
+                                           SELECT gat1.id
+                                           FROM grass_asset_type gat1,
+                                                asset_type t
+                                           WHERE gat1.parent_id = t.id)
+
+        SELECT id
+        FROM asset_type
+    </select>
+    <select id="getListPageCount" resultType="java.lang.Long">
+        <if test="assetTypeId != null and assetTypeId!='' ">
+            WITH recursive asset_type (id) AS
+            (
+            SELECT gat.id FROM grass_asset_type gat WHERE gat.id = #{assetTypeId}
+            UNION ALL
+            SELECT gat1.id FROM grass_asset_type gat1, asset_type t WHERE gat1.parent_id = t.id)
+        </if>
+        SELECT
+            COUNT(1)
+        FROM
+            grass_asset AS ga
+            LEFT JOIN sys_dict_data sdd ON ga.asset_status = sdd.dict_value AND sdd.dict_type = 'asset_status'
+        <where>
+            <if test="assetName != null  and assetName != ''">
+                and ga.asset_name like concat('%', #{assetName}, '%')
+            </if>
+            <if test="assetTypeId != null and assetTypeId!='' ">
+                and ga.asset_type_id in (SELECT id FROM asset_type)
+            </if>
+            <if test="assetStatus != null  and assetStatus != ''">
+                and ga.asset_status = #{assetStatus}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and ga.tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

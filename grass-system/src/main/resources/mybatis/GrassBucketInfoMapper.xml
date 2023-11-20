@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassBucketInfoMapper">
+
+    <resultMap type="GrassBucketInfo" id="GrassBucketInfoResult">
+        <result property="bucketId" column="bucket_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="bucketName" column="bucket_name"/>
+        <result property="bucketCode" column="bucket_code"/>
+        <result property="everySeconds" column="every_seconds"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassBucketInfoVo">
+        select bucket_id,
+               tenant_id,
+               bucket_name,
+               bucket_code,
+               every_seconds,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_bucket_info
+    </sql>
+    <delete id="deleteByBucketIds">
+        delete from grass_bucket_info
+        <where>
+            <choose>
+                <when test="bucketIds!=null and bucketIds.size>0">
+                    bucket_id in
+                    <foreach item="bucketId" collection="bucketIds" open="(" separator="," close=")">
+                        #{bucketId}
+                    </foreach>
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </delete>
+    <delete id="deleteGrassBucketInfoByTenantId">
+        delete from grass_bucket_info
+        <where>
+            <choose>
+                <when test="tenantId!=null and tenantId != '' ">
+                    tenant_id=#{tenantId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </delete>
+
+    <select id="selectGrassBucketInfoList" parameterType="GrassBucketInfo" resultMap="GrassBucketInfoResult">
+        <include refid="selectGrassBucketInfoVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="bucketName != null  and bucketName != ''">
+                and bucket_name like concat('%', #{bucketName}, '%')
+            </if>
+            <if test="bucketCode != null  and bucketCode != ''">
+                and bucket_code = #{bucketCode}
+            </if>
+        </where>
+    </select>
+    <select id="selectGrassBucketInfoByTenantIds" resultType="com.rexel.system.domain.GrassBucketInfo">
+        <include refid="selectGrassBucketInfoVo"/>
+        <where>
+            <choose>
+                <when test="tenantIds!=null and tenantIds.size>0">
+                    tenant_id in
+                    <foreach item="tenantId" collection="tenantIds" open="(" separator="," close=")">
+                        #{tenantId}
+                    </foreach>
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+        ORDER BY create_time desc
+    </select>
+    <select id="selectGrassBucketInfoByTenantId" resultType="com.rexel.system.domain.GrassBucketInfo">
+        <include refid="selectGrassBucketInfoVo"/>
+        <where>
+            <choose>
+                <when test="tenantId!=null and tenantId != '' ">
+                    tenant_id=#{tenantId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

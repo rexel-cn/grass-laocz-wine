@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassWebBoardMapper">
+
+    <resultMap type="GrassWebBoard" id="GrassWebBoardResult">
+        <result property="id" column="id"/>
+        <result property="webName" column="web_name"/>
+        <result property="webAddress" column="web_address"/>
+        <result property="webType" column="web_type"/>
+        <result property="webPictureUrl" column="web_picture_url"/>
+        <result property="webDescribe" column="web_describe"/>
+        <result property="webSort" column="web_sort"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassWebBoardVo">
+        SELECT
+            t1.id,
+            t1.web_name,
+            t1.web_address,
+            t1.web_type,
+            t1.web_picture_url,
+            t1.web_describe,
+            t1.tenant_id,
+            t1.web_sort,
+            t1.remark,
+            t1.create_by,
+            t1.create_time,
+            t1.update_by,
+            t1.update_time,
+            t2.dict_label AS web_type_name
+        FROM grass_web_board AS t1
+                 LEFT JOIN sys_dict_data AS t2 ON t2.dict_type = 'web_conf_board'
+            AND t2.dict_value = t1.web_type
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_web_board
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassWebBoardList" parameterType="GrassWebBoard"
+            resultType="com.rexel.system.domain.GrassWebBoard">
+        <include refid="selectGrassWebBoardVo"/>
+        <where>
+            <if test="webName != null  and webName != ''">
+                and web_name like concat('%', #{webName}, '%')
+            </if>
+            <if test="webAddress != null  and webAddress != ''">
+                and web_address = #{webAddress}
+            </if>
+            <if test="webType != null  and webType != ''">
+                and web_type = #{webType}
+            </if>
+            <if test="webPictureUrl != null  and webPictureUrl != ''">
+                and web_picture_url = #{webPictureUrl}
+            </if>
+            <if test="webDescribe != null  and webDescribe != ''">
+                and web_describe = #{webDescribe}
+            </if>
+            <if test="webSort != null ">
+                and web_sort = #{webSort}
+            </if>
+        </where>
+        order by web_sort
+    </select>
+
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.SysTenantDetailMapper">
+
+    <resultMap type="com.rexel.system.domain.SysTenantDetail" id="SysTenantDetailResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="introduceUrl" column="introduce_url"/>
+        <result property="companyProfile" column="company_profile"/>
+        <result property="textTitle" column="text_title"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectSysTenantDetailVo">
+        select id,
+               tenant_id,
+               introduce_url,
+               text_title,
+               company_profile,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from sys_tenant_detail
+    </sql>
+
+    <select id="selectSysTenantDetailList" parameterType="SysTenantDetail" resultMap="SysTenantDetailResult">
+        <include refid="selectSysTenantDetailVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="introduceUrl != null  and introduceUrl != ''">
+                and introduce_url = #{introduceUrl}
+            </if>
+            <if test="companyProfile != null  and companyProfile != ''">
+                and company_profile = #{companyProfile}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+    
+    <select id="getUserAssetInfo" resultType="com.rexel.system.domain.vo.tenant.UserAssetVO">
+        select (SELECT COUNT(id)  FROM grass_asset WHERE tenant_id = #{tenantId}) as assetCount,
+               (SELECT COUNT(user_id) FROM sys_user WHERE tenant_id = #{tenantId}) as userCount,
+               (SELECT COUNT(dept_id) FROM sys_dept WHERE tenant_id = #{tenantId}) as deptCount,
+               (SELECT COUNT(post_id) FROM sys_post WHERE tenant_id = #{tenantId}) as postCount
+    </select>
+
+    <insert id="batchSysTenantDetail" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into sys_tenant_detail
+        ( id , tenant_id , introduce_url , company_profile , create_time , create_by , update_time , update_by) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.tenantId}, #{item.introduceUrl}, #{item.companyProfile}, #{item.createTime},
+            #{item.createBy}, #{item.updateTime}, #{item.updateBy})
+        </foreach>
+    </insert>
+
+</mapper>

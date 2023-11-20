@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.common.core.mapper.SysHeaderMetadataMapper">
+
+    <resultMap type="com.rexel.common.core.domain.SysHeaderMetadata" id="SysHeaderMetadataResult">
+        <result property="id" column="id"/>
+        <result property="headerName" column="header_name"/>
+        <result property="prop" column="prop"/>
+        <result property="propName" column="prop_name"/>
+        <result property="hasSort" column="has_sort"/>
+        <result property="currentSort" column="current_sort"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="propDescribtion" column="prop_describtion"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="com.rexel.common.core.page.PageHeader" id="PageHeaderResult">
+        <result property="prop" column="prop"/>
+        <result property="propName" column="prop_name"/>
+        <result property="propDescribtion" column="prop_describtion"/>
+        <result property="hasSort" column="has_sort"/>
+    </resultMap>
+
+    <sql id="selectSysHeaderMetadataVo">
+        select id,
+               header_name,
+               prop,
+               prop_name,
+               has_sort,
+               current_sort,
+               is_delete,
+               prop_describtion,
+               create_time,
+               update_time
+        from sys_header_metadata
+    </sql>
+
+    <select id="selectSysHeaderMetadataList" parameterType="SysHeaderMetadata" resultMap="PageHeaderResult">
+        <include refid="selectSysHeaderMetadataVo"/>
+        <where>
+            <if test="headerName != null  and headerName != ''">
+                and header_name like concat('%', #{headerName}, '%')
+            </if>
+            <if test="prop != null  and prop != ''">
+                and prop = #{prop}
+            </if>
+            <if test="propName != null  and propName != ''">
+                and prop_name like concat('%', #{propName}, '%')
+            </if>
+            <if test="hasSort != null ">
+                and has_sort = #{hasSort}
+            </if>
+            <if test="currentSort != null ">
+                and current_sort = #{currentSort}
+            </if>
+            <if test="isDelete != null ">
+                and is_delete = #{isDelete}
+            </if>
+            <if test="propDescribtion != null  and propDescribtion != ''">
+                and prop_describtion = #{propDescribtion}
+            </if>
+        </where>
+        order by current_sort
+    </select>
+
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeMailboxMapper">
+
+    <resultMap type="GrassNoticeMailbox" id="GrassNoticeMailboxResult">
+        <result property="id" column="id"/>
+        <result property="noticeConfigId" column="notice_config_id"/>
+        <result property="mailboxAddress" column="mailbox_address"/>
+        <result property="serverPassword" column="server_password"/>
+        <result property="smtpServerUrl" column="smtp_server_url"/>
+        <result property="smtpServerPort" column="smtp_server_port"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassNoticeMailboxVo">
+        select id,
+               notice_config_id,
+               mailbox_address,
+               server_password,
+               smtp_server_url,
+               smtp_server_port,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_notice_mailbox
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                delete from grass_notice_mailbox
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeMailboxList" parameterType="GrassNoticeMailbox" resultMap="GrassNoticeMailboxResult">
+        <include refid="selectGrassNoticeMailboxVo"/>
+        <where>
+            <if test="noticeConfigId != null ">
+                and notice_config_id = #{noticeConfigId}
+            </if>
+            <if test="mailboxAddress != null  and mailboxAddress != ''">
+                and mailbox_address = #{mailboxAddress}
+            </if>
+            <if test="serverPassword != null  and serverPassword != ''">
+                and server_password = #{serverPassword}
+            </if>
+            <if test="smtpServerUrl != null  and smtpServerUrl != ''">
+                and smtp_server_url = #{smtpServerUrl}
+            </if>
+            <if test="smtpServerPort != null  and smtpServerPort != ''">
+                and smtp_server_port = #{smtpServerPort}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+    <select id="selectOneByTenantId" resultType="com.rexel.system.domain.GrassNoticeMailbox">
+        <include refid="selectGrassNoticeMailboxVo"/>
+        <where>
+            <choose>
+                <when test="tenantId != null  and tenantId != ''">
+                    tenant_id = #{tenantId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

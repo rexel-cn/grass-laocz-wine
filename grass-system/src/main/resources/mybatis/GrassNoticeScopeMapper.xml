@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeScopeMapper">
+
+    <resultMap type="GrassNoticeScope" id="GrassNoticeScopeResult">
+        <result property="noticeTemplateId" column="notice_template_id"/>
+        <result property="noticeScope" column="notice_scope"/>
+        <result property="noticeObject" column="notice_object"/>
+    </resultMap>
+
+    <sql id="selectGrassNoticeScopeVo">
+        select notice_template_id, notice_scope, notice_object
+        from grass_notice_scope
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE gnc
+                FROM
+                grass_notice_scope gnc
+                INNER JOIN grass_notice_template gnt ON gnc.notice_template_id = gnt.id
+                <where>
+                    gnt.tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeScopeList" parameterType="GrassNoticeScope" resultMap="GrassNoticeScopeResult">
+        <include refid="selectGrassNoticeScopeVo"/>
+        <where>
+            <if test="noticeTemplateId != null ">
+                and notice_template_id = #{noticeTemplateId}
+            </if>
+            <if test="noticeScope != null ">
+                and notice_scope = #{noticeScope}
+            </if>
+            <if test="noticeObject != null ">
+                and notice_object = #{noticeObject}
+            </if>
+        </where>
+    </select>
+
+</mapper>

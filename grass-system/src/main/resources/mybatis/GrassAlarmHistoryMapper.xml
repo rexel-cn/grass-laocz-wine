@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassAlarmHistoryMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassAlarmHistory" id="GrassAlarmHistoryResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="rulesId" column="rules_id"/>
+        <result property="rulesUnique" column="rules_unique"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="pointId" column="point_id"/>
+        <result property="pointJudge" column="point_judge"/>
+        <result property="pointValue" column="point_value"/>
+        <result property="alarmTime" column="alarm_time"/>
+        <result property="alarmValue" column="alarm_value"/>
+        <result property="rulesLevel" column="rules_level"/>
+        <result property="rulesType" column="rules_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassAlarmHistoryVo">
+        select id,
+               tenant_id,
+               rules_id,
+               rules_name,
+               rules_unique,
+               device_id,
+               asset_id,
+               point_id,
+               point_judge,
+               point_value,
+               alarm_time,
+               alarm_value,
+               rules_level,
+               rules_type,
+               create_time,
+               update_time
+        from grass_alarm_history
+    </sql>
+
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!=''">
+                delete from grass_alarm_history
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassAlarmHistoryList" parameterType="com.rexel.system.domain.GrassAlarmHistory" resultMap="GrassAlarmHistoryResult">
+        <include refid="selectGrassAlarmHistoryVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="rulesId != null ">
+                and rules_id = #{rulesId}
+            </if>
+            <if test="rulesUnique != null  and rulesUnique != ''">
+                and rules_unique = #{rulesUnique}
+            </if>
+            <if test="deviceId != null  and deviceId != ''">
+                and device_id = #{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and point_id = #{pointId}
+            </if>
+            <if test="pointJudge != null  and pointJudge != ''">
+                and point_judge = #{pointJudge}
+            </if>
+            <if test="pointValue != null ">
+                and point_value = #{pointValue}
+            </if>
+            <if test="alarmTime != null ">
+                and alarm_time = #{alarmTime}
+            </if>
+            <if test="alarmValue != null ">
+                and alarm_value = #{alarmValue}
+            </if>
+            <if test="rulesLevel != null  and rulesLevel != ''">
+                and rules_level = #{rulesLevel}
+            </if>
+            <if test="rulesType != null  and rulesType != ''">
+                and rules_type = #{rulesType}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="selectIotAlarmHistoryGroup" resultType="com.rexel.system.domain.vo.GrassAlarmGroupVO">
+        SELECT
+        count( 1 ) AS alarmCount,
+        DATE_FORMAT( gah.alarm_time, #{timeFormat} ) AS alarmTimeRange
+        FROM
+        grass_alarm_history gah
+        LEFT JOIN grass_asset ga ON gah.asset_id = ga.id
+        LEFT JOIN grass_asset_type gat ON ga.asset_type_id = gat.id
+        LEFT JOIN grass_point_info gpi on gah.point_id = gpi.id
+        <where>
+            <if test="rulesName != null  and rulesName != ''">
+                and gah.rules_name like CONCAT('%',#{rulesName},'%')
+            </if>
+            <if test="deviceId != null  and deviceId != ''">
+                and gah.device_id = #{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and gah.point_id = #{pointId}
+            </if>
+            <if test="timeFrom != null and timeFrom != ''">and date_format(gah.alarm_time, '%Y%m%d%H%i%s') &gt;=
+                date_format(#{timeFrom}, '%Y%m%d%H%i%s')
+            </if>
+            <if test="timeTo != null and timeTo != ''">and date_format(gah.alarm_time, '%Y%m%d%H%i%s') &lt;=
+                date_format(#{timeTo}, '%Y%m%d%H%i%s')
+            </if>
+        </where>
+        GROUP BY
+        alarmTimeRange
+        ORDER BY
+        alarmTimeRange
+    </select>
+
+    <select id="selectIotAlarmHistoryList" resultType="com.rexel.system.domain.vo.GrassAlarmHistoryVO">
+        SELECT
+        gah.alarm_time,
+        gah.rules_name,
+        gah.device_id,
+        gah.point_id,
+        gpi.point_name,
+        gah.point_judge,
+        gah.alarm_value,
+        gah.point_value,
+        gat.asset_type_name,
+        ga.asset_name
+        FROM
+        grass_alarm_history gah
+        LEFT JOIN grass_asset ga ON gah.asset_id = ga.id
+        LEFT JOIN grass_asset_type gat ON ga.asset_type_id = gat.id
+        LEFT JOIN grass_point_info gpi ON gah.device_id = gpi.device_id
+        AND gah.point_id = gpi.point_id
+        <where>
+            <if test="rulesName != null  and rulesName != ''">
+                and gah.rules_name like concat('%', #{rulesName}, '%')
+            </if>
+            <if test="deviceId != null  and deviceId != ''">
+                and gah.device_id = #{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and gah.point_id = #{pointId}
+            </if>
+            <if test="timeFrom != null and timeFrom != ''">and date_format(gah.alarm_time, '%Y%m%d%H%i%s') &gt;=
+                date_format(#{timeFrom}, '%Y%m%d%H%i%s')
+            </if>
+            <if test="timeTo != null and timeTo != ''">and date_format(gah.alarm_time, '%Y%m%d%H%i%s') &lt;=
+                date_format(#{timeTo}, '%Y%m%d%H%i%s')
+            </if>
+        </where>
+        ORDER BY
+        gah.alarm_time DESC
+    </select>
+
+    <select id="selectAlarmCountList" resultType="com.rexel.system.domain.vo.tenant.AlarmVO">
+        SELECT
+        COUNT(1) as count ,
+        <if test="type == 1">
+            DATE_FORMAT(alarm_time,"%m-%d") as alarmTime
+        </if>
+        <if test="type == 2">
+            DATE_FORMAT(alarm_time,"%Y-%m") as alarmTime
+        </if>
+        FROM
+        grass_alarm_history
+        <where>
+            <if test="type == 1">
+                DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt; date(alarm_time)
+                GROUP BY DATE_FORMAT(alarm_time,"%Y-%m-%d")
+            </if>
+            <if test="type == 2">
+                alarm_time
+                between date_sub(now(),interval 6 month) and now()
+                GROUP BY DATE_FORMAT(alarm_time,"%Y-%m")
+            </if>
+        </where>
+    </select>
+</mapper>

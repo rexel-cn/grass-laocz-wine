@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeDingdingMapper">
+
+    <resultMap type="GrassNoticeDingding" id="GrassNoticeDingdingResult">
+        <result property="id" column="id"/>
+        <result property="noticeConfigId" column="notice_config_id"/>
+        <result property="name" column="name"/>
+        <result property="webhook" column="webhook"/>
+        <result property="secret" column="secret"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassNoticeDingdingVo">
+        select id,
+               notice_config_id,
+               name,
+               webhook,
+               secret,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_notice_dingding
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!=''">
+                delete from grass_notice_dingding
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeDingdingList" parameterType="GrassNoticeDingding"
+            resultMap="GrassNoticeDingdingResult">
+        <include refid="selectGrassNoticeDingdingVo"/>
+        <where>
+            <if test="noticeConfigId != null ">
+                and notice_config_id = #{noticeConfigId}
+            </if>
+            <if test="name != null  and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+            <if test="webhook != null  and webhook != ''">
+                and webhook = #{webhook}
+            </if>
+            <if test="secret != null  and secret != ''">
+                and secret = #{secret}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+    <select id="selectByTenantId" resultType="com.rexel.system.domain.GrassNoticeDingding">
+        <include refid="selectGrassNoticeDingdingVo"/>
+        <where>
+            <choose>
+                <when test="tenantId != null  and tenantId != '' ">
+                    tenant_id = #{tenantId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassRulesInfoMapper">
+
+    <resultMap type="com.rexel.system.domain.vo.RulesVO" id="GrassRulesInfoResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="rulesUnique" column="rules_unique"/>
+        <result property="rulesName" column="rules_name"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="pointId" column="point_id"/>
+        <result property="pointJudge" column="point_judge"/>
+        <result property="pointValue" column="point_value"/>
+        <result property="silentCycle" column="silent_cycle"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="rulesLevel" column="rules_level"/>
+        <result property="rulesType" column="rules_type"/>
+        <result property="isEnable" column="is_enable"/>
+        <result property="isTemplate" column="is_template"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="pointName" column="point_name"/>
+        <result property="rulesLevelName" column="rulesLevelName"/>
+        <result property="silentCycleName" column="silentCycleName"/>
+    </resultMap>
+
+    <resultMap id="selectTemplateNameMap" type="com.rexel.system.domain.vo.RulesVO">
+        <result property="id" column="rules_id"/>
+        <collection property="noticeTemplateNameList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="notice_template_name"/>
+        </collection>
+        <collection property="noticeTemplateIds" ofType="java.lang.Long" javaType="java.util.List">
+            <result column="notice_template_id"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="com.rexel.system.domain.vo.AlarmRulesDetailVo" id="AlarmRulesDetailVoResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="rulesUnique" column="rules_unique"/>
+        <result property="rulesName" column="rules_name"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="pointId" column="point_id"/>
+        <result property="pointJudge" column="point_judge"/>
+        <result property="pointValue" column="point_value"/>
+        <result property="silentCycle" column="silent_cycle"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="rulesLevel" column="rules_level"/>
+        <result property="rulesType" column="rules_type"/>
+        <result property="isEnable" column="is_enable"/>
+        <result property="isTemplate" column="is_template"/>
+        <collection property="ruleNoticeVOList" javaType="java.util.List" resultMap="RuleNoticeVOResult"/>
+    </resultMap>
+
+    <resultMap type="com.rexel.system.domain.vo.RuleNoticeVO" id="RuleNoticeVOResult">
+        <result property="noticeTemplateId" column="notice_template_id"/>
+        <collection property="noticeModeInfoList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="notice_mode"/>
+        </collection>
+        <collection property="userList" ofType="com.rexel.common.core.domain.entity.SysUser">
+            <result property="userId" column="user_id"/>
+            <result property="userName" column="user_name"/>
+            <result property="email" column="email"/>
+            <result property="tenantId" column="user_tenant_id"/>
+        </collection>
+    </resultMap>
+
+    <sql id="selectGrassRulesInfoVo">
+        select id,
+               tenant_id,
+               rules_unique,
+               rules_name,
+               device_id,
+               point_id,
+               point_judge,
+               point_value,
+               silent_cycle,
+               start_time,
+               end_time,
+               rules_level,
+               rules_type,
+               is_enable,
+               is_template,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_rules_info
+    </sql>
+
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_rules_info
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassRulesInfoList" parameterType="com.rexel.system.domain.GrassRulesInfo"
+            resultMap="GrassRulesInfoResult">
+        SELECT
+            gri.id,
+            gri.tenant_id,
+            gri.rules_unique,
+            gri.rules_name,
+            gri.device_id,
+            gri.asset_id,
+            gri.point_id,
+            gri.point_judge,
+            gri.point_value,
+            gri.silent_cycle,
+            gri.start_time,
+            gri.end_time,
+            gri.rules_level,
+            gri.rules_type,
+            gri.is_enable,
+            gri.is_template,
+            gri.remark,
+            gri.create_by,
+            gri.update_by,
+            gri.create_time,
+            gri.update_time,
+            gdi.device_name,
+            gpi.point_name,
+            sdd_level.dict_label AS rulesLevelName,
+            sdd_cycle.dict_label AS silentCycleName,
+            ga.asset_name,
+            gat.asset_type_name
+        FROM
+            grass_rules_info AS gri
+            LEFT JOIN grass_device_info gdi ON gri.device_id = gdi.device_id
+            AND gri.tenant_id = gdi.tenant_id
+            LEFT JOIN grass_point_info gpi ON gri.point_id = gpi.point_id
+            AND gri.tenant_id = gpi.tenant_id
+            AND gri.device_id = gpi.device_id
+            AND gpi.is_delete = '0'
+            LEFT JOIN sys_dict_data sdd_level ON gri.rules_level = sdd_level.dict_value
+            AND sdd_level.dict_type = 'rules_level'
+            LEFT JOIN sys_dict_data sdd_cycle ON gri.silent_cycle = sdd_cycle.dict_value
+            AND sdd_cycle.dict_type = 'silent_cycle'
+            LEFT JOIN grass_asset ga on gri.asset_id=ga.id
+            LEFT JOIN grass_asset_type gat on ga.asset_type_id =gat.id
+        <where>
+            <if test="rulesName != null  and rulesName != ''">
+                and gri.rules_name like concat('%', #{rulesName}, '%')
+            </if>
+            <if test="deviceId != null  and deviceId != ''">
+                and gri.device_id = #{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and gri.point_id = #{pointId}
+            </if>
+            <if test="isTemplate != null">
+                and gri.is_template = #{isTemplate}
+            </if>
+        </where>
+        ORDER BY gri.create_time desc
+    </select>
+
+    <select id="selectCountByDeviceId" resultType="java.lang.Integer">
+        select count(1)
+        from grass_rules_info
+        <where>
+            <choose>
+                <when test="deviceId != null and deviceId != '' ">
+                    device_id = #{deviceId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="getAlarmRulesDetailVoByRulesId" resultMap="AlarmRulesDetailVoResult">
+        SELECT
+            gnm.notice_mode,
+            grn.notice_template_id,
+            su.user_id,
+            su.user_name,
+            su.nick_name,
+            su.email,
+            su.tenant_id user_tenant_id,
+            gri.id,
+            gri.tenant_id,
+            gri.rules_unique,
+            gri.rules_name,
+            gri.device_id,
+            gri.point_judge,
+            gri.point_id,
+            gri.point_value,
+            gri.silent_cycle,
+            gri.start_time,
+            gri.end_time,
+            gri.rules_level,
+            gri.rules_type,
+            gri.is_enable,
+            gri.is_template,
+            gri.remark
+        FROM
+            grass_rules_info AS gri
+            LEFT JOIN grass_rule_notice AS grn ON gri.id = grn.rules_id
+            LEFT JOIN grass_notice_scope AS gnc ON grn.notice_template_id = gnc.notice_template_id
+            LEFT JOIN grass_notice_mode AS gnm ON grn.notice_template_id = gnm.notice_template_id
+            LEFT JOIN sys_user_role AS sur ON gnc.notice_object = sur.role_id AND gnc.notice_scope = '1'
+            LEFT JOIN sys_user AS su ON su.user_id =
+            IF( gnc.notice_scope = '1', sur.user_id, gnc.notice_object ) AND su.`status` = '0' AND su.del_flag = '0'
+        <where>
+            <choose>
+                <when test="rulesId != null  and rulesId != '' ">
+                    gri.id = #{rulesId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectNoticeTemplateName" resultMap="selectTemplateNameMap" parameterType="java.util.List">
+        SELECT
+            grn.rules_id,
+            gnt.id AS notice_template_id,
+            gnt.notice_template_name
+        FROM
+            grass_notice_template gnt
+            LEFT JOIN grass_rule_notice grn ON grn.notice_template_id = gnt.id
+            AND grn.tenant_id = gnt.tenant_id
+        <where>
+            <choose>
+                <when test="list!=null and list.size()>0">
+                    grn.rules_id in
+                    <foreach item="id" collection="list" open="(" separator="," close=")">
+                        #{id}
+                    </foreach>
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+        ORDER BY gnt.create_time desc
+    </select>
+
+    <!--回显-->
+    <select id="getRulesInfoById" resultType="com.rexel.system.domain.vo.RulesTypeIdVO">
+        SELECT
+            gri.id,
+            gri.tenant_id,
+            gri.rules_unique,
+            gri.rules_name,
+            gri.device_id,
+            gri.asset_id,
+            gri.point_id,
+            gri.point_judge,
+            gri.point_value,
+            gri.silent_cycle,
+            gri.start_time,
+            gri.end_time,
+            gri.rules_level,
+            gri.rules_type,
+            gri.is_enable,
+            gri.is_template,
+            gri.remark,
+            gri.create_by,
+            gri.update_by,
+            gri.create_time,
+            gri.update_time,
+            gdi.device_name,
+            gpi.point_name,
+            sdd_level.dict_label AS rulesLevelName,
+            sdd_cycle.dict_label AS silentCycleName,
+            ga.asset_name,
+            gat.asset_type_name,
+            ga.asset_type_id
+        FROM
+            grass_rules_info AS gri
+            LEFT JOIN grass_device_info gdi ON gri.device_id = gdi.device_id
+            AND gri.tenant_id = gdi.tenant_id
+            LEFT JOIN grass_point_info gpi ON gri.point_id = gpi.point_id
+            AND gri.tenant_id = gpi.tenant_id
+            AND gri.device_id = gpi.device_id
+            AND gpi.is_delete = '0'
+            LEFT JOIN sys_dict_data sdd_level ON gri.rules_level = sdd_level.dict_value
+            AND sdd_level.dict_type = 'rules_level'
+            LEFT JOIN sys_dict_data sdd_cycle ON gri.silent_cycle = sdd_cycle.dict_value
+            AND sdd_cycle.dict_type = 'silent_cycle'
+            LEFT JOIN grass_asset ga ON gri.asset_id = ga.id
+            LEFT JOIN grass_asset_type gat ON ga.asset_type_id = gat.id
+        <where>
+            <if test="id != null  and id != ''">
+                and gri.id = #{id}
+            </if>
+        </where>
+        ORDER BY gri.create_time desc
+    </select>
+</mapper>

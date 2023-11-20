@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeTemplateMapper">
+
+    <resultMap type="com.rexel.system.domain.vo.GrassNoticeTemplateVO" id="GrassNoticeTemplateResult">
+        <result property="id" column="id"/>
+        <result property="noticeTemplateName" column="notice_template_name"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="modeArray" ofType="java.lang.String" javaType="java.util.List">
+            <result column="notice_mode"/>
+        </collection>
+        <collection property="modeArrayDesc" ofType="java.lang.String" javaType="java.util.List">
+            <result column="modeArrayDesc"/>
+        </collection>
+
+        <collection property="userNameList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="user_name"/>
+        </collection>
+
+        <collection property="roleNameList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="role_name"/>
+        </collection>
+        <collection property="grassNoticeScopeList" resultMap="grassNoticeScopeListMap"/>
+    </resultMap>
+
+    <resultMap id="grassNoticeScopeListMap" type="com.rexel.system.domain.dto.GrassNoticeScopeDTO">
+        <result property="noticeScope" column="notice_scope"/>
+        <collection property="noticeObjectArray" ofType="long" javaType="java.util.List">
+            <result column="notice_object"/>
+        </collection>
+    </resultMap>
+
+    <sql id="selectGrassNoticeTemplateVo">
+        SELECT gnt.id,
+               gnt.notice_template_name,
+               gnt.tenant_id,
+               gnt.remark,
+               gnt.create_by,
+               gnt.create_time,
+               gnt.update_by,
+               gnt.update_time,
+               gnm.notice_mode,
+               gns.notice_scope,
+               gns.notice_object,
+               sdd.dict_label AS modeArrayDesc,
+               su.user_id,
+               su.user_name,
+               sr.role_name
+        FROM grass_notice_template AS gnt
+                 LEFT JOIN grass_notice_mode AS gnm ON gnt.id = gnm.notice_template_id
+                 LEFT JOIN grass_notice_scope AS gns ON gnt.id = gns.notice_template_id
+                 LEFT JOIN sys_dict_data AS sdd ON sdd.dict_value = gnm.notice_mode
+            AND sdd.dict_type = 'notification_type'
+                 LEFT JOIN sys_role AS sr ON gns.notice_object = sr.role_id
+            AND gns.notice_scope = '1'
+                 LEFT JOIN sys_user su ON su.user_id = gns.notice_object
+            AND gns.notice_scope = '0'
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                delete from grass_notice_template
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeTemplateList" parameterType="GrassNoticeTemplate"
+            resultMap="GrassNoticeTemplateResult">
+        <include refid="selectGrassNoticeTemplateVo"/>
+        <where>
+            <if test="noticeTemplateName != null  and noticeTemplateName != ''">
+                and gnt.notice_template_name like concat('%', #{noticeTemplateName}, '%')
+            </if>
+            <if test="id != null  and id != ''">
+                and gnt.id = #{id}
+            </if>
+        </where>
+    </select>
+
+</mapper>

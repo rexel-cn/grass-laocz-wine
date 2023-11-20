@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassRuleNoticeMapper">
+
+    <resultMap type="GrassRuleNotice" id="GrassRuleNoticeResult">
+        <result property="rulesId" column="rules_id"/>
+        <result property="noticeTemplateId" column="notice_template_id"/>
+        <result property="tenantId" column="tenant_id"/>
+    </resultMap>
+
+
+    <resultMap type="com.rexel.system.domain.vo.GrassRuleNoticeVO" id="GrassRuleNoticeVOResult">
+        <result property="rulesId" column="rules_id"/>
+        <collection property="ruleNoticeList" ofType="com.rexel.system.domain.GrassRuleNotice"
+                    javaType="java.util.List">
+            <result property="noticeTemplateId" column="notice_template_id"/>
+            <result property="noticeTemplateName" column="notice_template_name"/>
+        </collection>
+    </resultMap>
+
+
+    <sql id="selectGrassRuleNoticeVo">
+        select rules_id, notice_template_id, tenant_id
+        from grass_rule_notice
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_rule_notice
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassRuleNoticeList" parameterType="GrassRuleNotice" resultMap="GrassRuleNoticeResult">
+        <include refid="selectGrassRuleNoticeVo"/>
+        <where>
+            <if test="rulesId != null  and rulesId != ''">
+                and rules_id = #{rulesId}
+            </if>
+            <if test="noticeTemplateId != null  and noticeTemplateId != ''">
+                and notice_template_id = #{noticeTemplateId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+    <select id="selectGrassRuleNoticeVOByIds" resultMap="GrassRuleNoticeVOResult">
+        SELECT
+        rules_id,
+        notice_template_id,
+        rnt.notice_template_name
+        FROM
+        grass_rule_notice grn
+        INNER JOIN grass_notice_template rnt ON grn.notice_template_id = rnt.id
+        <where>
+            <choose>
+                <when test="list!=null and list.size()>0">
+                    grn.rules_id IN
+                    <foreach item="rulesId" collection="list" open="(" separator="," close=")">
+                        #{rulesId}
+                    </foreach>
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassUserSmsMailboxDingdingMapper">
+
+    <resultMap type="GrassUserSmsMailboxDingding" id="GrassUserSmsMailboxDingdingResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="pushType" column="push_type"/>
+        <result property="sendContent" column="send_content"/>
+        <result property="sendRes" column="send_res"/>
+        <result property="failReason" column="fail_reason"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectGrassUserSmsMailboxDingdingVo">
+        select id,
+               tenant_id,
+               user_id,
+               push_type,
+               send_content,
+               send_res,
+               fail_reason,
+               create_time
+        from grass_user_sms_mailbox_dingding
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_user_sms_mailbox_dingding
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassUserSmsMailboxDingdingList" parameterType="GrassUserSmsMailboxDingding"
+            resultMap="GrassUserSmsMailboxDingdingResult">
+        <include refid="selectGrassUserSmsMailboxDingdingVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="userId != null  and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="pushType != null  and pushType != ''">
+                and push_type = #{pushType}
+            </if>
+            <if test="sendContent != null  and sendContent != ''">
+                and send_content = #{sendContent}
+            </if>
+            <if test="sendRes != null  and sendRes != ''">
+                and send_res = #{sendRes}
+            </if>
+            <if test="failReason != null  and failReason != ''">
+                and fail_reason = #{failReason}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassAssetPointMapper">
+
+    <resultMap type="GrassAssetPoint" id="GrassAssetPointResult">
+        <result property="assetId" column="asset_id"/>
+        <result property="pointPrimaryKey" column="point_primary_key"/>
+    </resultMap>
+
+    <sql id="selectGrassAssetPointVo">
+        select asset_id, point_primary_key
+        from grass_asset_point
+    </sql>
+
+    <delete id="deleteToTenant">
+        <choose>
+            <when test="tenantId!=null and tenantId!=''">
+                DELETE gap
+                FROM
+                grass_asset_point gap
+                INNER JOIN grass_asset ga ON gap.asset_id = ga.id
+                <where>
+                    ga.tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+
+    </delete>
+
+    <select id="selectGrassAssetPointList" parameterType="GrassAssetPoint" resultMap="GrassAssetPointResult">
+        <include refid="selectGrassAssetPointVo"/>
+        <where>
+            <if test="deleted != null">and deleted = #{deleted}</if>
+            <if test="deleted == null">and deleted = 0</if>
+        </where>
+    </select>
+    <select id="selectAssetPointCountByDeviceId" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM grass_asset_point
+        WHERE EXISTS(
+                      SELECT id
+                      FROM grass_point_info
+                      WHERE device_id = #{deviceId}
+                        AND id = point_primary_key
+                        and is_delete = '0')
+    </select>
+
+</mapper>

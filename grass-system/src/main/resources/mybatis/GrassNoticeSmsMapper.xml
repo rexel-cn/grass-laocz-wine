@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassNoticeSmsMapper">
+
+    <resultMap type="GrassNoticeSms" id="GrassNoticeSmsResult">
+        <result property="id" column="id"/>
+        <result property="noticeConfigId" column="notice_config_id"/>
+        <result property="signName" column="sign_name"/>
+        <result property="templateCode" column="template_code"/>
+        <result property="examineResult" column="examine_result"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassNoticeSmsVo">
+        select id,
+               notice_config_id,
+               sign_name,
+               template_code,
+               examine_result,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_notice_sms
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                delete from grass_notice_sms
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassNoticeSmsList" parameterType="GrassNoticeSms" resultMap="GrassNoticeSmsResult">
+        <include refid="selectGrassNoticeSmsVo"/>
+        <where>
+            <if test="noticeConfigId != null ">
+                and notice_config_id = #{noticeConfigId}
+            </if>
+            <if test="signName != null  and signName != ''">
+                and sign_name like concat('%', #{signName}, '%')
+            </if>
+            <if test="templateCode != null  and templateCode != ''">
+                and template_code = #{templateCode}
+            </if>
+            <if test="examineResult != null  and examineResult != ''">
+                and examine_result = #{examineResult}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+    <select id="selectOneByTenantId" resultType="com.rexel.system.domain.GrassNoticeSms">
+        <include refid="selectGrassNoticeSmsVo"/>
+        <where>
+            <choose>
+                <when test="tenantId != null  and tenantId != ''">
+                    tenant_id = #{tenantId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

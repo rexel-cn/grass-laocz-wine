@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassPointTagToPointMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassPointTagPoint" id="GrassPointTagResult">
+        <result property="id" column="id"/>
+        <result property="pointTagInfoId" column="point_tag_info_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="pointId" column="point_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassPointTagVo">
+        select id,
+               point_tag_info_id,
+               device_id,
+               point_id,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from grass_point_tag_point
+    </sql>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                DELETE
+                FROM
+                grass_point_tag_point
+                <where>
+                    tenant_id = #{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectGrassPointTagList" parameterType="com.rexel.system.domain.GrassPointTagPoint"
+            resultMap="GrassPointTagResult">
+        <include refid="selectGrassPointTagVo"/>
+        <where>
+            <if test="deviceId != null  and deviceId != ''">
+                and device_id = #{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and point_id = #{pointId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+
+
+    <!--根据测点标签信息id，拿到所有的deviceId和pointId-->
+    <select id="selectByPointTagInfoId" resultType="com.rexel.system.domain.vo.GrassPDVO">
+        select device_id,
+               point_id,
+               point_type
+        from grass_point_tag_point
+        where point_tag_info_id = #{pointTagInfoId}
+    </select>
+
+
+    <select id="selectGrassPointTagRelationListByTagKey"
+            resultType="com.rexel.system.domain.vo.GrassPointTagInfoVO">
+
+        SELECT
+        gpti.id,
+        gpti.tag_key,
+        gpti.tag_value,
+        gpti.tag_type,
+        gpti.tenant_id,
+        gpti.remark,
+        gpti.create_by,
+        gpti.create_time,
+        gpti.update_by,
+        gpti.update_time,
+        ( SELECT count( 1 ) FROM grass_point_tag_point gptp WHERE gptp.point_tag_info_id = gpti.id ) AS relationNum,
+        sdd_tt.dict_label AS tage_type_desc
+        FROM
+        grass_point_tag_info gpti
+        LEFT JOIN sys_dict_data sdd_tt ON gpti.tag_type = sdd_tt.dict_value
+        AND sdd_tt.dict_type = 'tag_type'
+        <where>
+            <if test="tagKey != null  and tagKey != ''">
+                and tag_key like concat('%',#{tagKey},'%')
+            </if>
+        </where>
+    </select>
+
+
+    <!--  根据deviceId和pointId,拿到关联测点的具体信息-->
+    <select id="selectPointDevice" resultType="com.rexel.system.domain.vo.GrassPointTagDeviceVO">
+        SELECT
+        gpi.point_id,
+        gpi.point_name,
+        gpi.point_type,
+        gdi.device_id,
+        gdi.device_name,
+        pli.link_device_type
+        FROM
+        grass_point_tag_point gptp
+        LEFT JOIN grass_device_info gdi ON gdi.device_id=gptp.device_id
+        LEFT JOIN pulse_link_info pli ON pli.link_id=gdi.link_id
+        LEFT JOIN grass_point_info gpi ON gpi.device_id=gptp.device_id and gpi.point_id=gptp.point_id AND
+        gpi.point_type=gptp.point_type and gpi.is_delete='0'
+        <where>
+            <choose>
+                <when test="pointTagInfoId!=null">
+                    gptp.point_tag_info_id = #{pointTagInfoId}
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <!--     // 通过point_tag_info_id 查询所有point_id-->
+    <select id="selectIdsByPointTagInfoId" resultType="String">
+        select point_id
+        from grass_point_tag_point
+        where point_tag_info_id = #{id}
+    </select>
+    <select id="selectPointTagVOList" resultType="com.rexel.system.domain.vo.PointTagVO">
+        SELECT
+        gptp.point_id,
+        gptp.device_id,
+        gptp.point_type,
+        gptp.tenant_id,
+        gpti.tag_key,
+        gpti.tag_value,
+        gpti.tag_type
+        FROM
+        grass_point_tag_point AS gptp
+        INNER JOIN grass_point_tag_info AS gpti ON gptp.point_tag_info_id = gpti.id
+        <where>
+            <if test="tagKey!=null and tagKey!='' ">
+                and gpti.tag_key = #{tagKey}
+            </if>
+            <if test="tagValue!=null and tagValue!='' ">
+                and gpti.tag_value=#{tagvalue}
+            </if>
+        </where>
+    </select>
+
+    <select id="getPointTagInfoByPoint" resultType="com.rexel.system.domain.GrassPointTagInfo">
+        SELECT DISTINCT
+        gpti.tag_key,
+        gpti.tag_value,
+        gpti.create_time
+        FROM
+        grass_point_tag_point AS gptp
+        INNER JOIN grass_point_tag_info AS gpti ON gpti.id = gptp.point_tag_info_id
+        <where>
+            <choose>
+                <when test="(deviceId!=null and deviceId!='') and (pointId!=null and pointId!='')">
+                    gptp.device_id = #{deviceId}
+                    AND gptp.point_id = #{pointId}
+                    AND gptp.point_type = #{pointType}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="getPointTagAndBucket" parameterType="String"
+            resultType="com.rexel.system.domain.vo.GrassPointTagBucketVO">
+        SELECT
+        t1.device_id AS deviceId,
+        t1.point_id AS pointId,
+        t2.tag_key AS tagKey,
+        t2.tag_value AS tagValue,
+        t3.tenant_id AS tenantId,
+        t3.bucket_id AS bucketId
+        FROM
+        grass_point_tag_point AS t1
+        INNER JOIN grass_point_tag_info AS t2 ON t1.point_tag_info_id = t2.id
+        INNER JOIN sys_tenant AS t3 ON t3.tenant_id = t2.tenant_id
+        <where>
+            <if test="tagKey!=null and tagKey!=''">and t2.tag_key = #{tagKey}</if>
+        </where>
+    </select>
+
+</mapper>

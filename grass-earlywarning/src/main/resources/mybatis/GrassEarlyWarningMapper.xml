@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.earlywarning.mapper.GrassEarlyWarningMapper">
+
+    <resultMap type="com.rexel.earlywarning.domain.GrassEarlyWarning" id="GrassEarlyWarningResult">
+        <result property="rulesId" column="rules_id"/>
+        <result property="rulesName" column="rules_name"/>
+        <result property="rulesState" column="rules_state"/>
+        <result property="rulesStateName" column="rules_state_name"/>
+        <result property="rulesLevel" column="rules_level"/>
+        <result property="rulesLevelName" column="rules_level_name"/>
+        <result property="triggerRelation" column="trigger_relation"/>
+        <result property="judgeRelation" column="judge_relation"/>
+        <result property="finishRelation" column="finish_relation"/>
+        <result property="triggerFrequency" column="trigger_frequency"/>
+        <result property="judgeFrequency" column="judge_frequency"/>
+        <result property="finishFrequency" column="finish_frequency"/>
+        <result property="judgeType" column="judge_type"/>
+        <result property="addUpCount" column="add_up_count"/>
+        <result property="addUpDuration" column="add_up_duration"/>
+        <result property="addUpOnceMax" column="add_up_once_max"/>
+        <result property="continuousCount" column="continuous_count"/>
+        <result property="continuousIncrease" column="continuous_increase"/>
+        <result property="silentCycle" column="silent_cycle"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="suggestId" column="suggest_id"/>
+        <result property="isTemplate" column="is_template"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="suggestType" column="suggest_type"/>
+        <result property="suggestTypeName" column="suggest_type_name"/>
+        <result property="suggestTitle" column="suggest_title"/>
+        <result property="suggestContent" column="suggest_content"/>
+        <result property="silentCycleName" column="silent_cycle_name"/>
+        <result property="alarmCount" column="alarm_count"/>
+    </resultMap>
+
+    <sql id="selectGrassEarlyWarningVo">
+        SELECT
+            t1.rules_id,
+            t1.rules_name,
+            t1.rules_state,
+            if(t1.rules_state = 0, '关闭', '打开') AS rules_state_name,
+            t1.rules_level,
+            t1.trigger_relation,
+            t1.judge_relation,
+            t1.finish_relation,
+            t1.trigger_frequency,
+            t1.judge_frequency,
+            t1.finish_frequency,
+            t1.judge_type,
+            t1.add_up_count,
+            t1.add_up_duration,
+            t1.add_up_once_max,
+            t1.continuous_count,
+            t1.continuous_increase,
+            t1.silent_cycle,
+            t1.start_time,
+            t1.end_time,
+            t1.suggest_id,
+            t1.is_template,
+            t1.tenant_id,
+            t1.create_time,
+            t1.create_by,
+            t1.update_time,
+            t1.update_by,
+            t2.suggest_type,
+            t2.suggest_title,
+            t2.suggest_content,
+            st.dict_label AS suggest_type_name,
+            rl.dict_label AS rules_level_name,
+            sc.dict_label AS silent_cycle_name
+        FROM
+            grass_early_warning AS t1
+            LEFT JOIN grass_early_warning_suggest AS t2 ON t2.suggest_id = t1.suggest_id
+            LEFT JOIN sys_dict_data AS rl ON rl.dict_type = 'early_warning_level' AND rl.dict_value = t1.rules_level
+            LEFT JOIN sys_dict_data AS st ON st.dict_type = 'suggest_type' AND st.dict_value = t2.suggest_type
+            LEFT JOIN sys_dict_data AS sc ON sc.dict_type = 'silent_cycle' AND sc.dict_value = t1.silent_cycle
+    </sql>
+
+    <select id="selectGrassEarlyWarningList" parameterType="com.rexel.earlywarning.domain.GrassEarlyWarning"
+            resultMap="GrassEarlyWarningResult">
+        SELECT
+            t1.rules_id,
+            t1.rules_name,
+            t1.rules_state,
+            t1.rules_level,
+            t1.trigger_relation,
+            t1.judge_relation,
+            t1.finish_relation,
+            t1.trigger_frequency,
+            t1.judge_frequency,
+            t1.finish_frequency,
+            t1.judge_type,
+            t1.add_up_count,
+            t1.add_up_duration,
+            t1.add_up_once_max,
+            t1.continuous_count,
+            t1.continuous_increase,
+            t1.silent_cycle,
+            t1.start_time,
+            t1.end_time,
+            t1.suggest_id,
+            t1.is_template,
+            t1.tenant_id,
+            t1.create_time,
+            t1.create_by,
+            t1.update_time,
+            t1.update_by,
+            COUNT(his.rules_id) AS alarm_count
+        FROM
+            grass_early_warning AS t1
+            LEFT JOIN grass_early_warning_alarm_his AS his
+                ON his.rules_id = t1.rules_id AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(his.alarm_time)
+        <where>
+            <if test="rulesName != null  and rulesName != ''"> and t1.rules_name like concat('%', #{rulesName}, '%')</if>
+            <if test="rulesState != null "> and t1.rules_state = #{rulesState}</if>
+            <if test="rulesLevel != null  and rulesLevel != ''"> and t1.rules_level = #{rulesLevel}</if>
+            <if test="tenantId != null  and tenantId != ''"> and t1.tenant_id = #{tenantId}</if>
+            <if test="isTemplate != null "> and t1.is_template = #{isTemplate}</if>
+        </where>
+        GROUP BY t1.rules_id
+        ORDER BY t1.create_time
+    </select>
+
+    <select id="selectGrassEarlyWarningById" parameterType="Long" resultMap="GrassEarlyWarningResult">
+        <include refid="selectGrassEarlyWarningVo"/>
+        where t1.rules_id = #{rulesId}
+    </select>
+
+    <insert id="insertGrassEarlyWarning" parameterType="com.rexel.earlywarning.domain.GrassEarlyWarning"
+            useGeneratedKeys="true" keyProperty="rulesId">
+        insert into grass_early_warning
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="rulesName != null  and rulesName != ''">rules_name,</if>
+            <if test="rulesState != null ">rules_state,</if>
+            <if test="rulesLevel != null  and rulesLevel != ''">rules_level,</if>
+            <if test="triggerRelation != null  and triggerRelation != ''">trigger_relation,</if>
+            <if test="judgeRelation != null  and judgeRelation != ''">judge_relation,</if>
+            <if test="finishRelation != null  and finishRelation != ''">finish_relation,</if>
+            <if test="triggerFrequency != null ">trigger_frequency,</if>
+            <if test="judgeFrequency != null ">judge_frequency,</if>
+            <if test="finishFrequency != null ">finish_frequency,</if>
+            <if test="judgeType != null  and judgeType != ''">judge_type,</if>
+            <if test="addUpCount != null ">add_up_count,</if>
+            <if test="addUpDuration != null ">add_up_duration,</if>
+            <if test="addUpOnceMax != null ">add_up_once_max,</if>
+            <if test="continuousCount != null ">continuous_count,</if>
+            <if test="continuousIncrease != null ">continuous_increase,</if>
+            <if test="silentCycle != null ">silent_cycle,</if>
+            <if test="startTime != null  and startTime != ''">start_time,</if>
+            <if test="endTime != null  and endTime != ''">end_time,</if>
+            <if test="suggestId != null  and suggestId != ''">suggest_id,</if>
+            <if test="isTemplate != null">is_template,</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="rulesName != null  and rulesName != ''">#{rulesName},</if>
+            <if test="rulesState != null ">#{rulesState},</if>
+            <if test="rulesLevel != null  and rulesLevel != ''">#{rulesLevel},</if>
+            <if test="triggerRelation != null  and triggerRelation != ''">#{triggerRelation},</if>
+            <if test="judgeRelation != null  and judgeRelation != ''">#{judgeRelation},</if>
+            <if test="finishRelation != null  and finishRelation != ''">#{finishRelation},</if>
+            <if test="triggerFrequency != null ">#{triggerFrequency},</if>
+            <if test="judgeFrequency != null ">#{judgeFrequency},</if>
+            <if test="finishFrequency != null ">#{finishFrequency},</if>
+            <if test="judgeType != null  and judgeType != ''">#{judgeType},</if>
+            <if test="addUpCount != null ">#{addUpCount},</if>
+            <if test="addUpDuration != null ">#{addUpDuration},</if>
+            <if test="addUpOnceMax != null ">#{addUpOnceMax},</if>
+            <if test="continuousCount != null ">#{continuousCount},</if>
+            <if test="continuousIncrease != null ">#{continuousIncrease},</if>
+            <if test="silentCycle != null ">#{silentCycle},</if>
+            <if test="startTime != null  and startTime != ''">#{startTime},</if>
+            <if test="endTime != null  and endTime != ''">#{endTime},</if>
+            <if test="suggestId != null  and suggestId != ''">#{suggestId},</if>
+            <if test="isTemplate != null">#{isTemplate},</if>
+            <if test="tenantId != null  and tenantId != ''">#{tenantId},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGrassEarlyWarning" parameterType="com.rexel.earlywarning.domain.GrassEarlyWarning">
+        update grass_early_warning
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="rulesName != null  and rulesName != ''">rules_name = #{rulesName},</if>
+            <if test="rulesState != null ">rules_state = #{rulesState},</if>
+            <if test="rulesLevel != null  and rulesLevel != ''">rules_level = #{rulesLevel},</if>
+            <if test="triggerRelation != null  and triggerRelation != ''">trigger_relation = #{triggerRelation},</if>
+            <if test="judgeRelation != null  and judgeRelation != ''">judge_relation = #{judgeRelation},</if>
+            <if test="finishRelation != null  and finishRelation != ''">finish_relation = #{finishRelation},</if>
+            <if test="triggerFrequency != null ">trigger_frequency = #{triggerFrequency},</if>
+            <if test="judgeFrequency != null ">judge_frequency = #{judgeFrequency},</if>
+            <if test="finishFrequency != null ">finish_frequency = #{finishFrequency},</if>
+            <if test="judgeType != null  and judgeType != ''">judge_type = #{judgeType},</if>
+            <if test="addUpCount != null ">add_up_count = #{addUpCount},</if>
+            <if test="addUpDuration != null ">add_up_duration = #{addUpDuration},</if>
+            <if test="addUpOnceMax != null ">add_up_once_max = #{addUpOnceMax},</if>
+            <if test="continuousCount != null ">continuous_count = #{continuousCount},</if>
+            <if test="continuousIncrease != null ">continuous_increase = #{continuousIncrease},</if>
+            <if test="silentCycle != null ">silent_cycle = #{silentCycle},</if>
+            <if test="startTime != null  and startTime != ''">start_time = #{startTime},</if>
+            <if test="endTime != null  and endTime != ''">end_time = #{endTime},</if>
+            <if test="suggestId != null  and suggestId != ''">suggest_id = #{suggestId},</if>
+            <if test="isTemplate != null">is_template = #{isTemplate},</if>
+            <if test="tenantId != null  and tenantId != ''">tenant_id = #{tenantId},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+        </trim>
+        where rules_id = #{rulesId}
+    </update>
+
+    <delete id="deleteGrassEarlyWarningByRulesId" parameterType="Long">
+        delete from grass_early_warning where rules_id = #{rulesId}
+    </delete>
+
+    <delete id="deleteGrassEarlyWarningByTenantId" parameterType="String">
+        delete from grass_early_warning where tenant_id = #{tenantId}
+    </delete>
+
+    <delete id="deleteGrassEarlyWarningByIds" parameterType="Long">
+        delete from grass_early_warning where rules_id in
+        <foreach item="rulesId" collection="array" open="(" separator="," close=")">
+            #{rulesId}
+        </foreach>
+    </delete>
+    
+</mapper>

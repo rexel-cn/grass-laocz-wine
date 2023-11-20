@@ -1,0 +1,164 @@
+# 数据源配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      # 主库数据源
+      master:
+        url: jdbc:mysql://mysql.grass.svc.cluster.local:3306/grass-service-2.0?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
+        username: root
+        password: RexelMySql998866 #本机数据库
+        #password: 123456 #本机数据库
+      # 从库数据源
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: false
+        url:
+        username: rexel
+        password: rexel
+      # 初始连接数
+      initialSize: 10
+      # 最小连接池数量
+      minIdle: 20
+      # 最大连接池数量
+      maxActive: 50
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username:
+        login-password:
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+  # redis 配置
+  redis:
+    # 地址
+    #host: 101.132.242.90
+    host: redis.grass.svc.cluster.local
+    # 端口，默认为6379
+    #port: 36380
+    port: 6379
+    # 数据库索引
+    database: 0
+    # 密码
+    #password: lkA&%^!f110
+    password: 123456
+    # 连接超时时间
+    timeout: 10s
+    lettuce:
+      pool:
+        # 连接池中的最小空闲连接
+        min-idle: 0
+        # 连接池中的最大空闲连接
+        max-idle: 10
+        # 连接池的最大数据库连接数
+        max-active: 30
+        # #连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1ms
+
+server:
+  servlet.context-path: /
+
+# token配置
+token:
+  # 令牌自定义标识
+  header: Authorization
+  # 令牌秘钥
+  secret: abcdefghijklmnopqrstuvwxyz
+  # 令牌有效期（单位分钟） --2 小时
+  expireTime: 480
+##=================================================
+##   云存储 请求地址
+##=================================================
+oss:
+  local:
+    #文件域名
+    domain: http://localhost:8080
+    #存储路径
+    upload-file-path: D:/rexel
+  aliyun:
+    #阿里云api的内或外网域名
+    endpoint: oss-cn-beijing.aliyuncs.com
+    #阿里云api的密钥access key id
+    access-key-id:
+    #阿里云api的密钥access key secret
+    access-key-secret:
+    #阿里云api的bucket名称
+    bucket-name:
+    #外部访问域名
+    domain: http://xxxxx.oss-cn-beijing.aliyuncs.com
+  # minio文件存储
+  minio:
+    # MinIO 服务地址
+    #url: http://101.132.242.90:9000
+    url: http://minio.grass.svc.cluster.local:9000
+    # MinIO 用户
+    accessKey: admin
+    # MinIO 密码
+    secretKey: admin123
+    #bucketName: aaaaa	# 桶名称
+##=================================================
+##   nsp  消息队列
+##=================================================
+nsq:
+  #状态  false不启动，true启动
+  status: true
+  namesrvAddr: nsqlookupd-statefulset.grass.svc.cluster.local
+  port: 4161
+  #默认nsq最高支持2500，不配置默认200
+  MaxInFlight: 500
+##=================================================
+##   pulse 请求地址
+##=================================================
+pulse:
+  ip: http://172.19.228.71
+  port: 6912
+##=================================================
+##   阿里云连接配置信息
+##=================================================
+ali:
+  accessKey: TFRBSTRGb1pIMnlmRXFucHhvTnBRd1JM
+  accessSecret: YndhVWVQYnEzZzJRWFEyZklXZ0tOcERHSkU1VVUz
+  uid: MjQ2MzAzNzgxNDgwNjQ3NjI1
+  regionId: Y24tc2hhbmdoYWk=
+  iotVersion: MjAxOC0wMS0yMA==
+  iotDomain: aW90LmNuLXNoYW5naGFpLmFsaXl1bmNzLmNvbQ==
+  smsDomain: ZHlzbXNhcGkuYWxpeXVuY3MuY29t
+  smsVersion: MjAxNy0wNS0yNQ==
+##=================================================
+##   MQTT Conf
+##=================================================
+mqtt:
+  serverUrl: tcp://172.19.228.71:1885
+  username: admin
+  password: admin123
+  keepAliveInterval: 60
+  connectionTimeout: 30
+  #默认10
+  maxInFlight: 50

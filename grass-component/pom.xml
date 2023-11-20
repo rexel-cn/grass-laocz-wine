@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>grass-service</artifactId>
+        <groupId>com.rexel</groupId>
+        <version>2.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>grass-component</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.brainlag</groupId>
+            <artifactId>nsq-client</artifactId>
+            <version>1.0.0.RC4</version>
+        </dependency>
+        <!-- 通用工具-->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+        </dependency>
+        <!-- 系统模块-->
+        <dependency>
+            <groupId>com.rexel</groupId>
+            <artifactId>grass-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rexel</groupId>
+            <artifactId>grass-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rexel</groupId>
+            <artifactId>grass-framework</artifactId>
+        </dependency>
+        <!--Srping集成  mqtt客户端-->
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <!--mqtt客户端-->
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>com.github.brainlag</groupId>
+                            <artifactId>nsq-client</artifactId>
+                            <version>1.0.0.RC4</version>
+                            <file>${pom.basedir}/lib/nsq-client-1.0.0.RC4.jar</file>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

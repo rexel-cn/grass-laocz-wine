@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.earlywarning.mapper.GrassEarlyWarningHisMapper">
+
+    <resultMap type="com.rexel.earlywarning.domain.GrassEarlyWarningHis" id="GrassEarlyWarningHisResult">
+        <result property="id" column="id"/>
+        <result property="hisId" column="his_id"/>
+        <result property="rulesId" column="rules_id"/>
+        <result property="rulesName" column="rules_name"/>
+        <result property="rulesState" column="rules_state"/>
+        <result property="rulesLevel" column="rules_level"/>
+        <result property="triggerRelation" column="trigger_relation"/>
+        <result property="triggerFrequency" column="trigger_frequency"/>
+        <result property="judgeRelation" column="judge_relation"/>
+        <result property="judgeFrequency" column="judge_frequency"/>
+        <result property="finishRelation" column="finish_relation"/>
+        <result property="finishFrequency" column="finish_frequency"/>
+        <result property="judgeType" column="judge_type"/>
+        <result property="addUpCount" column="add_up_count"/>
+        <result property="addUpDuration" column="add_up_duration"/>
+        <result property="addUpOnceMax" column="add_up_once_max"/>
+        <result property="continuousCount" column="continuous_count"/>
+        <result property="continuousIncrease" column="continuous_increase"/>
+        <result property="silentCycle" column="silent_cycle"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="suggestId" column="suggest_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectGrassEarlyWarningHisVo">
+        select id,
+               his_id,
+               rules_id,
+               rules_name,
+               rules_state,
+               rules_level,
+               trigger_relation,
+               trigger_frequency,
+               judge_relation,
+               judge_frequency,
+               finish_relation,
+               finish_frequency,
+               judge_type,
+               add_up_count,
+               add_up_duration,
+               add_up_once_max,
+               continuous_count,
+               continuous_increase,
+               silent_cycle,
+               start_time,
+               end_time,
+               suggest_id,
+               tenant_id,
+               create_time,
+               create_by,
+               update_time,
+               update_by,
+               remark
+        from grass_early_warning_his
+    </sql>
+
+    <select id="selectGrassEarlyWarningHisList" parameterType="com.rexel.earlywarning.domain.GrassEarlyWarningHis"
+            resultMap="GrassEarlyWarningHisResult">
+        <include refid="selectGrassEarlyWarningHisVo"/>
+        <where>
+            <if test="hisId != null ">
+                and his_id = #{hisId}
+            </if>
+            <if test="rulesId != null ">
+                and rules_id = #{rulesId}
+            </if>
+            <if test="rulesName != null  and rulesName != ''">
+                and rules_name like concat('%', #{rulesName}, '%')
+            </if>
+            <if test="rulesState != null ">
+                and rules_state = #{rulesState}
+            </if>
+            <if test="rulesLevel != null  and rulesLevel != ''">
+                and rules_level = #{rulesLevel}
+            </if>
+            <if test="triggerRelation != null  and triggerRelation != ''">
+                and trigger_relation = #{triggerRelation}
+            </if>
+            <if test="triggerFrequency != null ">
+                and trigger_frequency = #{triggerFrequency}
+            </if>
+            <if test="judgeRelation != null  and judgeRelation != ''">
+                and judge_relation = #{judgeRelation}
+            </if>
+            <if test="judgeFrequency != null ">
+                and judge_frequency = #{judgeFrequency}
+            </if>
+            <if test="finishRelation != null  and finishRelation != ''">
+                and finish_relation = #{finishRelation}
+            </if>
+            <if test="finishFrequency != null  and finishFrequency != ''">
+                and finish_frequency = #{finishFrequency}
+            </if>
+            <if test="judgeType != null  and judgeType != ''">
+                and judge_type = #{judgeType}
+            </if>
+            <if test="addUpCount != null ">
+                and add_up_count = #{addUpCount}
+            </if>
+            <if test="addUpDuration != null ">
+                and add_up_duration = #{addUpDuration}
+            </if>
+            <if test="addUpOnceMax != null ">
+                and add_up_once_max = #{addUpOnceMax}
+            </if>
+            <if test="continuousCount != null ">
+                and continuous_count = #{continuousCount}
+            </if>
+            <if test="continuousIncrease != null ">
+                and continuous_increase = #{continuousIncrease}
+            </if>
+            <if test="silentCycle != null ">
+                and silent_cycle = #{silentCycle}
+            </if>
+            <if test="startTime != null  and startTime != ''">
+                and start_time = #{startTime}
+            </if>
+            <if test="endTime != null  and endTime != ''">
+                and end_time = #{endTime}
+            </if>
+            <if test="suggestId != null  and suggestId != ''">
+                and suggest_id = #{suggestId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchGrassEarlyWarningHis" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into grass_early_warning_his
+        ( id , his_id, rules_id , rules_name , rules_state , rules_level , trigger_relation , trigger_frequency ,
+        judge_relation, judge_frequency , finish_relation , finish_frequency , judge_type , add_up_count ,
+        add_up_duration , add_up_once_max , continuous_count , continuous_increase , silent_cycle , start_time ,
+        end_time , suggest_id , tenant_id , create_time , create_by , update_time , update_by , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.hisId}, #{item.rulesId}, #{item.rulesName}, #{item.rulesState}, #{item.rulesLevel},
+            #{item.triggerRelation}, #{item.triggerFrequency}, #{item.judgeRelation}, #{item.judgeFrequency},
+            #{item.finishRelation}, #{item.finishFrequency}, #{item.judgeType}, #{item.addUpCount},
+            #{item.addUpDuration}, #{item.addUpOnceMax}, #{item.continuousCount}, #{item.continuousIncrease},
+            #{item.silentCycle}, #{item.startTime}, #{item.endTime}, #{item.suggestId}, #{item.tenantId},
+            #{item.createTime}, #{item.createBy}, #{item.updateTime}, #{item.updateBy}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

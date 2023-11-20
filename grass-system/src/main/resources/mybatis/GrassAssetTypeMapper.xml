@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassAssetTypeMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassAssetType" id="GrassAssetTypeResult">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="assetTypeName" column="asset_type_name"/>
+        <result property="assetGrade" column="asset_grade"/>
+        <result property="id" column="icon"/>
+        <result property="parentId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectGrassAssetTypeVo">
+        SELECT id,
+               parent_id,
+               ancestors,
+               asset_type_name,
+               asset_grade,
+               icon,
+               tenant_id,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        FROM grass_asset_type
+    </sql>
+    <update id="updateChildren">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE grass_asset_type
+            <set>
+                <if test="item.ancestors != null and item.ancestors!='' ">
+                    ancestors = #{item.ancestors},
+                </if>
+            </set>
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+    <delete id="deleteAssetTypeById">
+        WITH recursive asset_type (id) AS (SELECT gat.id
+                                           FROM grass_asset_type gat
+                                           WHERE gat.id = #{id}
+                                           UNION ALL
+                                           SELECT gat1.id
+                                           FROM grass_asset_type gat1,
+                                                asset_type t
+                                           WHERE gat1.parent_id = t.id)
+        delete
+        from grass_asset_type
+        where id in (select id from asset_type)
+    </delete>
+    <delete id="deleteByTenantId">
+        <choose>
+            <when test="tenantId!=null and tenantId!='' ">
+                delete
+                from grass_asset_type
+                <where>
+                    tenant_id=#{tenantId}
+                </where>
+            </when>
+        </choose>
+    </delete>
+
+    <select id="selectAssetTypeTree" resultType="com.rexel.system.domain.GrassAssetType">
+        SELECT gat.id,
+               gat.parent_id,
+               gat.ancestors,
+               gat.asset_type_name,
+               gat.asset_grade,
+               gat.icon,
+               gat.tenant_id,
+               gat.remark,
+               gat.create_by,
+               gat.create_time,
+               gat.update_by,
+               gat.update_time,
+               (select count(1) from grass_asset ga WHERE ga.asset_type_id = gat.id) AS assetCount
+        FROM grass_asset_type AS gat
+    </select>
+    <select id="selectChildrenById" resultType="com.rexel.system.domain.GrassAssetType">
+        select *
+        from grass_asset_type
+        where find_in_set(#{id}, ancestors)
+    </select>
+
+</mapper>

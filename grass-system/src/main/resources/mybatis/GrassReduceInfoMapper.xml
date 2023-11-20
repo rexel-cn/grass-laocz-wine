@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.system.mapper.GrassReduceInfoMapper">
+
+    <resultMap type="com.rexel.system.domain.GrassReduceInfo" id="GrassReduceInfoResult">
+        <result property="id" column="id"/>
+        <result property="interval" column="interval"/>
+        <result property="retentionDays" column="retention_days"/>
+        <result property="intervalName" column="interval_name"/>
+    </resultMap>
+
+    <sql id="selectGrassReduceInfoVo">
+        SELECT
+            t1.id,
+            t1.`interval`,
+            t1.retention_days,
+            ifnull(t2.dict_label, t1.`interval`) AS interval_name
+        FROM
+            grass_reduce_info AS t1
+            LEFT JOIN sys_dict_data AS t2 ON t1.`interval` = t2.dict_value AND t2.dict_type = 'reduce_interval'
+    </sql>
+
+    <select id="selectGrassReduceInfoList" parameterType="com.rexel.system.domain.GrassReduceInfo" resultMap="GrassReduceInfoResult">
+        <include refid="selectGrassReduceInfoVo"/>
+        <where>
+            <if test="interval != null  and interval != ''">
+                and t1.`interval` = #{interval}
+            </if>
+            <if test="retentionDays != null ">
+                and t1.retention_days = #{retentionDays}
+            </if>
+        </where>
+        order by t2.dict_sort
+    </select>
+
+    <insert id="batchGrassReduceInfo" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into grass_reduce_info
+        ( id , `interval` , retention_days) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.interval}, #{item.retentionDays})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAllGrassReduceInfo">
+        delete from grass_reduce_info
+    </delete>
+</mapper>
