@@ -167,11 +167,7 @@
                 <filtering>true</filtering>
                 <excludes><!--打包是排除的节点-->
                     <exclude>environment/dev/*</exclude>
-                    <exclude>environment/demo/*</exclude>
-                    <exclude>environment/rittal/*</exclude>
-                    <exclude>environment/test/*</exclude>
-                    <exclude>environment/online/*</exclude>
-                    <exclude>environment/gs/*</exclude>
+                    <exclude>environment/prd/*</exclude>
                 </excludes>
             </resource>
             <!-- 不同环境的资源文件 -->
