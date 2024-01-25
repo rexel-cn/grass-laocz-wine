@@ -245,12 +245,6 @@
                 <artifactId>grass-component</artifactId>
                 <version>${grass.version}</version>
             </dependency>
-            <!-- 预警 -->
-            <dependency>
-                <groupId>com.rexel</groupId>
-                <artifactId>grass-earlywarning</artifactId>
-                <version>${grass.version}</version>
-            </dependency>
             <!-- dview -->
             <dependency>
                 <groupId>com.rexel</groupId>
@@ -361,7 +355,6 @@
         <module>grass-component</module>
         <module>grass-dview</module>
         <module>grass-framework/grass-framework-system-api</module>
-        <module>grass-earlywarning</module>
         <module>grass-project</module>
     </modules>
 
