@@ -6,7 +6,7 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://mysql.grass.svc.cluster.local:3306/grass-service-2.0?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
+        url: jdbc:mysql://mysql.grass.svc.cluster.local:3306/laocz_wine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
         username: root
         password: RexelMySql998866 #本机数据库
         #password: 123456 #本机数据库
