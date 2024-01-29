@@ -81,10 +81,8 @@ spring:
         max-active: 30
         # #连接池最大阻塞等待时间（使用负值表示没有限制）
         max-wait: -1ms
-
 server:
   servlet.context-path: /
-
 # token配置
 token:
   # 令牌自定义标识
@@ -105,13 +103,11 @@ oss:
   # minio文件存储
   minio:
     # MinIO 服务地址
-    #url: http://101.132.242.90:9000
     url: http://minio.grass.svc.cluster.local:9000
     # MinIO 用户
     accessKey: admin
     # MinIO 密码
     secretKey: admin123
-    #bucketName: aaaaa	# 桶名称
 ##=================================================
 ##   nsp  消息队列
 ##=================================================
@@ -126,28 +122,19 @@ nsq:
 ##   pulse 请求地址
 ##=================================================
 pulse:
-  ip: http://172.19.228.71
-  port: 6912
-##=================================================
-##   阿里云连接配置信息
-##=================================================
-ali:
-  accessKey: TFRBSTRGb1pIMnlmRXFucHhvTnBRd1JM
-  accessSecret: YndhVWVQYnEzZzJRWFEyZklXZ0tOcERHSkU1VVUz
-  uid: MjQ2MzAzNzgxNDgwNjQ3NjI1
-  regionId: Y24tc2hhbmdoYWk=
-  iotVersion: MjAxOC0wMS0yMA==
-  iotDomain: aW90LmNuLXNoYW5naGFpLmFsaXl1bmNzLmNvbQ==
-  smsDomain: ZHlzbXNhcGkuYWxpeXVuY3MuY29t
-  smsVersion: MjAxNy0wNS0yNQ==
+  ip: http://101.132.242.90
+  port: 6920
 ##=================================================
 ##   MQTT Conf
 ##=================================================
 mqtt:
-  serverUrl: tcp://172.19.228.71:1885
-  username: admin
-  password: admin123
+  clientId: laocz_app
+  topics: test
+  serverUrl: tcp://172.19.228.71:1902
+  userName: admin
+  passWord: admin123
   keepAliveInterval: 60
-  connectionTimeout: 30
-  #默认10
-  maxInFlight: 50
+  automaticReconnect: true
+  completionTimeout: 30
+  cleanSession: true
+  qos: 1

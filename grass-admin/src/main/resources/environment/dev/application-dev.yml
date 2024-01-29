@@ -61,11 +61,11 @@ spring:
     # 地址
     host: 101.132.242.90
     # 端口，默认为6379
-    port: 36380
+    port: 36369
     # 数据库索引
     database: 1
     # 密码
-    password: lkA&%^!f110
+    password: 123456
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -78,10 +78,8 @@ spring:
         max-active: 30
         # #连接池最大阻塞等待时间（使用负值表示没有限制）
         max-wait: -1ms
-
 server:
   servlet.context-path: /
-
 # token配置
 token:
   # 令牌自定义标识
@@ -102,12 +100,11 @@ oss:
   # minio文件存储
   minio:
     # MinIO 服务地址
-    url: http://101.132.242.90:9000
+    url: http://101.132.242.90:9004
     # MinIO 用户
     accessKey: admin
     # MinIO 密码
     secretKey: admin123
-    #bucketName: aaaaa	# 桶名称
 ##=================================================
 ##   nsp  消息队列
 ##=================================================
@@ -123,29 +120,16 @@ nsq:
 ##=================================================
 pulse:
   ip: http://101.132.242.90
-  port: 6912
-##=================================================
-##   阿里云连接配置信息
-##=================================================
-ali:
-  accessKey: TFRBSTRGb1pIMnlmRXFucHhvTnBRd1JM
-  accessSecret: YndhVWVQYnEzZzJRWFEyZklXZ0tOcERHSkU1VVUz
-  uid: MjQ2MzAzNzgxNDgwNjQ3NjI1
-  regionId: Y24tc2hhbmdoYWk=
-  iotVersion: MjAxOC0wMS0yMA==
-  iotDomain: aW90LmNuLXNoYW5naGFpLmFsaXl1bmNzLmNvbQ==
-  smsDomain: ZHlzbXNhcGkuYWxpeXVuY3MuY29t
-  smsVersion: MjAxNy0wNS0yNQ==
+  port: 6920
 ##=================================================
 ##   MQTT Conf
 ##=================================================
 mqtt:
-  clientId: early_warning
+  clientId: laocz_app
   topics: test
-  serverUrls: tcp://101.132.242.90:1883
+  serverUrls: tcp://101.132.242.90:1902
   userName: admin
   passWord: admin123
-  #如果未指定，则默认保持活动间隔（以秒为单位）
   keepAliveInterval: 60
   automaticReconnect: true
   completionTimeout: 30
