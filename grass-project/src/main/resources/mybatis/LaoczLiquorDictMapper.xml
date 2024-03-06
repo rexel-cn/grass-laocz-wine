@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczLiquorDictMapper">
+
+    <resultMap type="LaoczLiquorDict" id="LaoczLiquorDictResult">
+        <result property="liquorDictId" column="liquor_dict_id"/>
+        <result property="dictType" column="dict_type"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="wineDcitInfo" column="wine_dcit_info"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczLiquorDictVo">
+        select liquor_dict_id,
+               dict_type,
+               tenant_id,
+               wine_dcit_info,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_liquor_dict
+    </sql>
+
+    <select id="selectLaoczLiquorDictList" parameterType="LaoczLiquorDict" resultMap="LaoczLiquorDictResult">
+        <include refid="selectLaoczLiquorDictVo"/>
+        <where>
+            <if test="dictType != null ">
+                and dict_type = #{dictType}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="wineDcitInfo != null  and wineDcitInfo != ''">
+                and wine_dcit_info = #{wineDcitInfo}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczLiquorDict" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="liquorDictId">
+        insert into laocz_liquor_dict
+        ( liquor_dict_id , dict_type , tenant_id , wine_dcit_info , create_by , create_time , update_by , update_time ,
+        remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.liquorDictId}, #{item.dictType}, #{item.tenantId}, #{item.wineDcitInfo}, #{item.createBy},
+            #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

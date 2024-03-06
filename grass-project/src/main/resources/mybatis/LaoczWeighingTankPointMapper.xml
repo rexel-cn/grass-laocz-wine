@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczWeighingTankPointMapper">
+
+    <resultMap type="LaoczWeighingTankPoint" id="LaoczWeighingTankPointResult">
+        <result property="equipmentPointId" column="equipment_point_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="useMark" column="use_mark"/>
+        <result property="weighingTankId" column="weighing_tank_id"/>
+        <result property="pointPrimaryKey" column="point_primary_key"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczWeighingTankPointVo">
+        select equipment_point_id,
+               tenant_id,
+               use_mark,
+               weighing_tank_id,
+               point_primary_key,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_weighing_tank_point
+    </sql>
+
+    <select id="selectLaoczWeighingTankPointList" parameterType="LaoczWeighingTankPoint"
+            resultMap="LaoczWeighingTankPointResult">
+        <include refid="selectLaoczWeighingTankPointVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="useMark != null  and useMark != ''">
+                and use_mark = #{useMark}
+            </if>
+            <if test="weighingTankId != null ">
+                and weighing_tank_id = #{weighingTankId}
+            </if>
+            <if test="pointPrimaryKey != null ">
+                and point_primary_key = #{pointPrimaryKey}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczWeighingTankPoint" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="equipmentPointId">
+        insert into laocz_weighing_tank_point
+        ( equipment_point_id , tenant_id , use_mark , weighing_tank_id , point_primary_key , create_by , create_time ,
+        update_by , update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.equipmentPointId}, #{item.tenantId}, #{item.useMark}, #{item.weighingTankId},
+            #{item.pointPrimaryKey}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime},
+            #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

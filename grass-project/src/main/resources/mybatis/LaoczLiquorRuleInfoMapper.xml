@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczLiquorRuleInfoMapper">
+
+    <resultMap type="LaoczLiquorRuleInfo" id="LaoczLiquorRuleInfoResult">
+        <result property="liquorRuleId" column="liquor_rule_id"/>
+        <result property="liquorBatchId" column="liquor_batch_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="liquorRuleName" column="liquor_rule_name"/>
+        <result property="liquorRuleEnable" column="liquor_rule_enable"/>
+        <result property="liquorRuleJudge" column="liquor_rule_judge"/>
+        <result property="liquorRuleThreshold" column="liquor_rule_threshold"/>
+        <result property="liquorRuleNotifyUser" column="liquor_rule_notify_user"/>
+        <result property="liquorRuleNotifyTemplate" column="liquor_rule_notify_template"/>
+        <result property="deleteFlag" column="delete_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczLiquorRuleInfoVo">
+        select liquor_rule_id,
+               liquor_batch_id,
+               tenant_id,
+               liquor_rule_name,
+               liquor_rule_enable,
+               liquor_rule_judge,
+               liquor_rule_threshold,
+               liquor_rule_notify_user,
+               liquor_rule_notify_template,
+               delete_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_liquor_rule_info
+    </sql>
+
+    <select id="selectLaoczLiquorRuleInfoList" parameterType="LaoczLiquorRuleInfo"
+            resultMap="LaoczLiquorRuleInfoResult">
+        <include refid="selectLaoczLiquorRuleInfoVo"/>
+        <where>
+            <if test="liquorBatchId != null ">
+                and liquor_batch_id = #{liquorBatchId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="liquorRuleName != null  and liquorRuleName != ''">
+                and liquor_rule_name like concat('%', #{liquorRuleName}, '%')
+            </if>
+            <if test="liquorRuleEnable != null ">
+                and liquor_rule_enable = #{liquorRuleEnable}
+            </if>
+            <if test="liquorRuleJudge != null  and liquorRuleJudge != ''">
+                and liquor_rule_judge = #{liquorRuleJudge}
+            </if>
+            <if test="liquorRuleThreshold != null  and liquorRuleThreshold != ''">
+                and liquor_rule_threshold = #{liquorRuleThreshold}
+            </if>
+            <if test="liquorRuleNotifyUser != null  and liquorRuleNotifyUser != ''">
+                and liquor_rule_notify_user = #{liquorRuleNotifyUser}
+            </if>
+            <if test="liquorRuleNotifyTemplate != null  and liquorRuleNotifyTemplate != ''">
+                and liquor_rule_notify_template = #{liquorRuleNotifyTemplate}
+            </if>
+            <if test="deleteFlag != null ">
+                and delete_flag = #{deleteFlag}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczLiquorRuleInfo" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="liquorRuleId">
+        insert into laocz_liquor_rule_info
+        ( liquor_rule_id , liquor_batch_id , tenant_id , liquor_rule_name , liquor_rule_enable , liquor_rule_judge ,
+        liquor_rule_threshold , liquor_rule_notify_user , liquor_rule_notify_template , delete_flag , create_by ,
+        create_time , update_by , update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.liquorRuleId}, #{item.liquorBatchId}, #{item.tenantId}, #{item.liquorRuleName},
+            #{item.liquorRuleEnable}, #{item.liquorRuleJudge}, #{item.liquorRuleThreshold},
+            #{item.liquorRuleNotifyUser}, #{item.liquorRuleNotifyTemplate}, #{item.deleteFlag}, #{item.createBy},
+            #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

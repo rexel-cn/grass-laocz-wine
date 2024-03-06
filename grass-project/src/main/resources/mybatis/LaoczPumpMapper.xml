@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczPumpMapper">
+
+    <resultMap type="LaoczPump" id="LaoczPumpResult">
+        <result property="pumpId" column="pump_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="fireZoneId" column="fire_zone_id"/>
+        <result property="pumpNumber" column="pump_number"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczPumpVo">
+        select pump_id,
+               tenant_id,
+               fire_zone_id,
+               pump_number,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_pump
+    </sql>
+
+    <select id="selectLaoczPumpList" parameterType="LaoczPump" resultMap="LaoczPumpResult">
+        <include refid="selectLaoczPumpVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="fireZoneId != null ">
+                and fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="pumpNumber != null ">
+                and pump_number = #{pumpNumber}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczPump" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="pumpId">
+        insert into laocz_pump
+        ( pump_id , tenant_id , fire_zone_id , pump_number , create_by , create_time , update_by , update_time , remark)
+        values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.pumpId}, #{item.tenantId}, #{item.fireZoneId}, #{item.pumpNumber}, #{item.createBy},
+            #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

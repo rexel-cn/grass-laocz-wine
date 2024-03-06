@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczLiquorManagementMapper">
+
+    <resultMap type="LaoczLiquorManagement" id="LaoczLiquorManagementResult">
+        <result property="liquorManagementId" column="liquor_management_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="liquorName" column="liquor_name"/>
+        <result property="liquorLevel" column="liquor_level"/>
+        <result property="liquorRound" column="liquor_round"/>
+        <result property="liquorFlavorName" column="liquor_flavor_name"/>
+        <result property="liquorSource" column="liquor_source"/>
+        <result property="liquorYear" column="liquor_year"/>
+        <result property="liquorBrewingTime" column="liquor_brewing_time"/>
+        <result property="liquorContent" column="liquor_content"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczLiquorManagementVo">
+        select liquor_management_id,
+               tenant_id,
+               liquor_name,
+               liquor_level,
+               liquor_round,
+               liquor_flavor_name,
+               liquor_source,
+               liquor_year,
+               liquor_brewing_time,
+               liquor_content,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_liquor_management
+    </sql>
+
+    <select id="selectLaoczLiquorManagementList" parameterType="LaoczLiquorManagement"
+            resultMap="LaoczLiquorManagementResult">
+        <include refid="selectLaoczLiquorManagementVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="liquorName != null  and liquorName != ''">
+                and liquor_name like concat('%', #{liquorName}, '%')
+            </if>
+            <if test="liquorLevel != null  and liquorLevel != ''">
+                and liquor_level = #{liquorLevel}
+            </if>
+            <if test="liquorRound != null  and liquorRound != ''">
+                and liquor_round = #{liquorRound}
+            </if>
+            <if test="liquorFlavorName != null  and liquorFlavorName != ''">
+                and liquor_flavor_name like concat('%', #{liquorFlavorName}, '%')
+            </if>
+            <if test="liquorSource != null  and liquorSource != ''">
+                and liquor_source = #{liquorSource}
+            </if>
+            <if test="liquorYear != null  and liquorYear != ''">
+                and liquor_year = #{liquorYear}
+            </if>
+            <if test="liquorBrewingTime != null ">
+                and liquor_brewing_time = #{liquorBrewingTime}
+            </if>
+            <if test="liquorContent != null  and liquorContent != ''">
+                and liquor_content = #{liquorContent}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczLiquorManagement" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="liquorManagementId">
+        insert into laocz_liquor_management
+        ( liquor_management_id , tenant_id , liquor_name , liquor_level , liquor_round , liquor_flavor_name ,
+        liquor_source , liquor_year , liquor_brewing_time , liquor_content , create_by , create_time , update_by ,
+        update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.liquorManagementId}, #{item.tenantId}, #{item.liquorName}, #{item.liquorLevel},
+            #{item.liquorRound}, #{item.liquorFlavorName}, #{item.liquorSource}, #{item.liquorYear},
+            #{item.liquorBrewingTime}, #{item.liquorContent}, #{item.createBy}, #{item.createTime}, #{item.updateBy},
+            #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper">
+
+    <resultMap type="LaoczPotteryAltarManagement" id="LaoczPotteryAltarManagementResult">
+        <result property="potteryAltarId" column="pottery_altar_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="potteryAltarNumber" column="pottery_altar_number"/>
+        <result property="potteryAltarState" column="pottery_altar_state"/>
+        <result property="fireZoneId" column="fire_zone_id"/>
+        <result property="potteryAltarFullAltarWeight" column="pottery_altar_full_altar_weight"/>
+        <result property="potteryAltarQrCodeAddress" column="pottery_altar_qr_code_address"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczPotteryAltarManagementVo">
+        select pottery_altar_id,
+               tenant_id,
+               pottery_altar_number,
+               pottery_altar_state,
+               fire_zone_id,
+               pottery_altar_full_altar_weight,
+               pottery_altar_qr_code_address,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_pottery_altar_management
+    </sql>
+
+    <select id="selectLaoczPotteryAltarManagementList" parameterType="LaoczPotteryAltarManagement"
+            resultMap="LaoczPotteryAltarManagementResult">
+        <include refid="selectLaoczPotteryAltarManagementVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="potteryAltarNumber != null  and potteryAltarNumber != ''">
+                and pottery_altar_number = #{potteryAltarNumber}
+            </if>
+            <if test="potteryAltarState != null ">
+                and pottery_altar_state = #{potteryAltarState}
+            </if>
+            <if test="fireZoneId != null ">
+                and fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="potteryAltarFullAltarWeight != null ">
+                and pottery_altar_full_altar_weight = #{potteryAltarFullAltarWeight}
+            </if>
+            <if test="potteryAltarQrCodeAddress != null  and potteryAltarQrCodeAddress != ''">
+                and pottery_altar_qr_code_address = #{potteryAltarQrCodeAddress}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczPotteryAltarManagement" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="potteryAltarId">
+        insert into laocz_pottery_altar_management
+        ( pottery_altar_id , tenant_id , pottery_altar_number , pottery_altar_state , fire_zone_id ,
+        pottery_altar_full_altar_weight , pottery_altar_qr_code_address , create_by , create_time , update_by ,
+        update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.potteryAltarId}, #{item.tenantId}, #{item.potteryAltarNumber}, #{item.potteryAltarState},
+            #{item.fireZoneId}, #{item.potteryAltarFullAltarWeight}, #{item.potteryAltarQrCodeAddress},
+            #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczPumpPointMapper">
+
+    <resultMap type="LaoczPumpPoint" id="LaoczPumpPointResult">
+        <result property="equipmentPointId" column="equipment_point_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="useMark" column="use_mark"/>
+        <result property="pumpId" column="pump_id"/>
+        <result property="pointPrimaryKey" column="point_primary_key"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczPumpPointVo">
+        select equipment_point_id,
+               tenant_id,
+               use_mark,
+               pump_id,
+               point_primary_key,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_pump_point
+    </sql>
+
+    <select id="selectLaoczPumpPointList" parameterType="LaoczPumpPoint" resultMap="LaoczPumpPointResult">
+        <include refid="selectLaoczPumpPointVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="useMark != null  and useMark != ''">
+                and use_mark = #{useMark}
+            </if>
+            <if test="pumpId != null ">
+                and pump_id = #{pumpId}
+            </if>
+            <if test="pointPrimaryKey != null ">
+                and point_primary_key = #{pointPrimaryKey}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczPumpPoint" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="equipmentPointId">
+        insert into laocz_pump_point
+        ( equipment_point_id , tenant_id , use_mark , pump_id , point_primary_key , create_by , create_time , update_by
+        , update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.equipmentPointId}, #{item.tenantId}, #{item.useMark}, #{item.pumpId}, #{item.pointPrimaryKey},
+            #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

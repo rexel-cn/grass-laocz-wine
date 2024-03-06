@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczFireZoneInfoMapper">
+
+    <resultMap type="LaoczFireZoneInfo" id="LaoczFireZoneInfoResult">
+        <result property="fireZoneId" column="fire_zone_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="areaId" column="area_id"/>
+        <result property="fireZoneName" column="fire_zone_name"/>
+        <result property="dispalyOrder" column="dispaly_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczFireZoneInfoVo">
+        select fire_zone_id,
+               tenant_id,
+               area_id,
+               fire_zone_name,
+               dispaly_order,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_fire_zone_info
+    </sql>
+
+    <select id="selectLaoczFireZoneInfoList" parameterType="LaoczFireZoneInfo" resultMap="LaoczFireZoneInfoResult">
+        <include refid="selectLaoczFireZoneInfoVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="areaId != null ">
+                and area_id = #{areaId}
+            </if>
+            <if test="fireZoneName != null  and fireZoneName != ''">
+                and fire_zone_name like concat('%', #{fireZoneName}, '%')
+            </if>
+            <if test="dispalyOrder != null ">
+                and dispaly_order = #{dispalyOrder}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczFireZoneInfo" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="fireZoneId">
+        insert into laocz_fire_zone_info
+        ( fire_zone_id , tenant_id , area_id , fire_zone_name , dispaly_order , create_by , create_time , update_by ,
+        update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.fireZoneId}, #{item.tenantId}, #{item.areaId}, #{item.fireZoneName}, #{item.dispalyOrder},
+            #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

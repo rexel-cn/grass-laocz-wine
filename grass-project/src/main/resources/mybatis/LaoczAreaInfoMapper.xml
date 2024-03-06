@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczAreaInfoMapper">
+
+    <resultMap type="LaoczAreaInfo" id="LaoczAreaInfoResult">
+        <result property="areaId" column="area_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="areaName" column="area_name"/>
+        <result property="dispalyOrder" column="dispaly_order"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczAreaInfoVo">
+        select area_id,
+               tenant_id,
+               area_name,
+               dispaly_order,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_area_info
+    </sql>
+
+    <select id="selectLaoczAreaInfoList" parameterType="LaoczAreaInfo" resultMap="LaoczAreaInfoResult">
+        <include refid="selectLaoczAreaInfoVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="areaName != null  and areaName != ''">
+                and area_name like concat('%', #{areaName}, '%')
+            </if>
+            <if test="dispalyOrder != null ">
+                and dispaly_order = #{dispalyOrder}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczAreaInfo" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="areaId">
+        insert into laocz_area_info
+        ( area_id , tenant_id , area_name , dispaly_order , create_by , create_time , update_by , update_time , remark)
+        values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.areaId}, #{item.tenantId}, #{item.areaName}, #{item.dispalyOrder}, #{item.createBy},
+            #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>
