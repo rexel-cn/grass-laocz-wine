@@ -125,7 +125,7 @@ pulse:
 ##   MQTT Conf
 ##=================================================
 mqtt:
-  clientId: laocz_app
+  clientId: laocz_app_fhw
   topics: test
   serverUrls: tcp://101.132.242.90:1902
   userName: admin

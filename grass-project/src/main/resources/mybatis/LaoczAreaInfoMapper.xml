@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rexel.laocz.mapper.LaoczAreaInfoMapper">
 
-    <resultMap type="LaoczAreaInfo" id="LaoczAreaInfoResult">
+    <resultMap type="com.rexel.laocz.domain.LaoczAreaInfo" id="LaoczAreaInfoResult">
         <result property="areaId" column="area_id"/>
         <result property="tenantId" column="tenant_id"/>
         <result property="areaName" column="area_name"/>
@@ -29,7 +29,7 @@
         from laocz_area_info
     </sql>
 
-    <select id="selectLaoczAreaInfoList" parameterType="LaoczAreaInfo" resultMap="LaoczAreaInfoResult">
+    <select id="selectLaoczAreaInfoList" parameterType="com.rexel.laocz.domain.LaoczAreaInfo" resultMap="LaoczAreaInfoResult">
         <include refid="selectLaoczAreaInfoVo"/>
         <where>
             <if test="tenantId != null  and tenantId != ''">
@@ -42,6 +42,7 @@
                 and dispaly_order = #{dispalyOrder}
             </if>
         </where>
+        order by laocz_area_info.dispaly_order
     </select>
 
     <insert id="batchLaoczAreaInfo" parameterType="java.util.List"
