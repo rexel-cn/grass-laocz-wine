@@ -1,7 +1,9 @@
 package com.rexel.laocz.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
@@ -31,6 +33,7 @@ public class LaoczLiquorManagement extends BaseEntity {
     /**
      * 酒品管理ID
      */
+    @TableId(type = IdType.AUTO)
     private Long liquorManagementId;
     /**
      * 租户ID

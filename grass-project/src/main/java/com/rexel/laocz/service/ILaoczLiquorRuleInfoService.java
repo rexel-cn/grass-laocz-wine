@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
+import com.rexel.laocz.vo.LiquorRuleInfoVo;
 
 import java.util.List;
 
@@ -19,6 +20,6 @@ public interface ILaoczLiquorRuleInfoService extends IService<LaoczLiquorRuleInf
      * @param laoczLiquorRuleInfo 酒液批次存储报警规则信息
      * @return 酒液批次存储报警规则信息集合
      */
-    List<LaoczLiquorRuleInfo> selectLaoczLiquorRuleInfoList(LaoczLiquorRuleInfo laoczLiquorRuleInfo);
+    List<LiquorRuleInfoVo> selectLaoczLiquorRuleInfoList(LaoczLiquorRuleInfo laoczLiquorRuleInfo);
 
 }

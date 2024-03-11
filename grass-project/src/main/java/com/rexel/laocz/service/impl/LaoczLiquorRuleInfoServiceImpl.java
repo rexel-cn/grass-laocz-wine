@@ -1,12 +1,15 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.mapper.LaoczLiquorRuleInfoMapper;
 import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
+import com.rexel.laocz.vo.LiquorRuleInfoVo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 酒液批次存储报警规则信息Service业务层处理
@@ -25,8 +28,28 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
      * @return 酒液批次存储报警规则信息
      */
     @Override
-    public List<LaoczLiquorRuleInfo> selectLaoczLiquorRuleInfoList(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
-        return baseMapper.selectLaoczLiquorRuleInfoList(laoczLiquorRuleInfo);
+    public List<LiquorRuleInfoVo> selectLaoczLiquorRuleInfoList(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
+
+        List<LaoczLiquorRuleInfo> laoczLiquorRuleInfos = baseMapper.selectLaoczLiquorRuleInfoList(laoczLiquorRuleInfo);
+
+        List<LiquorRuleInfoVo> list = laoczLiquorRuleInfos.stream().map((item) -> {
+            LiquorRuleInfoVo liquorRuleInfoVo = new LiquorRuleInfoVo();
+
+            BeanUtil.copyProperties(item, liquorRuleInfoVo);
+
+            String liquorRuleNotifyUser = item.getLiquorRuleNotifyUser();
+
+            String[] split = liquorRuleNotifyUser.split(",");
+
+            int length = split.length;
+
+            liquorRuleInfoVo.setCount(length);
+
+            return liquorRuleInfoVo;
+        }).collect(Collectors.toList());
+
+
+        return list;
     }
 
 }

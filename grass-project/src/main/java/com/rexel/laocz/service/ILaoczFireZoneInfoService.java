@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.vo.FireZoneInfoVo;
 
 import java.util.List;
 
@@ -19,6 +20,6 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
      * @param laoczFireZoneInfo 防火区信息
      * @return 防火区信息集合
      */
-    List<LaoczFireZoneInfo> selectLaoczFireZoneInfoList(LaoczFireZoneInfo laoczFireZoneInfo);
+    List<FireZoneInfoVo> selectLaoczFireZoneInfoList(LaoczFireZoneInfo laoczFireZoneInfo);
 
 }

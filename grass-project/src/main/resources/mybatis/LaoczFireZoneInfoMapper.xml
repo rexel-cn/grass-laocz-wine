@@ -47,6 +47,7 @@
                 and dispaly_order = #{dispalyOrder}
             </if>
         </where>
+        order by laocz_fire_zone_info.dispaly_order
     </select>
 
     <insert id="batchLaoczFireZoneInfo" parameterType="java.util.List"
