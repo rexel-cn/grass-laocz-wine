@@ -1,4 +1,4 @@
-package com.rexel.laocz;
+package com.rexel.laocz.config;
 
 import java.util.Arrays;
 import java.util.List;

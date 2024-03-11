@@ -1,13 +1,13 @@
-package com.rexel.laocz;
+package com.rexel.laocz.config;
 
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
 import com.rexel.laocz.vo.LiquorRuleInfoVo;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.rexel.laocz.vo.UserInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +21,6 @@ import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.enums.BusinessType;
-import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.common.core.page.TableDataInfo;
 
 /**
@@ -81,4 +80,16 @@ public class LaoczLiquorRuleInfoController extends BaseController {
         return toAjax(laoczLiquorRuleInfoService.removeByIds(Arrays.asList(liquorRuleIds)));
     }
 
+
+    /**
+     * 根据id查询通知人员信息
+     * @param id 酒液批次报警ID
+     * @return 用户信息
+     */
+    @GetMapping("/getByIdWithUserInfo/{id}")
+    public TableDataInfo get(@PathVariable Long id){
+        startPage();
+        List<UserInfoVo> userInfos = laoczLiquorRuleInfoService.getByIdWithUserInfo(id);
+        return getDataTable(userInfos,"byIdUserInfo");
+    }
 }

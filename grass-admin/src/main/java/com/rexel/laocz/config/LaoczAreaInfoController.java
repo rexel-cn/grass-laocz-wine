@@ -1,4 +1,4 @@
-package com.rexel.laocz;
+package com.rexel.laocz.config;
 
 import java.io.IOException;
 import java.util.Arrays;
