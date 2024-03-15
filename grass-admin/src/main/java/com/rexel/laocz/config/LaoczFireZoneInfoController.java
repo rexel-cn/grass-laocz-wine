@@ -1,25 +1,18 @@
 package com.rexel.laocz.config;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.rexel.laocz.domain.LaoczFireZoneInfo;
-import com.rexel.laocz.service.ILaoczFireZoneInfoService;
-import com.rexel.laocz.vo.FireZoneInfoVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
-import com.rexel.common.enums.BusinessType;
 import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.enums.BusinessType;
+import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
+import com.rexel.laocz.service.ILaoczFireZoneInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 防火区信息Controller

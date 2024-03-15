@@ -1,5 +1,7 @@
 package com.rexel.common.exception;
 
+import org.slf4j.helpers.MessageFormatter;
+
 /**
  * 自定义异常
  *
@@ -12,6 +14,9 @@ public class CustomException extends RuntimeException {
 
     private final String message;
 
+    public CustomException(String message, Object... args) {
+        this.message = MessageFormatter.arrayFormat(message, args).getMessage();
+    }
     public CustomException(String message) {
         this.message = message;
     }

@@ -1,7 +1,9 @@
 package com.rexel.laocz.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,7 @@ public class LaoczPumpPoint extends BaseEntity {
     /**
      * 设备测点关联表
      */
+    @TableId(type = IdType.AUTO)
     private Long equipmentPointId;
     /**
      * 租户ID

@@ -2,7 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
-import com.rexel.laocz.vo.FireZoneInfoVo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 
 import java.util.List;
 

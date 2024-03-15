@@ -2,7 +2,6 @@ package com.rexel.framework.config;
 
 import com.alibaba.ttl.threadpool.TtlExecutors;
 import com.rexel.common.utils.Threads;
-import com.rexel.tenant.context.TenantContextHolder;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,6 +97,19 @@ public class ThreadPoolConfig {
         return executor;
     }
 
+    @Bean(name = "laoczThreadPoolTaskScheduler")
+    public ThreadPoolTaskScheduler laoczThreadPoolTaskScheduler() {
+        ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
+        executor.setPoolSize(corePoolSize);
+        executor.setThreadNamePrefix("laoczTaskExecutor-");
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        executor.setAwaitTerminationSeconds(5);
+        return executor;
+    }
+
+
+
+
     @Bean(name = "branchInquiryExecutor")
     public Executor querySqlExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -134,5 +146,14 @@ public class ThreadPoolConfig {
                 Threads.printException(r, t);
             }
         });
+    }
+
+    /**
+     * 执行周期性或定时任务
+     */
+    @Bean(name = "laoczTtlScheduledExecutorService")
+    protected ScheduledExecutorService laoczScheduledExecutorService() {
+        return TtlExecutors.getTtlScheduledExecutorService(new ScheduledThreadPoolExecutor(corePoolSize,
+                new BasicThreadFactory.Builder().namingPattern("schedule-pool-%d").daemon(true).build()));
     }
 }

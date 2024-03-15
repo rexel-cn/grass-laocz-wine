@@ -20,6 +20,7 @@ import com.rexel.common.enums.RoleCodeEnum;
 import com.rexel.common.enums.RoleTypeEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.common.utils.LoginTokenUtils;
 import com.rexel.common.utils.SecurityUtils;
 import com.rexel.common.utils.StringUtils;
@@ -58,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
@@ -571,7 +573,7 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
     }
 
     private String replaceDatabaseName(String engName) {
-        return engName.replace("-", "").toLowerCase();
+        return ("db_" + engName.replace("-", "") + "_" + DateUtils.dateTimeNow()).toLowerCase();
     }
 
     /**

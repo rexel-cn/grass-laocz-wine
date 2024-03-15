@@ -4,9 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import com.rexel.laocz.mapper.LaoczFireZoneInfoMapper;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
-import com.rexel.laocz.vo.FireZoneInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

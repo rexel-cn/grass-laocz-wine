@@ -1,7 +1,9 @@
 package com.rexel.laocz.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
@@ -32,6 +34,7 @@ public class LaoczSamplingHistority extends BaseEntity {
     /**
      * 取样主键ID
      */
+    @TableId(type = IdType.AUTO)
     private Long samplingHistorityId;
     /**
      * 申请的工单id

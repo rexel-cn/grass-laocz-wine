@@ -28,6 +28,13 @@ public class DictUtils {
      */
     public static void setDictCache(String key, List<SysDictData> dictDatas) {
         SpringUtils.getBean(RedisCache.class).setCacheObject(getCacheKey(key), dictDatas);
+        //向咖啡因缓存中添加
+        if (dictDatas == null) {
+            return;
+        }
+        for (SysDictData dictData : dictDatas) {
+            CaffeineUtil.setStringCache(dictData.getDictType() + dictData.getDictLabel(), dictData.getDictValue());
+        }
     }
 
     /**

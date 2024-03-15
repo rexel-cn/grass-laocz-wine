@@ -46,13 +46,13 @@ public class LaoczLiquorBatch extends BaseEntity {
      */
     @Excel(name = "申请的重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long applyWeight;
+    private Double applyWeight;
     /**
      * 酒品管理ID，外键关联laocz_liquor_management
      */
     @Excel(name = "酒品管理ID，外键关联laocz_liquor_management")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private String liquorManagementId;
+    private Long liquorManagementId;
 
 
     @Override

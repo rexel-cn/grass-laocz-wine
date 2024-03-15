@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczWineEventMapper">
+
+    <resultMap type="LaoczWineEvent" id="LaoczWineEventResult">
+        <result property="wineEventId" column="wine_event_id"/>
+        <result property="workOrderId" column="work_order_id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="busyId" column="busy_id"/>
+        <result property="liquorBatchId" column="liquor_batch_id"/>
+        <result property="potteryAltarId" column="pottery_altar_id"/>
+        <result property="eventId" column="event_id"/>
+        <result property="eventTime" column="event_time"/>
+        <result property="eventLog" column="event_log"/>
+        <result property="eventStatus" column="event_status"/>
+        <result property="eventParam" column="event_param"/>
+        <result property="pointArray" column="point_array"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczWineEventVo">
+        select wine_event_id,
+               work_order_id,
+               tenant_id,
+               busy_id,
+               liquor_batch_id,
+               pottery_altar_id,
+               event_id,
+               event_time,
+               event_log,
+               event_status,
+               event_param,
+               point_array,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_wine_event
+    </sql>
+
+    <select id="selectLaoczWineEventList" parameterType="LaoczWineEvent" resultMap="LaoczWineEventResult">
+        <include refid="selectLaoczWineEventVo"/>
+        <where>
+            <if test="workOrderId != null  and workOrderId != ''">
+                and work_order_id = #{workOrderId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="busyId != null  and busyId != ''">
+                and busy_id = #{busyId}
+            </if>
+            <if test="liquorBatchId != null  and liquorBatchId != ''">
+                and liquor_batch_id = #{liquorBatchId}
+            </if>
+            <if test="potteryAltarId != null ">
+                and pottery_altar_id = #{potteryAltarId}
+            </if>
+            <if test="eventId != null  and eventId != ''">
+                and event_id = #{eventId}
+            </if>
+            <if test="eventTime != null ">
+                and event_time = #{eventTime}
+            </if>
+            <if test="eventLog != null  and eventLog != ''">
+                and event_log = #{eventLog}
+            </if>
+            <if test="eventStatus != null  and eventStatus != ''">
+                and event_status = #{eventStatus}
+            </if>
+            <if test="eventParam != null  and eventParam != ''">
+                and event_param = #{eventParam}
+            </if>
+            <if test="pointArray != null  and pointArray != ''">
+                and point_array = #{pointArray}
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczWineEvent" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="wineEventId">
+        insert into laocz_wine_event
+        ( wine_event_id , work_order_id , tenant_id , busy_id , liquor_batch_id , pottery_altar_id , event_id ,
+        event_time , event_log , event_status , event_param , point_array , create_by , create_time , update_by ,
+        update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.wineEventId}, #{item.workOrderId}, #{item.tenantId}, #{item.busyId}, #{item.liquorBatchId},
+            #{item.potteryAltarId}, #{item.eventId}, #{item.eventTime}, #{item.eventLog}, #{item.eventStatus},
+            #{item.eventParam}, #{item.pointArray}, #{item.createBy}, #{item.createTime}, #{item.updateBy},
+            #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>

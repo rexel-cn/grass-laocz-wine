@@ -1,10 +1,9 @@
 package com.rexel.laocz.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
-import com.rexel.laocz.vo.LiquorRuleInfoVo;
-import com.rexel.laocz.vo.UserInfoVo;
+import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
+import com.rexel.laocz.domain.vo.UserInfoVo;
 
 import java.util.List;
 
