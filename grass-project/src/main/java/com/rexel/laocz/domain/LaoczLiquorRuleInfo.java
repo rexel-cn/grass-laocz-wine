@@ -87,6 +87,11 @@ public class LaoczLiquorRuleInfo extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long deleteFlag;
 
+    /**
+     * 通知人员集合
+     */
+    @TableField(exist = false)
+    private Long[] noticePeopleArray;
 
     @Override
     public String toString() {

@@ -74,6 +74,10 @@
             </if>
         </where>
     </select>
+    <select id="dropDown" resultType="java.lang.String">
+        select distinct liquor_batch_id
+        from laocz_wine_details
+    </select>
 
     <insert id="batchLaoczLiquorRuleInfo" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="liquorRuleId">

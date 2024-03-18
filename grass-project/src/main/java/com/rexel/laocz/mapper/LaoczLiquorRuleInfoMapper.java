@@ -29,5 +29,9 @@ public interface LaoczLiquorRuleInfoMapper extends BaseMapper<LaoczLiquorRuleInf
      * @return 结果
      */
     int batchLaoczLiquorRuleInfo(List<LaoczLiquorRuleInfo> laoczLiquorRuleInfoList);
-
+    /**
+     * 酒液批次下拉
+     * @return
+     */
+    List<String> dropDown();
 }

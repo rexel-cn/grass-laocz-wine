@@ -3,6 +3,7 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.core.domain.entity.SysUser;
+import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
 import com.rexel.laocz.domain.vo.UserInfoVo;
@@ -11,6 +12,7 @@ import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
 import com.rexel.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,13 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
 
             liquorRuleInfoVo.setCount(length);
 
+            Long[] result = new Long[split.length];
+            for (int i = 0; i < split.length; i++) {
+                result[i] = Long.parseLong(split[i]);
+            }
+
+            liquorRuleInfoVo.setNoticePeopleArray(result);
+
             return liquorRuleInfoVo;
         }).collect(Collectors.toList());
 
@@ -73,7 +82,7 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
 
         LaoczLiquorRuleInfo laoczLiquorRuleInfo = this.getById(id);
 
-        if (laoczLiquorRuleInfo == null){
+        if (laoczLiquorRuleInfo == null) {
             return userInfoVos;
         }
 
@@ -87,7 +96,7 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
 
         for (String s : split) {
             SysUser sysUser = userService.getById(s);
-            if (sysUser != null){
+            if (sysUser != null) {
                 UserInfoVo userInfoVo = new UserInfoVo();
                 userInfoVo.setUserId(sysUser.getUserId());
                 userInfoVo.setUserName(sysUser.getUserName());
@@ -97,6 +106,49 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
             }
         }
         return userInfoVos;
+    }
+
+    /**
+     * 新增报警规则
+     *
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    @Override
+    public void saveWithRule(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
+        Long[] noticePeopleArray = laoczLiquorRuleInfo.getNoticePeopleArray();
+
+        if (noticePeopleArray != null && noticePeopleArray.length > 0) {
+
+            laoczLiquorRuleInfo.setLiquorRuleNotifyUser(StringUtils.join(noticePeopleArray, ","));
+
+        }
+
+        save(laoczLiquorRuleInfo);
+    }
+    /**
+     * 修改报警规则
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateWithRule(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
+
+        if (laoczLiquorRuleInfo.getNoticePeopleArray() != null && laoczLiquorRuleInfo.getNoticePeopleArray().length > 0) {
+            laoczLiquorRuleInfo.setLiquorRuleNotifyUser(StringUtils.join(laoczLiquorRuleInfo.getNoticePeopleArray(), ","));
+        }
+
+        updateById(laoczLiquorRuleInfo);
+    }
+    /**
+     * 酒液批次下拉
+     * @return
+     */
+    @Override
+    public List<String> dropDown() {
+
+        return baseMapper.dropDown();
     }
 
 }

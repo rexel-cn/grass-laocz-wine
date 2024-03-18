@@ -1,24 +1,27 @@
 package com.rexel.laocz.config;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczLiquorDict;
+import com.rexel.laocz.domain.vo.LiquorVo;
 import com.rexel.laocz.service.ILaoczLiquorDictService;
+import com.rexel.system.domain.vo.PointTagExportVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.enums.BusinessType;
 import com.rexel.common.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 酒品字典Controller
@@ -36,10 +39,9 @@ public class LaoczLiquorDictController extends BaseController {
      * 查询酒品字典列表
      */
     @GetMapping("/list")
-    public TableDataInfo list(LaoczLiquorDict laoczLiquorDict) {
-        startPage();
+    public AjaxResult list(LaoczLiquorDict laoczLiquorDict) {
         List<LaoczLiquorDict> list = laoczLiquorDictService.selectLaoczLiquorDictList(laoczLiquorDict);
-        return getDataTable(list);
+        return AjaxResult.success(list);
     }
 
     /**
@@ -54,9 +56,11 @@ public class LaoczLiquorDictController extends BaseController {
      * 新增酒品字典
      */
     @Log(title = "酒品字典", businessType = BusinessType.INSERT)
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping
-    public AjaxResult add(@RequestBody LaoczLiquorDict laoczLiquorDict) {
-        return toAjax(laoczLiquorDictService.save(laoczLiquorDict));
+    public AjaxResult add(@RequestBody List<LaoczLiquorDict> laoczLiquorDicts) {
+
+        return toAjax(laoczLiquorDictService.addLiquorDict(laoczLiquorDicts));
     }
 
     /**
@@ -76,5 +80,17 @@ public class LaoczLiquorDictController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] liquorDictIds) {
         return toAjax(laoczLiquorDictService.removeByIds(Arrays.asList(liquorDictIds)));
     }
+
+    /**
+     * 酒液等级 香型名称 下拉
+     *
+     * @return
+     */
+    @GetMapping("/dropDown")
+    public AjaxResult dropDownLiquor(LaoczLiquorDict laoczLiquorDict) {
+        return AjaxResult.success(laoczLiquorDictService.dropDownLiquor(laoczLiquorDict));
+    }
+
+
 
 }

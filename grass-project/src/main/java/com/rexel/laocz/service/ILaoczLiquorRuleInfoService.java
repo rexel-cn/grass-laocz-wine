@@ -29,4 +29,21 @@ public interface ILaoczLiquorRuleInfoService extends IService<LaoczLiquorRuleInf
      * @return 用户信息
      */
     List<UserInfoVo> getByIdWithUserInfo(Long id);
+    /**
+     * 新增报警规则
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    void saveWithRule(LaoczLiquorRuleInfo laoczLiquorRuleInfo);
+    /**
+     * 修改报警规则
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    void updateWithRule(LaoczLiquorRuleInfo laoczLiquorRuleInfo);
+    /**
+     * 酒液批次下拉
+     * @return
+     */
+    List<String> dropDown();
 }

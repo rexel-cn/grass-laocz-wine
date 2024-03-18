@@ -6,7 +6,7 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://mysql.grass.svc.cluster.local:3306/laocz_wine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
+        url: jdbc:mysql://192.168.12.101:33308/laocz_wine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
         username: root
         password: RexelMySql998866 #本机数据库
         #password: 123456 #本机数据库
@@ -60,10 +60,10 @@ spring:
   redis:
     # 地址
     #host: 101.132.242.90
-    host: redis.grass.svc.cluster.local
+    host: 192.168.12.101
     # 端口，默认为6379
     #port: 36380
-    port: 6379
+    port: 36380
     # 数据库索引
     database: 0
     # 密码
@@ -103,7 +103,7 @@ oss:
   # minio文件存储
   minio:
     # MinIO 服务地址
-    url: http://minio.grass.svc.cluster.local:9000
+    url: http://192.168.12.101:9000
     # MinIO 用户
     accessKey: admin
     # MinIO 密码
@@ -114,7 +114,7 @@ oss:
 nsq:
   #状态  false不启动，true启动
   status: true
-  namesrvAddr: nsqlookupd-statefulset.grass.svc.cluster.local
+  namesrvAddr: 192.168.12.101
   port: 4161
   #默认nsq最高支持2500，不配置默认200
   MaxInFlight: 500
@@ -122,15 +122,15 @@ nsq:
 ##   pulse 请求地址
 ##=================================================
 pulse:
-  ip: http://101.132.242.90
-  port: 6920
+  ip: http://192.168.12.101
+  port: 6912
 ##=================================================
 ##   MQTT Conf
 ##=================================================
 mqtt:
-  clientId: laocz_app
+  clientId: laocz_app_fhw
   topics: test
-  serverUrl: tcp://172.19.228.71:1902
+  serverUrls: tcp://192.168.12.101:1883
   userName: admin
   passWord: admin123
   keepAliveInterval: 60
@@ -138,3 +138,15 @@ mqtt:
   completionTimeout: 30
   cleanSession: true
   qos: 1
+##=================================================
+##   组态 请求地址
+##=================================================
+configuration:
+  ip: http://192.168.12.101
+  port: 9255
+  #租户注册调用组态接口
+  registerUrl: /configure_service/sys_user/register
+  #租户删除调用组态接口
+  deleteUrl: /configure_service/sys_user/delete/by/phone
+  #定时同步组态接口
+  syncUrl: /configure_service/sys_user/sync/user

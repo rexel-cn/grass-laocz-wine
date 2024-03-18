@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorManagement;
+import com.rexel.laocz.domain.vo.LiquorVo;
 
 import java.util.List;
 
@@ -21,4 +22,5 @@ public interface ILaoczLiquorManagementService extends IService<LaoczLiquorManag
      */
     List<LaoczLiquorManagement> selectLaoczLiquorManagementList(LaoczLiquorManagement laoczLiquorManagement);
 
+    boolean importPoint(List<LiquorVo> liquorVos);
 }

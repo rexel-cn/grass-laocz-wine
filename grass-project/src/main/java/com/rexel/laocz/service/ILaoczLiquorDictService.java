@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorDict;
+import com.rexel.laocz.domain.vo.LiquorVo;
 
 import java.util.List;
 
@@ -20,5 +21,15 @@ public interface ILaoczLiquorDictService extends IService<LaoczLiquorDict> {
      * @return 酒品字典集合
      */
     List<LaoczLiquorDict> selectLaoczLiquorDictList(LaoczLiquorDict laoczLiquorDict);
+
+    /**
+     * 酒液等级 香型名称 下拉
+     * @return
+     */
+    List<String> dropDownLiquor(LaoczLiquorDict laoczLiquorDict);
+    /**
+     * 新增酒品字典
+     */
+    boolean addLiquorDict(List<LaoczLiquorDict> laoczLiquorDicts);
 
 }

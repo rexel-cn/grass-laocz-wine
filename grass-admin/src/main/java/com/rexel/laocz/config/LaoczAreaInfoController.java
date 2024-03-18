@@ -93,4 +93,13 @@ public class LaoczAreaInfoController extends BaseController {
         ExcelUtil<LaoczAreaInfo> util = new ExcelUtil<>(LaoczAreaInfo.class);
         util.exportExcel(response, list, "场区信息数据");
     }
+
+    /**
+     * 场区下拉
+     * @return
+     */
+    @GetMapping("/dropDown")
+    public AjaxResult dropDown() {
+        return AjaxResult.success(laoczAreaInfoService.dropDown());
+    }
 }

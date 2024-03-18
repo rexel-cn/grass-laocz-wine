@@ -9,6 +9,7 @@ import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
 import com.rexel.laocz.domain.vo.UserInfoVo;
 import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
+import com.rexel.laocz.service.ILaoczWineOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,24 +47,6 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     }
 
     /**
-     * 新增酒液批次存储报警规则信息
-     */
-    @Log(title = "酒液批次存储报警规则信息", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
-        return toAjax(laoczLiquorRuleInfoService.save(laoczLiquorRuleInfo));
-    }
-
-    /**
-     * 修改酒液批次存储报警规则信息
-     */
-    @Log(title = "酒液批次存储报警规则信息", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
-        return toAjax(laoczLiquorRuleInfoService.updateById(laoczLiquorRuleInfo));
-    }
-
-    /**
      * 删除酒液批次存储报警规则信息
      */
     @Log(title = "酒液批次存储报警规则信息", businessType = BusinessType.DELETE)
@@ -75,13 +58,55 @@ public class LaoczLiquorRuleInfoController extends BaseController {
 
     /**
      * 根据id查询通知人员信息
+     *
      * @param id 酒液批次报警ID
      * @return 用户信息
      */
     @GetMapping("/getByIdWithUserInfo/{id}")
-    public TableDataInfo get(@PathVariable Long id){
+    public TableDataInfo get(@PathVariable Long id) {
         startPage();
         List<UserInfoVo> userInfos = laoczLiquorRuleInfoService.getByIdWithUserInfo(id);
-        return getDataTable(userInfos,"byIdUserInfo");
+        return getDataTable(userInfos, "byIdUserInfo");
     }
+
+    /**
+     * 新增报警规则
+     *
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    @PostMapping
+    public AjaxResult save(@RequestBody LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
+        try {
+            laoczLiquorRuleInfoService.saveWithRule(laoczLiquorRuleInfo);
+            return AjaxResult.success();
+        } catch (Exception e) {
+            return AjaxResult.error();
+        }
+    }
+
+    /**
+     * 修改报警规则
+     * @param laoczLiquorRuleInfo 报警规则
+     * @return
+     */
+    @PutMapping
+    public AjaxResult edit(@RequestBody LaoczLiquorRuleInfo laoczLiquorRuleInfo){
+        try {
+            laoczLiquorRuleInfoService.updateWithRule(laoczLiquorRuleInfo);
+            return AjaxResult.success();
+        } catch (Exception e) {
+            return AjaxResult.error();
+        }
+    }
+
+    /**
+     * 酒液批次下拉
+     * @return
+     */
+    @GetMapping("/dropDown")
+    public AjaxResult dropDown(){
+        return AjaxResult.success(laoczLiquorRuleInfoService.dropDown());
+    }
+    //TODO 报警条件触发
 }
