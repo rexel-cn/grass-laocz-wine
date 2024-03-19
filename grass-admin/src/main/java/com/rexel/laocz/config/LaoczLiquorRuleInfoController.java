@@ -35,7 +35,7 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     public TableDataInfo list(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
         startPage();
         List<LiquorRuleInfoVo> list = laoczLiquorRuleInfoService.selectLaoczLiquorRuleInfoList(laoczLiquorRuleInfo);
-        return getDataTable(list);
+        return getDataTable(list,"liquorRule");
     }
 
     /**
@@ -66,7 +66,7 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     public TableDataInfo get(@PathVariable Long id) {
         startPage();
         List<UserInfoVo> userInfos = laoczLiquorRuleInfoService.getByIdWithUserInfo(id);
-        return getDataTable(userInfos, "byIdUserInfo");
+        return getDataTable(userInfos);
     }
 
     /**
@@ -108,5 +108,4 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     public AjaxResult dropDown(){
         return AjaxResult.success(laoczLiquorRuleInfoService.dropDown());
     }
-    //TODO 报警条件触发
 }

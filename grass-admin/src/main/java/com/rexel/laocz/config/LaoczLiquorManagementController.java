@@ -84,7 +84,6 @@ public class LaoczLiquorManagementController extends BaseController {
      */
     @PostMapping("/template")
     public void template(HttpServletResponse response) throws IOException {
-        //TODO
         ExcelUtil<LiquorVo> util = new ExcelUtil<>(LiquorVo.class);
         util.exportExcel(response, new ArrayList<>(), "酒品管理");
     }
@@ -97,7 +96,6 @@ public class LaoczLiquorManagementController extends BaseController {
      */
     @PostMapping("/import")
     public AjaxResult importPoint(@RequestParam("file") MultipartFile file) throws Exception {
-        //TODO
         ExcelUtil<LiquorVo> util = new ExcelUtil<>(LiquorVo.class);
         List<LiquorVo> LiquorVos = util.importExcel(file.getInputStream());
         return AjaxResult.success(laoczLiquorManagementService.importPoint(LiquorVos));

@@ -55,7 +55,7 @@ public class LaoczLiquorRuleInfo extends BaseEntity {
      */
     @Excel(name = "是否启用，1启用，0停止")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long liquorRuleEnable;
+    private String liquorRuleEnable;
     /**
      * 规则判断条件
      */

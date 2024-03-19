@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczLiquorManagement;
@@ -48,8 +49,17 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
 
         liquorVos.stream().map((item) -> {
 
-            LaoczLiquorManagement laoczLiquorManagement = new LaoczLiquorManagement();
+            // 去重，如果该酒品名称已经存在，则该数据不进行导入
+            QueryWrapper<LaoczLiquorManagement> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("liquor_name", item.getLiquorName());
+            int size = this.list(queryWrapper).size();
 
+            if (size > 0) {
+                return laoczLiquorManagements;
+            }
+
+            LaoczLiquorManagement laoczLiquorManagement = new LaoczLiquorManagement();
+            // 数据拷贝
             BeanUtil.copyProperties(item, laoczLiquorManagement);
 
             laoczLiquorManagements.add(laoczLiquorManagement);
@@ -58,7 +68,11 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
 
         }).collect(Collectors.toList());
 
-        return saveBatch(laoczLiquorManagements);
+        if (CollectionUtil.isNotEmpty(laoczLiquorManagements)) {
+            return saveBatch(laoczLiquorManagements);
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -72,28 +86,28 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
         for (int i = 0; i < liquorVos.size(); i++) {
             LiquorVo liquorVo = liquorVos.get(i);
             if (StrUtil.isEmpty(liquorVo.getLiquorName())) {
-                errList.add("第" + (i + 2) + "酒品名称为空");
+                errList.add("第" + (i + 2) + "行酒品名称为空");
             }
             if (ObjectUtil.isNull(liquorVo.getLiquorLevel())) {
-                errList.add("第" + (i + 2) + "酒类等级为空");
+                errList.add("第" + (i + 2) + "行酒类等级为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorRound())) {
-                errList.add("第" + (i + 2) + "酒业轮次为空");
+                errList.add("第" + (i + 2) + "行酒业轮次为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorFlavorName())) {
-                errList.add("第" + (i + 2) + "香型名称为空");
+                errList.add("第" + (i + 2) + "行香型名称为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorSource())) {
-                errList.add("第" + (i + 2) + "酒液来源为空");
+                errList.add("第" + (i + 2) + "行酒液来源为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorYear())) {
-                errList.add("第" + (i + 2) + "酒液年份为空");
+                errList.add("第" + (i + 2) + "行酒液年份为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorBrewingTime())) {
-                errList.add("第" + (i + 2) + "酿造时间为空");
+                errList.add("第" + (i + 2) + "行酿造时间为空");
             }
             if (StrUtil.isEmpty(liquorVo.getLiquorContent())) {
-                errList.add("第" + (i + 2) + "酒精度数为空");
+                errList.add("第" + (i + 2) + "行酒精度数为空");
             }
         }
         if (CollectionUtil.isNotEmpty(errList)) {

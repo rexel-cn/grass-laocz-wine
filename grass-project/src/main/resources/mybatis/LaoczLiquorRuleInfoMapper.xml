@@ -45,6 +45,9 @@
             resultMap="LaoczLiquorRuleInfoResult">
         <include refid="selectLaoczLiquorRuleInfoVo"/>
         <where>
+            <if test="liquorRuleId != null ">
+                and liquor_rule_id = #{liquorRuleId}
+            </if>
             <if test="liquorBatchId != null ">
                 and liquor_batch_id = #{liquorBatchId}
             </if>
