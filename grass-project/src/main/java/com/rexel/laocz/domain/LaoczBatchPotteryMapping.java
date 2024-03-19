@@ -58,7 +58,7 @@ public class LaoczBatchPotteryMapping extends BaseEntity {
      */
     @Excel(name = "该批次在此陶坛中的实际酒重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long actualWeight;
+    private Double actualWeight;
     /**
      * 运行状态（0：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中）
      */

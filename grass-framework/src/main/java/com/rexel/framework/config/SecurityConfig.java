@@ -5,7 +5,6 @@ import com.rexel.framework.security.handle.AuthenticationEntryPointImpl;
 import com.rexel.framework.security.handle.LogoutSuccessHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -96,27 +95,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 过滤请求
                 .authorizeRequests()
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
-                .antMatchers("/login","/getToken", "/register", "/captchaImage").anonymous()
-                .antMatchers(
-                        HttpMethod.GET,
-                        "/",
-                        "/*.html",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js",
-                        "/profile/**"
-                ).permitAll()
-                .antMatchers("/swagger-ui.html").anonymous()
-                .antMatchers("/swagger-resources/**").anonymous()
-                .antMatchers("/rexel-api/read/**").anonymous()
-                .antMatchers(" /rexel-api/pushServer/**").anonymous()
-                .antMatchers("/webjars/**").anonymous()
-                .antMatchers("/*/api-docs").anonymous()
-                .antMatchers("/druid/**").anonymous()
+                .antMatchers("/login", "/getToken", "/captchaImage").anonymous()
                 .antMatchers("/rexel-api/pushServer/**").anonymous()
-                // 分厂单独为总厂提供数据接口
-                .antMatchers("/rexel-api/gs/branch/plant/**").anonymous()
-                .antMatchers("/rexel-api/upload").anonymous()
                 // 数据降维测点信息接口
                 .antMatchers("/rexel-api/tag/getReduceInfo").anonymous()
                 // 除上面外的所有请求全部需要鉴权认证

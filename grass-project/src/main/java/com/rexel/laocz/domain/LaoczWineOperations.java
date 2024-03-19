@@ -51,12 +51,6 @@ public class LaoczWineOperations extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String workOrderId;
     /**
-     * 酒液批次号，时间戳生成
-     */
-    @Excel(name = "酒液批次号，时间戳生成")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private String liquorBatchId;
-    /**
      * 操作类型：1：入酒，2出酒，3倒坛，4取样
      */
     @Excel(name = "操作类型：1：入酒，2出酒，3倒坛，4取样")
@@ -71,7 +65,6 @@ public class LaoczWineOperations extends BaseEntity {
                 .append("busyId", getBusyId())
                 .append("tenantId", getTenantId())
                 .append("workOrderId", getWorkOrderId())
-                .append("liquorBatchId", getLiquorBatchId())
                 .append("operationType", getOperationType())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())

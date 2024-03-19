@@ -28,7 +28,7 @@ public interface WineEntryApplyService {
     /**
      * 入酒开始
      *
-     * @param busyId 业务id
+     * @param wineEntryDTO 业务id
      */
     void wineEntry(WineEntryDTO wineEntryDTO);
 
@@ -39,5 +39,8 @@ public interface WineEntryApplyService {
      * @return 入酒出酒实时数据
      */
     WineRealDataVO getWineRealData(Long wineDetailsId);
+
+
+    void wineEntryFinish(Long wineDetailsId);
 
 }

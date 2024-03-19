@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName WineEntryController
- * @Description
+ * @Description 入酒
  * @Author 孟开通
  * @Date 2024/3/11 16:55
  **/

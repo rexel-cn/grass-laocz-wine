@@ -30,4 +30,5 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      */
     int batchLaoczWineHistory(List<LaoczWineHistory> laoczWineHistoryList);
 
+    void saveHistory(Long wineDetailsId);
 }
