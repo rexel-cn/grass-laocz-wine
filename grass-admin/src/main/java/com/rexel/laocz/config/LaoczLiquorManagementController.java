@@ -95,7 +95,7 @@ public class LaoczLiquorManagementController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/import")
-    public AjaxResult importPoint(@RequestParam("file") MultipartFile file) throws Exception {
+    public AjaxResult importLiquor(@RequestParam("file") MultipartFile file) throws Exception {
         ExcelUtil<LiquorVo> util = new ExcelUtil<>(LiquorVo.class);
         List<LiquorVo> LiquorVos = util.importExcel(file.getInputStream());
         return AjaxResult.success(laoczLiquorManagementService.importPoint(LiquorVos));

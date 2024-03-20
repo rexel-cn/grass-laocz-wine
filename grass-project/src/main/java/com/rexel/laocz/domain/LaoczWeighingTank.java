@@ -36,13 +36,11 @@ public class LaoczWeighingTank extends BaseEntity {
     /**
      * 租户ID
      */
-    @Excel(name = "租户ID")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String tenantId;
     /**
      * 防火区主键ID，外键关联laocz_fire_zone_info
      */
-    @Excel(name = "防火区主键ID，外键关联laocz_fire_zone_info")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long fireZoneId;
     /**
@@ -50,7 +48,7 @@ public class LaoczWeighingTank extends BaseEntity {
      */
     @Excel(name = "称重罐编号")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long weighingTankNumber;
+    private String weighingTankNumber;
     /**
      * 满罐上限值
      */

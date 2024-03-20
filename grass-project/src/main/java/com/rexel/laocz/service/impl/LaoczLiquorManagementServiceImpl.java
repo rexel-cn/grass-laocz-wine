@@ -12,6 +12,7 @@ import com.rexel.laocz.domain.vo.LiquorVo;
 import com.rexel.laocz.mapper.LaoczLiquorManagementMapper;
 import com.rexel.laocz.service.ILaoczLiquorManagementService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean importPoint(List<LiquorVo> liquorVos) {
         ArrayList<LaoczLiquorManagement> laoczLiquorManagements = new ArrayList<>();
         if (CollectionUtil.isEmpty(liquorVos)) {
@@ -55,7 +57,7 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
             int size = this.list(queryWrapper).size();
 
             if (size > 0) {
-                return laoczLiquorManagements;
+                throw new ServiceException("酒品名称已存在");
             }
 
             LaoczLiquorManagement laoczLiquorManagement = new LaoczLiquorManagement();

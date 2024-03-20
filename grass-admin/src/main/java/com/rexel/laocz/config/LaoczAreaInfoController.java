@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.rexel.laocz.domain.LaoczAreaInfo;
+import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,10 +98,20 @@ public class LaoczAreaInfoController extends BaseController {
 
     /**
      * 场区下拉
+     *
      * @return
      */
     @GetMapping("/dropDown")
     public AjaxResult dropDown() {
         return AjaxResult.success(laoczAreaInfoService.dropDown());
+    }
+
+    /**
+     * 通过场区Id查询防火区信息
+     */
+    @GetMapping("/get/{id}")
+    public AjaxResult get(@PathVariable Long id) {
+        List<LaoczFireZoneInfo> laoczFireZoneInfos = laoczAreaInfoService.getByIdWithfireZoneName(id);
+        return AjaxResult.success(laoczFireZoneInfos);
     }
 }

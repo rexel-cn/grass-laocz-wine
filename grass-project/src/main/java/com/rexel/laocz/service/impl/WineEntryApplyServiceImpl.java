@@ -499,7 +499,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         }
 
         //称重罐编号
-        Long weighingTankWeight = weighingTank.getWeighingTankNumber();
+        String weighingTankWeight = weighingTank.getWeighingTankNumber();
         //申请重量
         Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
 
@@ -511,7 +511,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         WineDetailPointVO startSignalPoint = pumpMap.get(WinePointConstants.START_SIGNAL);
         DviewUtilsPro.writePointValue(
                 new DviewPointDTO(weightPoint.getPointId(), weightPoint.getPointType(), weightPoint.getPointName(), String.valueOf(potteryAltarApplyWeight)),
-                new DviewPointDTO(weighingTankNumberPoint.getPointId(), weighingTankNumberPoint.getPointType(), weighingTankNumberPoint.getPointName(), String.valueOf(weighingTankWeight))
+                new DviewPointDTO(weighingTankNumberPoint.getPointId(), weighingTankNumberPoint.getPointType(), weighingTankNumberPoint.getPointName(), weighingTankWeight)
         );
         Thread.sleep(500);
         DviewUtilsPro.writePointValue(new DviewPointDTO(startSignalPoint.getPointId(), startSignalPoint.getPointType(), startSignalPoint.getPointName(), "1"));

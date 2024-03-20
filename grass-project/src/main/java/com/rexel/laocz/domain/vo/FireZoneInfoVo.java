@@ -14,7 +14,7 @@ public class FireZoneInfoVo extends LaoczFireZoneInfo {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 防火区名称
+     * 场区名称
      */
     private String areaName;
 

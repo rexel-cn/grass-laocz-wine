@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczAreaInfo;
+import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.AreaVo;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface ILaoczAreaInfoService extends IService<LaoczAreaInfo> {
     List<LaoczAreaInfo> selectLaoczAreaInfoList(LaoczAreaInfo laoczAreaInfo);
 
     List<AreaVo> dropDown();
+
+    List<LaoczFireZoneInfo> getByIdWithfireZoneName(Long id);
 }

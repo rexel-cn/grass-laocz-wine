@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.vo.PotteryAltarVo;
 
 import java.util.List;
 
@@ -21,4 +22,11 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      */
     List<LaoczPotteryAltarManagement> selectLaoczPotteryAltarManagementList(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
 
+    List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
+
+    PotteryAltarVo selectLaoczPotteryAltarManagement(Long potteryAltarId);
+
+    boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
+
+    boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
 }
