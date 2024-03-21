@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
+import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczWineHistory;
@@ -68,29 +69,34 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      */
     @Override
     public TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
-        List<LaoczWineHistoryVO> laoczWineHistoryVOS;
         try {
-            PageUtils.startPage();
-            laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
-        } finally {
-            PageUtils.clearPage();
-        }
-        List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
-        Long totalOperand = (long) laoczWineHistoryVOSList.size();
-        long entryOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "1".equals(history.getOperationType()))
-                .count();
-        long distillingOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "2".equals(history.getOperationType()))
-                .count();
-        long invertedJarOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "3".equals(history.getOperationType()))
-                .count();
-        long samplingOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "4".equals(history.getOperationType()))
-                .count();
+            List<LaoczWineHistoryVO> laoczWineHistoryVOS;
+            try {
+                PageUtils.startPage();
+                laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+            } finally {
+                PageUtils.clearPage();
+            }
+            List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+            Long totalOperand = (long) laoczWineHistoryVOSList.size();
+            long entryOperation = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "1".equals(history.getOperationType()))
+                    .count();
+            long distillingOperation = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "2".equals(history.getOperationType()))
+                    .count();
+            long invertedJarOperation = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "3".equals(history.getOperationType()))
+                    .count();
+            long samplingOperation = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "4".equals(history.getOperationType()))
+                    .count();
 
-        return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperation, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
+            return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperation, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
+        } catch (Exception e) {
+            log.error("查询失败", e);
+            throw new ServiceException("查询失败");
+        }
     }
 
     /**
@@ -108,7 +114,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
     @Override
     public List<LaoczWineHistoryVO> getLaoczWineHistoryTable(String fromTime, String endTime, String liquorBatchId) {
-        return baseMapper.selectLaoczWineHistoryStatement(null, fromTime, endTime, liquorBatchId, null,null);
+        return baseMapper.selectLaoczWineHistoryStatement(null, fromTime, endTime, liquorBatchId, null, null);
     }
 
     /**

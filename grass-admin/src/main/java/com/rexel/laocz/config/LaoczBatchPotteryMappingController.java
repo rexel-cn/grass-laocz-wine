@@ -33,11 +33,11 @@ public class LaoczBatchPotteryMappingController extends BaseController {
     /**
      * 酒液存储报表查询
      *
-     * @param fireZoneId     防火区编号
-     * @param liquorBatchId  批次ID
+     * @param fireZoneId         防火区编号
+     * @param liquorBatchId      批次ID
      * @param potteryAltarNumber 陶坛ID
-     * @param liquorName     酒品名称
-     * @param areaId         区域编号
+     * @param liquorName         酒品名称
+     * @param areaId             区域编号
      * @return
      */
     @GetMapping("/list")
@@ -66,7 +66,7 @@ public class LaoczBatchPotteryMappingController extends BaseController {
      * @throws IOException
      */
     @PostMapping("/liquorStorageReportExport")
-    public void liquorStorageReportExport(HttpServletResponse response,Long areaId, Long fireZoneId, String liquorBatchId) throws IOException {
+    public void liquorStorageReportExport(HttpServletResponse response, Long areaId, Long fireZoneId, String liquorBatchId) throws IOException {
         ExcelUtil<LaoczBatchPotteryMappingVO> util = new ExcelUtil<>(LaoczBatchPotteryMappingVO.class);
         List<LaoczBatchPotteryMappingVO> laoczWineHistories = laoczBatchPotteryMappingService.selectTableDataInfoReportActualList(fireZoneId, liquorBatchId, areaId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchPotteryMappingVO.class), "酒液存储报表");

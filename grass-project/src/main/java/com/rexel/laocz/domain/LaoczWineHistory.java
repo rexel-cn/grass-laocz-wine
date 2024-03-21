@@ -78,6 +78,12 @@ public class LaoczWineHistory extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long potteryAltarApplyWeight;
     /**
+     * 操作重量
+     */
+    @Excel(name = "操作重量")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Long operatingWeight;
+    /**
      * 剩余重量
      */
     @Excel(name = "剩余重量")
@@ -127,6 +133,8 @@ public class LaoczWineHistory extends BaseEntity {
     /**
      * 场区信息ID
      */
+    @Excel(name = "场区信息ID")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long areaId;
     /**
      * 场区名称
@@ -137,6 +145,8 @@ public class LaoczWineHistory extends BaseEntity {
     /**
      * 防火区主键ID
      */
+    @Excel(name = "防火区主键ID")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long fireZoneId;
     /**
      * 防火区名称

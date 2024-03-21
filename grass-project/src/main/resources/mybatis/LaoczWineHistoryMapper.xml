@@ -13,6 +13,7 @@
         <result property="potteryAltarId" column="pottery_altar_id"/>
         <result property="operationType" column="operation_type"/>
         <result property="potteryAltarApplyWeight" column="pottery_altar_apply_weight"/>
+        <result property="operatingWeight" column="operating_weight"/>
         <result property="remainingWeight" column="remaining_weight"/>
         <result property="lossWeight" column="loss_weight"/>
         <result property="weighingTank" column="weighing_tank"/>
@@ -52,6 +53,7 @@
                pottery_altar_id,
                operation_type,
                pottery_altar_apply_weight,
+               operating_weight,
                remaining_weight,
                loss_weight,
                weighing_tank,
@@ -106,6 +108,9 @@
             </if>
             <if test="potteryAltarApplyWeight != null ">
                 and pottery_altar_apply_weight = #{potteryAltarApplyWeight}
+            </if>
+            <if test="operatingWeight != null ">
+                and operating_weight = #{operatingWeight}
             </if>
             <if test="remainingWeight != null ">
                 and remaining_weight = #{remainingWeight}
@@ -291,16 +296,20 @@
             useGeneratedKeys="true" keyProperty="winHisId">
         insert into laocz_wine_history
         ( win_his_id , busy_id , tenant_id , work_order_id , liquor_batch_id , pottery_altar_id , operation_type ,
-        pottery_altar_apply_weight , remaining_weight , loss_weight , weighing_tank , pump_id , weighing_tank_weight ,
-        operation_time , sampling_purpose , sampling_weight , area_name , fire_zone_name , pottery_altar_number ,
+        pottery_altar_apply_weight ,operating_weight, remaining_weight , loss_weight , weighing_tank , pump_id ,
+        weighing_tank_weight ,
+        operation_time , sampling_purpose , sampling_weight ,area_id, area_name ,fire_zone_id, fire_zone_name ,
+        pottery_altar_number ,
         pottery_altar_qr_code_address , pottery_altar_full_altar_weight , liquor_name , liquor_level , liquor_round ,
         liquor_flavor_name , liquor_source , liquor_year , liquor_brewing_time , liquor_content , create_by ,
         create_time , update_by , update_time , remark) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.winHisId}, #{item.busyId}, #{item.tenantId}, #{item.workOrderId}, #{item.liquorBatchId},
-            #{item.potteryAltarId}, #{item.operationType}, #{item.potteryAltarApplyWeight}, #{item.remainingWeight},
+            #{item.potteryAltarId}, #{item.operationType}, #{item.potteryAltarApplyWeight},#{item.operatingWeight},
+            #{item.remainingWeight},
             #{item.lossWeight}, #{item.weighingTank}, #{item.pumpId}, #{item.weighingTankWeight}, #{item.operationTime},
-            #{item.samplingPurpose}, #{item.samplingWeight}, #{item.areaName}, #{item.fireZoneName},
+            #{item.samplingPurpose}, #{item.samplingWeight},#{item.areaId}, #{item.areaName},#{item.fireZoneId},
+            #{item.fireZoneName},
             #{item.potteryAltarNumber}, #{item.potteryAltarQrCodeAddress}, #{item.potteryAltarFullAltarWeight},
             #{item.liquorName}, #{item.liquorLevel}, #{item.liquorRound}, #{item.liquorFlavorName},
             #{item.liquorSource}, #{item.liquorYear}, #{item.liquorBrewingTime}, #{item.liquorContent},
