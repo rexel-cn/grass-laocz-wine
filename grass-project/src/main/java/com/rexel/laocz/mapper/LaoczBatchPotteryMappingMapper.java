@@ -2,6 +2,8 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,4 +32,9 @@ public interface LaoczBatchPotteryMappingMapper extends BaseMapper<LaoczBatchPot
      */
     int batchLaoczBatchPotteryMapping(List<LaoczBatchPotteryMapping> laoczBatchPotteryMappingList);
 
+    List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(@Param("fireZoneId") Long fireZoneId,
+                                                                     @Param("liquorBatchId") String liquorBatchId,
+                                                                     @Param("potteryAltarId") String potteryAltarId,
+                                                                     @Param("liquorName") String liquorName,
+                                                                     @Param("areaId") Long areaId);
 }

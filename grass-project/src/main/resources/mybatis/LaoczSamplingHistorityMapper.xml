@@ -74,6 +74,40 @@
             </if>
         </where>
     </select>
+    <select id="selectLaoczSamplingHist" resultType="com.rexel.laocz.domain.LaoczSamplingHistorityVO">
+        SELECT
+        lsh.sampling_histority_id,
+        lsh.work_order_id,
+        lsh.tenant_id,
+        lsh.liquor_batch_id,
+        llm.liquor_name,
+        lsh.pottery_altar_id,
+        lsh.sampling_purpose,
+        lsh.sampling_weight,
+        lsh.sampling_date,
+        lsh.sampling_file_date,
+        lsh.sampling_file,
+        lsh.create_by,
+        lsh.create_time,
+        lsh.update_by,
+        lsh.update_time,
+        lsh.remark
+        FROM
+        laocz_sampling_histority lsh
+        LEFT JOIN laocz_liquor_batch llb ON llb.liquor_batch_id = lsh.liquor_batch_id
+        LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
+        <where>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                and lsh.pottery_altar_id = #{potteryAltarId}
+            </if>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and lsh.sampling_date between #{fromTime} and #{endTime}
+            </if>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and lsh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczSamplingHistority" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="samplingHistorityId">

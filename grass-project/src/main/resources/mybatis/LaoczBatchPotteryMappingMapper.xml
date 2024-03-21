@@ -59,6 +59,48 @@
             </if>
         </where>
     </select>
+    <select id="selectTableDataInfoReportActual"
+            resultType="com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO">
+        SELECT
+        pam.pottery_altar_number AS potteryAltarNumber,
+        sdd.dict_label as potteryAltarState,
+        tam.area_name AS areaName,
+        fz.fire_zone_name AS fireZoneName,
+        lm.liquor_name AS liquorName,
+        lpm.liquor_batch_id AS liquorBatchId,
+        lpm.actual_weight AS actualWeight,
+        TIMESTAMPDIFF(
+        DAY,
+        lpm.storing_time,
+        NOW()) AS StorageDuration
+        FROM
+        laocz_batch_pottery_mapping lpm
+        LEFT JOIN laocz_liquor_batch lb ON lpm.liquor_batch_id = lb.liquor_batch_id
+        LEFT JOIN laocz_liquor_management lm ON lb.liquor_management_id = lm.liquor_management_id
+        LEFT JOIN laocz_pottery_altar_management pam ON lpm.pottery_altar_id = pam.pottery_altar_id
+        LEFT JOIN sys_dict_data sdd ON pam.pottery_altar_state = sdd.dict_value AND sdd.dict_type = 'Ceramide_condition'
+        LEFT JOIN laocz_fire_zone_info fz ON pam.fire_zone_id = fz.fire_zone_id
+        LEFT JOIN laocz_area_info tam ON fz.area_id = tam.area_id
+        <where>
+            <!-- 根据传入参数添加条件 -->
+            <if test="fireZoneId != null and fireZoneId != ''">
+                fz.fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                AND lpm.liquor_batch_id LIKE CONCAT('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                AND pam.pottery_altar_number LIKE CONCAT('%', #{potteryAltarId}, '%')
+            </if>
+            <if test="liquorName != null and liquorName != ''">
+                AND lm.liquor_name LIKE CONCAT('%', #{liquorName}, '%')
+            </if>
+            <if test="areaId != null and areaId != ''">
+                AND tam.area_id = #{areaId}
+            </if>
+        </where>
+    </select>
+
 
     <insert id="batchLaoczBatchPotteryMapping" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="mappingId">

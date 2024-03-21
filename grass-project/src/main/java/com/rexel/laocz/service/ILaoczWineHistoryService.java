@@ -2,6 +2,9 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczWineHistory;
+import com.rexel.laocz.domain.vo.LaoczWineHistoryInfoVO;
+import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
+import com.rexel.laocz.domain.vo.TableDataInfoDataReportVO;
 
 import java.util.List;
 
@@ -21,4 +24,35 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      */
     List<LaoczWineHistory> selectLaoczWineHistoryList(LaoczWineHistory laoczWineHistory);
 
+    /**
+     * 查询历史信息
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param operationType  操作类型
+     * @return
+     */
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, Long operationType);
+
+    /**
+     * 数据报表-淘坛操作记录
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorBatchId  批次ID
+     * @param fireZoneId     防火区ID
+     * @param areaId         场区ID
+     * @return
+     */
+    TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId);
+
+    /**
+     * 数据报表-陶坛操作记录详情
+     *
+     * @param winHisId 历史ID
+     * @return
+     */
+    LaoczWineHistoryInfoVO selectLaoczWineHistoryInfo(Long winHisId);
 }

@@ -21,4 +21,15 @@ public interface ILaoczLiquorAlarmHistoryService extends IService<LaoczLiquorAla
      */
     List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistoryList(LaoczLiquorAlarmHistory laoczLiquorAlarmHistory);
 
+    /**
+     * 查询报警历史信息
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorRuleId   批次ID
+     * @param liquorRuleName 规则名称
+     * @return
+     */
+    List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName);
 }

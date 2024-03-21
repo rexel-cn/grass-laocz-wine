@@ -2,6 +2,8 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
+import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
 
 import java.util.List;
 
@@ -21,4 +23,25 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
      */
     List<LaoczBatchPotteryMapping> selectLaoczBatchPotteryMappingList(LaoczBatchPotteryMapping laoczBatchPotteryMapping);
 
+    /**
+     * 酒液存储报表查询
+     *
+     * @param fireZoneId     防火区编号
+     * @param liquorBatchId  批次ID
+     * @param potteryAltarId 陶坛ID
+     * @param liquorName     酒品名称
+     * @param areaId         区域编号
+     * @return
+     */
+    List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(Long fireZoneId, String liquorBatchId, String potteryAltarId, String liquorName, Long areaId);
+
+    /**
+     * 酒液存储报表查询所有
+     *
+     * @param areaId        区域编号
+     * @param fireZoneId    防火区编号
+     * @param liquorBatchId 批次ID
+     * @return
+     */
+    TableDataInfoDataReportActualVO selectTableDataInfoDataReportActualVO(Long areaId, Long fireZoneId, String liquorBatchId);
 }

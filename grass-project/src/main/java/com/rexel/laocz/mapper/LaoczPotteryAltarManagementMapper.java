@@ -2,6 +2,8 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
+import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,4 +32,13 @@ public interface LaoczPotteryAltarManagementMapper extends BaseMapper<LaoczPotte
      */
     int batchLaoczPotteryAltarManagement(List<LaoczPotteryAltarManagement> laoczPotteryAltarManagementList);
 
+    /**
+     * 获取陶坛信息
+     *
+     * @param potteryAltarId 主键ID
+     * @return
+     */
+    PotteryAltarInformationVO setPotteryAltarInformation(Long potteryAltarId);
+
+    CurrentWineIndustryVO setCurrentWineIndustry(Long potteryAltarId);
 }

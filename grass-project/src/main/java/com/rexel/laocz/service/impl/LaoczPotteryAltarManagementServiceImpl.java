@@ -1,20 +1,31 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
+import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
+import com.rexel.laocz.domain.vo.PotteryPullDownFrameVO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
+import org.springframework.security.access.method.P;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +54,56 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     @Override
     public List<LaoczPotteryAltarManagement> selectLaoczPotteryAltarManagementList(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
         return baseMapper.selectLaoczPotteryAltarManagementList(laoczPotteryAltarManagement);
+    }
+
+    /**
+     * 查询陶坛下拉框
+     *
+     * @param fireZoneId 防火区ID
+     * @return
+     */
+    @Override
+    public List<PotteryPullDownFrameVO> selectPotteryPullDownFrameList(Long fireZoneId) {
+        List<LaoczPotteryAltarManagement> list = this.lambdaQuery()
+                .eq(LaoczPotteryAltarManagement::getFireZoneId, fireZoneId)
+                .list();
+        if (CollectionUtil.isEmpty(list)) {
+            return null;
+        }
+        return BeanUtil.copyToList(list, PotteryPullDownFrameVO.class);
+    }
+
+    /**
+     * 获取陶坛信息
+     *
+     * @param potteryAltarId 主键ID
+     * @return
+     */
+    @Override
+    public PotteryAltarInformationVO selectPotteryAltarInformation(Long potteryAltarId) {
+        PotteryAltarInformationVO potteryAltarInformationVO = baseMapper.setPotteryAltarInformation(potteryAltarId);
+        if (ObjectUtil.isEmpty(potteryAltarInformationVO)) {
+            PotteryAltarInformationVO potteryAltarInformationVO1 = new PotteryAltarInformationVO();
+            return potteryAltarInformationVO1;
+        }
+        return potteryAltarInformationVO;
+    }
+
+    @Override
+    public CurrentWineIndustryVO selectCurrentWineIndustry(Long potteryAltarId) throws ParseException {
+        // 定义一个与字符串日期格式相匹配的SimpleDateFormat对象
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        CurrentWineIndustryVO currentWineIndustryVO = baseMapper.setCurrentWineIndustry(potteryAltarId);
+        if (ObjectUtil.isEmpty(currentWineIndustryVO)) {
+            return null;
+        }
+        String date = DateUtils.getTime();
+        String storageDuration = currentWineIndustryVO.getStorageDuration();
+        Date date1 = formatter.parse(date);
+        Date date2 = formatter.parse(storageDuration);
+        String datePoor = DateUtils.getDatePoor(date1, date2);
+        currentWineIndustryVO.setStorageDuration(datePoor);
+        return currentWineIndustryVO;
     }
 
     @Override

@@ -34,6 +34,45 @@
                remark
         from laocz_pottery_altar_management
     </sql>
+    <select id="setCurrentWineIndustry" parameterType="long" resultType="com.rexel.laocz.domain.vo.CurrentWineIndustryVO">
+        SELECT
+        llm.liquor_name,
+        lbpm.liquor_batch_id,
+        lbpm.actual_weight,
+        lbpm.storing_time as StorageDuration,
+        llm.liquor_level,
+        llm.liquor_round,
+        llm.liquor_flavor_name,
+        llm.liquor_source,
+        llm.liquor_brewing_time,
+        llm.liquor_year,
+        llm.liquor_content
+        FROM laocz_batch_pottery_mapping lbpm
+        LEFT JOIN laocz_liquor_batch llb ON lbpm.liquor_batch_id = llb.liquor_batch_id
+        LEFT JOIN laocz_liquor_management llm ON llb.liquor_management_id = llm.liquor_management_id
+        <where>
+            <if test="potteryAltarId != null  and potteryAltarId != ''">
+                and lbpm.pottery_altar_id = #{potteryAltarId}
+            </if>
+        </where>
+    </select>
+    <select id="setPotteryAltarInformation" parameterType="long" resultType="com.rexel.laocz.domain.vo.PotteryAltarInformationVO">
+        SELECT
+            lpam.pottery_altar_number,
+            lpam.pottery_altar_full_altar_weight,
+            lfzi.fire_zone_name,
+            lai.area_name,
+            sdd.dict_label as potteryAltarState
+        FROM laocz_pottery_altar_management lpam
+                 LEFT JOIN laocz_fire_zone_info lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
+                 LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
+                 LEFT JOIN sys_dict_data sdd ON lpam.pottery_altar_state = sdd.dict_value AND sdd.dict_type = 'Ceramide_condition'
+        <where>
+            <if test="potteryAltarId != null  and potteryAltarId != ''">
+                and lpam.pottery_altar_id = #{potteryAltarId}
+            </if>
+        </where>
+    </select>
 
     <select id="selectLaoczPotteryAltarManagementList" parameterType="LaoczPotteryAltarManagement"
             resultMap="LaoczPotteryAltarManagementResult">

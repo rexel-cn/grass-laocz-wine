@@ -1,11 +1,5 @@
 package com.rexel.laocz.domain;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,90 +21,67 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LaoczSamplingHistority extends BaseEntity {
+public class LaoczSamplingHistorityVO extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 取样主键ID
      */
-    @TableId(type = IdType.AUTO)
     private Long samplingHistorityId;
     /**
      * 申请的工单id
      */
-    @Excel(name = "申请的工单id")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String workOrderId;
     /**
      * 租户ID
      */
-    @Excel(name = "租户ID")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String tenantId;
+    /**
+     * 酒品名称
+     */
+    private String liquorName;
     /**
      * 酒批次ID，外键关联laocz_liquor_batch
      */
-    @Excel(name = "酒批次ID，外键关联laocz_liquor_batch")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String liquorBatchId;
     /**
      * 陶坛ID，外键关联laocz_pottery_altar_management
      */
-    @Excel(name = "陶坛ID，外键关联laocz_pottery_altar_management")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long potteryAltarId;
     /**
      * 取样用途
      */
-    @Excel(name = "取样用途")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String samplingPurpose;
     /**
      * 取样重量
      */
-    @Excel(name = "取样重量")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long samplingWeight;
     /**
      * 取样时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "取样时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date samplingDate;
     /**
      * 取样文件上传时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "取样文件上传时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date samplingFileDate;
     /**
      * 取样文件上传地址
      */
-    @Excel(name = "取样文件上传地址")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String samplingFile;
-
     /**
      * 场区名称
      */
-    @Excel(name = "场区名称")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String areaName;
-
     /**
      * 防火区名称
      */
-    @Excel(name = "防火区名称")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String fireZoneName;
-
     /**
      * 陶坛管理编号
      */
-    @Excel(name = "陶坛管理编号")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String potteryAltarNumber;
+
 
     @Override
     public String toString() {

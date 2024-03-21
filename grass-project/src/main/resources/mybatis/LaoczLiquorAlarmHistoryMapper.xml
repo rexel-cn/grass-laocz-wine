@@ -74,6 +74,38 @@
             </if>
         </where>
     </select>
+    <select id="selectLaoczLiquorAlarmHistory" resultType="com.rexel.laocz.domain.LaoczLiquorAlarmHistory">
+        select liquor_alarm_history_id,
+        tenant_id,
+        liquor_rule_id,
+        pottery_altar_id,
+        liquor_rule_name,
+        liquor_rule_judge,
+        liquor_rule_threshold,
+        alarm_value,
+        liquor_rule_notify_user,
+        liquor_rule_notify_template,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        remark
+        from laocz_liquor_alarm_history
+        <where>
+            <if test="liquorRuleId != null and liquorRuleId != ''">
+                and liquor_rule_id = like concat('%', #{liquorRuleId}, '%')
+            </if>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                and pottery_altar_id = #{potteryAltarId}
+            </if>
+            <if test="liquorRuleName != null and liquorRuleName != ''">
+                and liquor_rule_name like concat('%', #{liquorRuleName}, '%')
+            </if>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and create_time between #{fromTime} and #{endTime}
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczLiquorAlarmHistory" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="liquorAlarmHistoryId">

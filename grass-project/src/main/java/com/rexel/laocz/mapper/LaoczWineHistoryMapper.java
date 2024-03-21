@@ -2,6 +2,9 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczWineHistory;
+import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
+import com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,4 +34,32 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
     int batchLaoczWineHistory(List<LaoczWineHistory> laoczWineHistoryList);
 
     void saveHistory(Long wineDetailsId);
+    /**
+     * 查询历史信息
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param operationType  操作类型
+     * @return
+     */
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime")String fromTime, @Param("endTime")String endTime, @Param("operationType")Long operationType);
+
+    /**
+     * 数据报表-淘坛操作记录
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorBatchId  批次ID
+     * @return
+     */
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement (@Param("potteryAltarId") Long potteryAltarId,
+                                                              @Param("fromTime")String fromTime,
+                                                              @Param("endTime")String endTime,
+                                                              @Param("liquorBatchId")String liquorBatchId,
+                                                              @Param("fireZoneId") Long fireZoneId,
+                                                              @Param("areaId") Long areaId);
+
+    PotteryAltarInfomationDInfoVO selectPotteryAltarFullAltarWeight(Long winHisId);
 }

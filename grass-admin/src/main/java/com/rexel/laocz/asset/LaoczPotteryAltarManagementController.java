@@ -1,16 +1,15 @@
 package com.rexel.laocz.asset;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
-import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -35,6 +34,39 @@ public class LaoczPotteryAltarManagementController extends BaseController {
         startPage();
         List<LaoczPotteryAltarManagement> list = iLaoczPotteryAltarManagementService.selectLaoczPotteryAltarManagementList(laoczPotteryAltarManagement);
         return getDataTable(list);
+    }
+
+    /**
+     * 查询陶坛下拉框
+     *
+     * @param fireZoneId 防火区ID
+     * @return
+     */
+    @GetMapping("/getPotteryPullDownFrame")
+    private AjaxResult getPotteryPullDownFrame(Long fireZoneId) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.selectPotteryPullDownFrameList(fireZoneId));
+    }
+
+    /**
+     * 获取陶坛信息
+     *
+     * @param potteryAltarId 主键ID
+     * @return
+     */
+    @GetMapping("/getPotteryAltarInformation")
+    private AjaxResult getPotteryAltarInformation(Long potteryAltarId) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.selectPotteryAltarInformation(potteryAltarId));
+    }
+
+    /**
+     * 获取当前陶坛酒液
+     *
+     * @param potteryAltarId 主键ID
+     * @return
+     */
+    @GetMapping("/getCurrentWineIndustry")
+    private AjaxResult getCurrentWineIndustry(Long potteryAltarId) throws ParseException {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.selectCurrentWineIndustry(potteryAltarId));
     }
 
     /**
@@ -88,6 +120,6 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     @PostMapping
     public AjaxResult add(@RequestBody LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
 
-            return toAjax(iLaoczPotteryAltarManagementService.addPotteryAltar(laoczPotteryAltarManagement));
+        return toAjax(iLaoczPotteryAltarManagementService.addPotteryAltar(laoczPotteryAltarManagement));
     }
 }

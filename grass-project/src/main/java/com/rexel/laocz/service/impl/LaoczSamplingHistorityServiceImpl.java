@@ -2,6 +2,7 @@ package com.rexel.laocz.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
+import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.mapper.LaoczSamplingHistorityMapper;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,20 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     @Override
     public List<LaoczSamplingHistority> selectLaoczSamplingHistorityList(LaoczSamplingHistority laoczSamplingHistority) {
         return baseMapper.selectLaoczSamplingHistorityList(laoczSamplingHistority);
+    }
+
+    /**
+     * 查询取样
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorBatchId  批次ID
+     * @return
+     */
+    @Override
+    public List<LaoczSamplingHistorityVO> selectLaoczSamplingHist(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId) {
+        return baseMapper.selectLaoczSamplingHist(potteryAltarId, fromTime, endTime, liquorBatchId);
     }
 
 }

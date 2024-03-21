@@ -168,6 +168,153 @@
             </if>
         </where>
     </select>
+    <select id="selectLaoczWineHistory" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
+        select
+        lwh.win_his_id,
+        lwh.busy_id,
+        lwh.tenant_id,
+        lwh.work_order_id,
+        lwh.liquor_batch_id,
+        lwh.pottery_altar_id,
+        sdd.dict_label AS operation_type,
+        lwh.pottery_altar_apply_weight,
+        lwh.remaining_weight,
+        lwh.loss_weight,
+        lwh.weighing_tank,
+        lwh.pump_id,
+        lwh.weighing_tank_weight,
+        lwh.operation_time,
+        lwh.sampling_purpose,
+        lwh.sampling_weight,
+        lwh.area_name,
+        lwh.fire_zone_name,
+        lwh.pottery_altar_number,
+        lwh.pottery_altar_qr_code_address,
+        lwh.pottery_altar_full_altar_weight,
+        lwh.liquor_name,
+        lwh.liquor_level,
+        lwh.liquor_round,
+        lwh.liquor_flavor_name,
+        lwh.liquor_source,
+        lwh.liquor_year,
+        lwh.liquor_brewing_time,
+        lwh.liquor_content,
+        lwh.create_by,
+        lwh.create_time,
+        lwh.update_by,
+        lwh.update_time,
+        lwh.remark
+        from laocz_wine_history lwh
+        LEFT JOIN sys_dict_data sdd ON lwh.operation_type = sdd.dict_value AND sdd.dict_type = 'operation_type'
+        <where>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                and lwh.pottery_altar_id = #{potteryAltarId}
+            </if>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and lwh.operation_time between #{fromTime} and #{endTime}
+            </if>
+            <if test="operationType != null and operationType != ''">
+                and lwh.operation_type = #{operationType}
+            </if>
+        </where>
+    </select>
+    <select id="selectLaoczWineHistoryStatement" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
+        select
+        lwh.win_his_id,
+        lwh.busy_id,
+        lwh.tenant_id,
+        lwh.work_order_id,
+        lwh.liquor_batch_id,
+        lwh.pottery_altar_id,
+        sdd.dict_label AS operation_type,
+        lwh.pottery_altar_apply_weight,
+        lwh.remaining_weight,
+        lwh.loss_weight,
+        lwh.weighing_tank,
+        lwh.pump_id,
+        lwh.weighing_tank_weight,
+        lwh.operation_time,
+        lwh.sampling_purpose,
+        lwh.sampling_weight,
+        lwh.area_name,
+        lwh.fire_zone_name,
+        lwh.pottery_altar_number,
+        lwh.pottery_altar_qr_code_address,
+        lwh.pottery_altar_full_altar_weight,
+        lwh.liquor_name,
+        lwh.liquor_level,
+        lwh.liquor_round,
+        lwh.liquor_flavor_name,
+        lwh.liquor_source,
+        lwh.liquor_year,
+        lwh.liquor_brewing_time,
+        lwh.liquor_content,
+        lwh.create_by,
+        lwh.create_time,
+        lwh.update_by,
+        lwh.update_time,
+        lwh.remark
+        from laocz_wine_history lwh
+        LEFT JOIN sys_dict_data sdd ON lwh.operation_type = sdd.dict_value AND sdd.dict_type = 'operation_type'
+        LEFT JOIN laocz_pottery_altar_management pam ON lwh.pottery_altar_id = pam.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info fz ON pam.fire_zone_id = fz.fire_zone_id
+        LEFT JOIN laocz_area_info tam ON fz.area_id = tam.area_id
+        <where>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                and lwh.pottery_altar_id = #{potteryAltarId}
+            </if>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and lwh.operation_time between #{fromTime} and #{endTime}
+            </if>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="fireZoneId != null and fireZoneId != ''">
+                fz.fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="areaId != null and areaId != ''">
+                AND tam.area_id = #{areaId}
+            </if>
+        </where>
+    </select>
+    <select id="selectPotteryAltarFullAltarWeight"
+            resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">
+        SELECT
+        lwh.work_order_id,
+        lwd.pottery_altar_apply_weight as ApplyWeight,
+        lwh.liquor_name,
+        lwh.liquor_batch_id,
+        lwh.liquor_level,
+        lwh.liquor_source,
+        lwh.liquor_round,
+        lwh.liquor_brewing_time,
+        lwh.liquor_flavor_name,
+        lwh.liquor_year,
+        lwh.liquor_content,
+        lwh.pottery_altar_apply_weight,
+        lwt.weighing_tank_number,
+        lwh.remaining_weight,
+        lpam.pottery_altar_number,
+        sdd.dict_label as potteryAltarState,
+        lwh.area_name,
+        lwh.fire_zone_name,
+        lpam.pottery_altar_full_altar_weight
+        FROM
+        laocz_wine_history lwh
+        LEFT JOIN
+        laocz_wine_details lwd ON lwd.liquor_batch_id = lwh.liquor_batch_id
+        LEFT JOIN
+        laocz_weighing_tank lwt ON lwh.weighing_tank = lwt.weighing_tank_id
+        LEFT JOIN
+        laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lwh.pottery_altar_id
+        LEFT JOIN sys_dict_data sdd ON lpam.pottery_altar_state = sdd.dict_value AND sdd.dict_type =
+        'Ceramide_condition'
+        <where>
+            <if test="winHisId != null and winHisId != ''">
+                and lwh.win_his_id = #{winHisId}
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczWineHistory" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="winHisId">
