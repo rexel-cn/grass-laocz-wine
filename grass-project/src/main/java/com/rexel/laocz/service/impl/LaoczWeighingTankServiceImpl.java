@@ -49,7 +49,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     public List<LaoczWeighingTank> selectLaoczWeighingTankList(LaoczWeighingTank laoczWeighingTank) {
         return baseMapper.selectLaoczWeighingTankList(laoczWeighingTank);
     }
-
+    /**
+     * 查询称重罐管理列表详细信息
+     */
     @Override
     public List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank) {
 
@@ -68,6 +70,8 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
             weighingTankVo.setAreaName(laoczAreaInfo.getAreaName());
             weighingTankVo.setFireZoneName(laoczFireZoneInfo.getFireZoneName());
+            weighingTankVo.setAreaId(laoczAreaInfo.getAreaId());
+
 
             return weighingTankVo;
 
@@ -75,7 +79,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
         return tankVos;
     }
-
+    /**
+     * 获取称重罐管理详细信息
+     */
     @Override
     public WeighingTankVo getByIdWithTank(Long weighingTankId) {
         LaoczWeighingTank laoczWeighingTank = this.getById(weighingTankId);
@@ -95,7 +101,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
         return weighingTankVo;
     }
-
+    /**
+     * 修改称重罐管理
+     */
     @Override
     public boolean updateByIdWithWeighingTank(LaoczWeighingTank laoczWeighingTank) {
         QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
@@ -104,13 +112,17 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
         int count = this.count(queryWrapper);
 
-        if (count > 0) {
+        LaoczWeighingTank weighingTank = this.getById(laoczWeighingTank.getWeighingTankId());
+
+        if (count > 0 && !laoczWeighingTank.getWeighingTankNumber().equals(weighingTank.getWeighingTankNumber())) {
             throw new ServiceException("称重罐编号已存在");
         } else {
             return updateById(laoczWeighingTank);
         }
     }
-
+    /**
+     * 新增称重罐管理
+     */
     @Override
     public boolean addWeighingTank(LaoczWeighingTank laoczWeighingTank) {
         QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
@@ -125,7 +137,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             return save(laoczWeighingTank);
         }
     }
-
+    /**
+     * 导入称重罐管理列表
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean importWeighingTank(List<WeighingTankDto> weighingTankDtos) {

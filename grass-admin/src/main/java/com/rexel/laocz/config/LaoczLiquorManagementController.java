@@ -39,7 +39,7 @@ public class LaoczLiquorManagementController extends BaseController {
     public TableDataInfo list(LaoczLiquorManagement laoczLiquorManagement) {
         startPage();
         List<LaoczLiquorManagement> list = laoczLiquorManagementService.selectLaoczLiquorManagementList(laoczLiquorManagement);
-        return getDataTable(list,"liquor");
+        return getDataTable(list,"jiupin");
     }
 
     /**

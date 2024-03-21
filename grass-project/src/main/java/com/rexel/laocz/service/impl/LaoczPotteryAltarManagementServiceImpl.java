@@ -103,7 +103,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         currentWineIndustryVO.setStorageDuration(datePoor);
         return currentWineIndustryVO;
     }
-
+    /**
+     * 查询陶坛管理列表详细信息
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     @Override
     public List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
         List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = baseMapper.selectLaoczPotteryAltarManagementList(laoczPotteryAltarManagement);
@@ -129,7 +134,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         return list;
     }
-
+    /**
+     * 编辑回显,通过Id查询陶坛管理详情
+     */
     @Override
     public PotteryAltarVo selectLaoczPotteryAltarManagement(Long potteryAltarId) {
 
@@ -147,12 +154,20 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         potteryAltarVo.setAreaName(laoczAreaInfo.getAreaName());
         potteryAltarVo.setFireZoneName(laoczFireZoneInfo.getFireZoneName());
+        potteryAltarVo.setAreaId(laoczAreaInfo.getAreaId());
 
         return potteryAltarVo;
     }
-
+    /**
+     * 新增陶坛
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     @Override
     public boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+
+        laoczPotteryAltarManagement.setPotteryAltarQrCodeAddress(" ");
 
         QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
 
@@ -166,7 +181,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             return this.save(laoczPotteryAltarManagement);
         }
     }
-
+    /**
+     * 修改陶坛
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     @Override
     public boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
 
@@ -176,7 +196,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         int count = this.count(queryWrapper);
 
-        if (count > 0) {
+        LaoczPotteryAltarManagement altarManagement = this.getById(laoczPotteryAltarManagement.getPotteryAltarId());
+
+        if (count > 0 && !altarManagement.getPotteryAltarNumber().equals(laoczPotteryAltarManagement.getPotteryAltarNumber())) {
             throw new ServiceException("陶坛编号已存在");
         } else {
             return updateById(laoczPotteryAltarManagement);

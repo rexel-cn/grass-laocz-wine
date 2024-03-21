@@ -19,6 +19,10 @@ public class PotteryAltarVo {
     /**
      * 区域名称
      */
+    private Long areaId;
+    /**
+     * 区域名称
+     */
     private String areaName;
     /**
      * 防火区主键ID，外键关联laocz_fire_zone_info

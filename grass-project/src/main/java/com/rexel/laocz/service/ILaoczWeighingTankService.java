@@ -22,14 +22,24 @@ public interface ILaoczWeighingTankService extends IService<LaoczWeighingTank> {
      * @return 称重罐管理集合
      */
     List<LaoczWeighingTank> selectLaoczWeighingTankList(LaoczWeighingTank laoczWeighingTank);
-
+    /**
+     * 查询称重罐管理列表详细信息
+     */
     List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank);
-
+    /**
+     * 获取称重罐管理详细信息
+     */
     WeighingTankVo getByIdWithTank(Long weighingTankId);
-
+    /**
+     * 修改称重罐管理
+     */
     boolean updateByIdWithWeighingTank(LaoczWeighingTank laoczWeighingTank);
-
+    /**
+     * 新增称重罐管理
+     */
     boolean addWeighingTank(LaoczWeighingTank laoczWeighingTank);
-
+    /**
+     * 导入称重罐管理列表
+     */
     boolean importWeighingTank(List<WeighingTankDto> WeighingTankDtos);
 }

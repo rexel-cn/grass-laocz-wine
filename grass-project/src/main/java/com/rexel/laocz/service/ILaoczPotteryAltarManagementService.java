@@ -26,7 +26,12 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      * @return 陶坛管理集合
      */
     List<LaoczPotteryAltarManagement> selectLaoczPotteryAltarManagementList(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
-
+    /**
+     * 查询陶坛管理列表详细信息
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     /**
      * 查询陶坛下拉框
      *
@@ -52,11 +57,23 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
     CurrentWineIndustryVO selectCurrentWineIndustry(Long potteryAltarId) throws ParseException;
 
     List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
-
+    /**
+     * 编辑回显,通过Id查询陶坛管理详情
+     */
     PotteryAltarVo selectLaoczPotteryAltarManagement(Long potteryAltarId);
-
+    /**
+     * 新增陶坛
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
-
+    /**
+     * 修改陶坛
+     *
+     * @param laoczPotteryAltarManagement
+     * @return
+     */
     boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
 
 
