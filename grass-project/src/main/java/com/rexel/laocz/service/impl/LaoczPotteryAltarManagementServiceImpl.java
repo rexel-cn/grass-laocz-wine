@@ -3,30 +3,28 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rexel.common.utils.DateUtils;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
 import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
-import com.rexel.laocz.domain.vo.PotteryPullDownFrameVO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
+import com.rexel.laocz.domain.vo.PotteryPullDownFrameVO;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
-import org.springframework.security.access.method.P;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -183,5 +181,18 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         } else {
             return updateById(laoczPotteryAltarManagement);
         }
+    }
+
+    /**
+     * 入酒时，陶坛列表过滤查询
+     *
+     * @param wineEntryPotteryAltarDTO 入酒，陶坛筛选DTO
+     * @return 陶坛列表
+     */
+    @Override
+    public List<PotteryAltarVo> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
+        List<PotteryAltarVo> list = baseMapper.selectWineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
+
+        return list;
     }
 }

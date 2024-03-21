@@ -1,12 +1,5 @@
 package com.rexel.laocz.domain.vo;
 
-
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.rexel.common.annotation.Excel;
-import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import lombok.Data;
 
 @Data
@@ -14,7 +7,6 @@ public class PotteryAltarVo {
     /**
      * 陶坛管理主键ID
      */
-    @TableId(type = IdType.AUTO)
     private Long potteryAltarId;
     /**
      * 陶坛管理编号

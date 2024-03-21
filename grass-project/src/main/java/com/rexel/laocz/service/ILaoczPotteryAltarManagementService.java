@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
 import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
@@ -57,4 +58,15 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
     boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
 
     boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
+
+
+    /**
+     * 入酒时，陶坛列表过滤查询
+     *
+     * @param wineEntryPotteryAltarDTO 入酒，陶坛筛选DTO 防火区筛选，陶坛编号筛选，已选陶坛过滤去除
+     * @return 陶坛列表
+     */
+    List<PotteryAltarVo> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO);
+
+
 }

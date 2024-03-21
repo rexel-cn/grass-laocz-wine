@@ -41,6 +41,11 @@ public interface WineEntryApplyService {
     WineRealDataVO getWineRealData(Long wineDetailsId);
 
 
+    /**
+     * 入酒结束
+     *
+     * @param wineDetailsId 酒操作业务详情id
+     */
     void wineEntryFinish(Long wineDetailsId);
 
 }

@@ -336,7 +336,7 @@
             #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
         </foreach>
     </insert>
-    <insert id="saveHistory">
+    <insert id="saveHistory" useGeneratedKeys="true">
         INSERT INTO laocz_wine_history(
         `busy_id`,
         `tenant_id`,

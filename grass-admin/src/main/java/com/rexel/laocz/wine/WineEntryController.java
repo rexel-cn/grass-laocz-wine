@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2024/3/11 16:55
  **/
 @RestController
-@RequestMapping("/wineEntry")
+@RequestMapping("/rexel-api/wineEntry")
 public class WineEntryController extends BaseController {
 
     @Autowired

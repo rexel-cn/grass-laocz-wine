@@ -16,7 +16,7 @@ import java.util.List;
  * @Date 2024/3/19 15:42
  **/
 @RestController
-@RequestMapping("/wineOut")
+@RequestMapping("/rexel-api/wineOut")
 public class WineOutController extends BaseController {
 
     @Autowired

@@ -4,6 +4,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,5 +122,10 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     public AjaxResult add(@RequestBody LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
 
         return toAjax(iLaoczPotteryAltarManagementService.addPotteryAltar(laoczPotteryAltarManagement));
+    }
+
+    @PostMapping("/wineEntryPotteryAltarList")
+    public AjaxResult wineEntryPotteryAltarList(@RequestBody WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO));
     }
 }

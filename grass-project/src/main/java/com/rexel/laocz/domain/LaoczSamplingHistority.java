@@ -43,6 +43,12 @@ public class LaoczSamplingHistority extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String workOrderId;
     /**
+     * 业务标识
+     */
+    @Excel(name = "业务标识")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private String busyId;
+    /**
      * 租户ID
      */
     @Excel(name = "租户ID")
@@ -71,7 +77,7 @@ public class LaoczSamplingHistority extends BaseEntity {
      */
     @Excel(name = "取样重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long samplingWeight;
+    private Double samplingWeight;
     /**
      * 取样时间
      */
@@ -90,21 +96,18 @@ public class LaoczSamplingHistority extends BaseEntity {
     @Excel(name = "取样文件上传地址")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String samplingFile;
-
     /**
      * 场区名称
      */
     @Excel(name = "场区名称")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String areaName;
-
     /**
      * 防火区名称
      */
     @Excel(name = "防火区名称")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String fireZoneName;
-
     /**
      * 陶坛管理编号
      */

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
 import com.rexel.dview.pojo.DViewVarInfo;
+import com.rexel.laocz.constant.WineConstants;
 import com.rexel.laocz.constant.WinePointConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineEntryApplyDTO;
@@ -32,7 +33,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +48,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     static AtomicInteger atomicInteger = new AtomicInteger(0);
     private final Map<Long, ScheduledFuture> threadMap = new ConcurrentHashMap<>();
     private final Map<Long, WineRealRunStatusEnum> wineRealRunStatusEnumMap = new ConcurrentHashMap<>();
-    private final ReentrantLock lock = new ReentrantLock();
     @Autowired
     private ILaoczLiquorBatchService iLaoczLiquorBatchService;
     @Autowired
@@ -244,28 +243,36 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //查询称重罐，需要的业务字段：称重罐重量上限，称重罐编号等。
         LaoczWeighingTank weighingTank = iLaoczWeighingTankService.getById(wineDetails.getWeighingTank());
 
-        switch (wineEntryDTO.getStatus()) {
-            case "1":
-                //开始
-                start(wineDetails, orDefault, weighingTankPointVOList, pumpPointVOList, weighingTank);
-                break;
-            case "2":
-                //急停
-                pause(wineDetails, orDefault, pumpPointVOList);
-                break;
-            case "3":
-                //继续
-                winContinue(wineDetails, orDefault, pumpPointVOList, weighingTankPointVOList);
-                break;
-            default:
-                throw new CustomException("入酒状态错误");
+
+        String eventStatus = WineConstants.SUCCESS;
+        try {
+            switch (wineEntryDTO.getStatus()) {
+                case "1":
+                    //开始
+                    start(wineDetails, orDefault, weighingTankPointVOList, pumpPointVOList, weighingTank);
+                    break;
+                case "2":
+                    //急停
+                    pause(wineDetails, orDefault, pumpPointVOList);
+                    break;
+                case "3":
+                    //继续
+                    winContinue(wineDetails, orDefault, pumpPointVOList, weighingTankPointVOList);
+                    break;
+                default:
+                    throw new CustomException("入酒状态错误");
+            }
+        } catch (Exception e) {
+            eventStatus = WineConstants.FAIL;
+        } finally {
+            //保存入酒事件
+            saveWineEvent(wineDetails, wineEntryDTO, weighingTankPointVOList, pumpPointVOList, eventStatus);
         }
 
-        saveWineEvent(wineDetails, wineEntryDTO, weighingTankPointVOList, pumpPointVOList);
 
     }
 
-    private void saveWineEvent(LaoczWineDetails wineDetails, WineEntryDTO wineEntryDTO, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList) {
+    private void saveWineEvent(LaoczWineDetails wineDetails, WineEntryDTO wineEntryDTO, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, String eventStatus) {
         List<String> weightPoints = weighingTankPointVOList.stream().map(WineDetailPointVO::getPointId).collect(Collectors.toList());
         List<String> pumpPoints = pumpPointVOList.stream().map(WineDetailPointVO::getPointId).collect(Collectors.toList());
 
@@ -276,9 +283,9 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         laoczWineEvent.setBusyId(wineDetails.getBusyId());
         laoczWineEvent.setLiquorBatchId(wineDetails.getLiquorBatchId());
         laoczWineEvent.setPotteryAltarId(wineDetails.getPotteryAltarId());
-        laoczWineEvent.setEventId("");
+        laoczWineEvent.setEventId(WineOperationTypeEnum.getNameByValue(wineEntryDTO.getStatus()));
         laoczWineEvent.setEventTime(new Date());
-        laoczWineEvent.setEventStatus("");
+        laoczWineEvent.setEventStatus(eventStatus);
         laoczWineEvent.setEventParam(JSON.toJSONString(wineEntryDTO));
         //转换为，号分割
         laoczWineEvent.setPointArray(String.join(",", weightPoints));
@@ -370,7 +377,9 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     }
 
     /**
-     * @param wineDetailsId
+     * 入酒结束
+     *
+     * @param wineDetailsId 酒操作业务详情id
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
