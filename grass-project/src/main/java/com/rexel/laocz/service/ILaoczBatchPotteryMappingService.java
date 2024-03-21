@@ -24,7 +24,7 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
     List<LaoczBatchPotteryMapping> selectLaoczBatchPotteryMappingList(LaoczBatchPotteryMapping laoczBatchPotteryMapping);
 
     /**
-     * 酒液存储报表查询
+     * 酒液存储报表查询下方
      *
      * @param fireZoneId     防火区编号
      * @param liquorBatchId  批次ID
@@ -36,7 +36,17 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
     List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(Long fireZoneId, String liquorBatchId, String potteryAltarId, String liquorName, Long areaId);
 
     /**
-     * 酒液存储报表查询所有
+     * 酒液存储报表查询
+     *
+     * @param fireZoneId     防火区编号
+     * @param liquorBatchId  批次ID
+     * @param areaId         区域编号
+     * @return
+     */
+    List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActualList(Long fireZoneId, String liquorBatchId, Long areaId);
+
+    /**
+     * 酒液存储报表查询所有上方
      *
      * @param areaId        区域编号
      * @param fireZoneId    防火区编号

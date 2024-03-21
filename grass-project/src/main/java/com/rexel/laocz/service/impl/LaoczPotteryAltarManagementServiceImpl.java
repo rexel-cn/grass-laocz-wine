@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -93,13 +94,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         CurrentWineIndustryVO currentWineIndustryVO = baseMapper.setCurrentWineIndustry(potteryAltarId);
         if (ObjectUtil.isEmpty(currentWineIndustryVO)) {
-            return null;
+            return Optional.ofNullable(currentWineIndustryVO).orElseGet(CurrentWineIndustryVO::new);
         }
         String date = DateUtils.getTime();
-        String storageDuration = currentWineIndustryVO.getStorageDuration();
+        Date storageDuration = currentWineIndustryVO.getLiquorBrewingTime();
         Date date1 = formatter.parse(date);
-        Date date2 = formatter.parse(storageDuration);
-        String datePoor = DateUtils.getDatePoor(date1, date2);
+        String datePoor = DateUtils.getDatePoor(date1, storageDuration);
         currentWineIndustryVO.setStorageDuration(datePoor);
         return currentWineIndustryVO;
     }

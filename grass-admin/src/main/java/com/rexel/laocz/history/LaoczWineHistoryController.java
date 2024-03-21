@@ -7,6 +7,7 @@ import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryExportVO;
+import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportVO;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class LaoczWineHistoryController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, Long operationType) {
+    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType) {
         startPage();
         return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType), "historyInfo");
     }
@@ -65,16 +66,29 @@ public class LaoczWineHistoryController extends BaseController {
     }
 
     /**
+     * 数据报表-淘坛操作记录查询2
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fireZoneId     防火区ID
+     * @param areaId         场区ID
+     * @return
+     */
+    @GetMapping("/getPotteryJarOperationTableList")
+    public TableDataInfo getPotteryJarOperationTableList(Long potteryAltarId, Long fireZoneId, Long areaId) {
+        return getDataTable(laoczWineHistoryService.getLaoczWineHistoryTableList(potteryAltarId, fireZoneId, areaId), "PotteryReport");
+    }
+
+    /**
      * 陶坛操作记录表导出
      *
      * @param response
      * @throws IOException
      */
     @PostMapping("/exportThePotteryJarOperation")
-    public void exportThePotteryJarOperation(HttpServletResponse response) throws IOException {
-        ExcelUtil<LaoczWineHistoryExportVO> util = new ExcelUtil<>(LaoczWineHistoryExportVO.class);
-        List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectLaoczWineHistoryList(null);
-        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczWineHistoryExportVO.class), "陶坛操作报表");
+    public void exportThePotteryJarOperation(HttpServletResponse response,String fromTime, String endTime, String liquorBatchId) throws IOException {
+        ExcelUtil<LaoczWineHistoryVO> util = new ExcelUtil<>(LaoczWineHistoryVO.class);
+        List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.getLaoczWineHistoryTable(fromTime,endTime,liquorBatchId);
+        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczWineHistoryVO.class), "陶坛操作报表");
     }
 
     /**

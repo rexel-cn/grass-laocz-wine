@@ -38,14 +38,10 @@ public class LaoczWineHistoryVO extends BaseEntity {
     /**
      * 业务标识
      */
-    @Excel(name = "业务标识")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String busyId;
     /**
      * 租户ID
      */
-    @Excel(name = "租户ID")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String tenantId;
     /**
      * 申请的工单id
@@ -110,6 +106,7 @@ public class LaoczWineHistoryVO extends BaseEntity {
     /**
      * 业务时间（出酒、入酒、取样时间）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "业务时间", readConverterExp = "出=酒、入酒、取样时间")
     private Date operationTime;
     /**
@@ -125,11 +122,19 @@ public class LaoczWineHistoryVO extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long samplingWeight;
     /**
+     * 场区信息ID
+     */
+    private Long areaId;
+    /**
      * 场区名称
      */
     @Excel(name = "场区名称")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String areaName;
+    /**
+     * 防火区主键ID
+     */
+    private Long fireZoneId;
     /**
      * 防火区名称
      */

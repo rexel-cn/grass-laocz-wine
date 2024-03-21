@@ -45,5 +45,8 @@ public interface LaoczSamplingHistorityMapper extends BaseMapper<LaoczSamplingHi
      * @param liquorBatchId  批次ID
      * @return
      */
-    List<LaoczSamplingHistorityVO> selectLaoczSamplingHist(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorBatchId") String liquorBatchId);
+    List<LaoczSamplingHistorityVO> selectLaoczSamplingHist(@Param("potteryAltarId") Long potteryAltarId,
+                                                           @Param("fromTime") String fromTime,
+                                                           @Param("endTime") String endTime,
+                                                           @Param("liquorBatchId") String liquorBatchId);
 }

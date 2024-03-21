@@ -22,7 +22,9 @@
         <result property="samplingPurpose" column="sampling_purpose"/>
         <result property="samplingWeight" column="sampling_weight"/>
         <result property="areaName" column="area_name"/>
+        <result property="areaId" column="area_id"/>
         <result property="fireZoneName" column="fire_zone_name"/>
+        <result property="fireZoneId" column="fire_zone_id"/>
         <result property="potteryAltarNumber" column="pottery_altar_number"/>
         <result property="potteryAltarQrCodeAddress" column="pottery_altar_qr_code_address"/>
         <result property="potteryAltarFullAltarWeight" column="pottery_altar_full_altar_weight"/>
@@ -58,7 +60,9 @@
                operation_time,
                sampling_purpose,
                sampling_weight,
+               area_id,
                area_name,
+               fire_zone_id,
                fire_zone_name,
                pottery_altar_number,
                pottery_altar_qr_code_address,
@@ -127,8 +131,14 @@
             <if test="samplingWeight != null ">
                 and sampling_weight = #{samplingWeight}
             </if>
+            <if test="areaId != null  and areaId != ''">
+                and area_id like concat('%', #{areaId}, '%')
+            </if>
             <if test="areaName != null  and areaName != ''">
                 and area_name like concat('%', #{areaName}, '%')
+            </if>
+            <if test="fireZoneId != null  and fireZoneId != ''">
+                and fire_zone_id like concat('%', #{fireZoneId}, '%')
             </if>
             <if test="fireZoneName != null  and fireZoneName != ''">
                 and fire_zone_name like concat('%', #{fireZoneName}, '%')
@@ -219,61 +229,22 @@
         </where>
     </select>
     <select id="selectLaoczWineHistoryStatement" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
-        select
-        lwh.win_his_id,
-        lwh.busy_id,
-        lwh.tenant_id,
-        lwh.work_order_id,
-        lwh.liquor_batch_id,
-        lwh.pottery_altar_id,
-        sdd.dict_label AS operation_type,
-        lwh.pottery_altar_apply_weight,
-        lwh.remaining_weight,
-        lwh.loss_weight,
-        lwh.weighing_tank,
-        lwh.pump_id,
-        lwh.weighing_tank_weight,
-        lwh.operation_time,
-        lwh.sampling_purpose,
-        lwh.sampling_weight,
-        lwh.area_name,
-        lwh.fire_zone_name,
-        lwh.pottery_altar_number,
-        lwh.pottery_altar_qr_code_address,
-        lwh.pottery_altar_full_altar_weight,
-        lwh.liquor_name,
-        lwh.liquor_level,
-        lwh.liquor_round,
-        lwh.liquor_flavor_name,
-        lwh.liquor_source,
-        lwh.liquor_year,
-        lwh.liquor_brewing_time,
-        lwh.liquor_content,
-        lwh.create_by,
-        lwh.create_time,
-        lwh.update_by,
-        lwh.update_time,
-        lwh.remark
-        from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.operation_type = sdd.dict_value AND sdd.dict_type = 'operation_type'
-        LEFT JOIN laocz_pottery_altar_management pam ON lwh.pottery_altar_id = pam.pottery_altar_id
-        LEFT JOIN laocz_fire_zone_info fz ON pam.fire_zone_id = fz.fire_zone_id
-        LEFT JOIN laocz_area_info tam ON fz.area_id = tam.area_id
+        <include refid="selectLaoczWineHistoryVo"/>
         <where>
-            <if test="potteryAltarId != null and potteryAltarId != ''">
-                and lwh.pottery_altar_id = #{potteryAltarId}
+            <if test="liquorBatchId != null  and liquorBatchId != ''">
+                and liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="potteryAltarId != null ">
+                and pottery_altar_id = #{potteryAltarId}
             </if>
             <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
-                and lwh.operation_time between #{fromTime} and #{endTime}
+                and operation_time between #{fromTime} and #{endTime}
             </if>
-            <if test="liquorBatchId != null and liquorBatchId != ''">
-                and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            <if test="areaId != null  and areaId != ''">
+                and area_id = #{areaId}
             </if>
-            <if test="fireZoneId != null and fireZoneId != ''">
-                fz.fire_zone_id = #{fireZoneId}
-            </if>
-            <if test="areaId != null and areaId != ''">
-                AND tam.area_id = #{areaId}
+            <if test="fireZoneId != null  and fireZoneId != ''">
+                and fire_zone_id = #{fireZoneId}
             </if>
         </where>
     </select>

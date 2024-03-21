@@ -87,6 +87,9 @@
         lsh.sampling_date,
         lsh.sampling_file_date,
         lsh.sampling_file,
+        lai.area_name,
+        lfzi.fire_zone_name,
+        lsh.pottery_altar_number,
         lsh.create_by,
         lsh.create_time,
         lsh.update_by,
@@ -96,6 +99,9 @@
         laocz_sampling_histority lsh
         LEFT JOIN laocz_liquor_batch llb ON llb.liquor_batch_id = lsh.liquor_batch_id
         LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
+        LEFT JOIN laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lsh.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id
+        LEFT JOIN laocz_area_info lai ON lai.area_id = lfzi.area_id
         <where>
             <if test="potteryAltarId != null and potteryAltarId != ''">
                 and lsh.pottery_altar_id = #{potteryAltarId}

@@ -51,7 +51,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      * @return
      */
     @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, Long operationType) {
+    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType) {
         return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType);
     }
 
@@ -78,19 +78,37 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
         List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
         Long totalOperand = (long) laoczWineHistoryVOSList.size();
         long entryOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "入酒".equals(history.getOperationType()))
+                .filter(history -> "1".equals(history.getOperationType()))
                 .count();
         long distillingOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "出酒".equals(history.getOperationType()))
+                .filter(history -> "2".equals(history.getOperationType()))
                 .count();
         long invertedJarOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "倒坛".equals(history.getOperationType()))
+                .filter(history -> "3".equals(history.getOperationType()))
                 .count();
         long samplingOperation = laoczWineHistoryVOSList.stream()
-                .filter(history -> "取样".equals(history.getOperationType()))
+                .filter(history -> "4".equals(history.getOperationType()))
                 .count();
 
         return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperation, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
+    }
+
+    /**
+     * 数据报表-淘坛操作记录查询2
+     *
+     * @param potteryAltarId 陶坛ID
+     * @param fireZoneId     防火区ID
+     * @param areaId         场区ID
+     * @return
+     */
+    @Override
+    public List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(Long potteryAltarId, Long fireZoneId, Long areaId) {
+        return baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, null, null, null, fireZoneId, areaId);
+    }
+
+    @Override
+    public List<LaoczWineHistoryVO> getLaoczWineHistoryTable(String fromTime, String endTime, String liquorBatchId) {
+        return baseMapper.selectLaoczWineHistoryStatement(null, fromTime, endTime, liquorBatchId, null,null);
     }
 
     /**

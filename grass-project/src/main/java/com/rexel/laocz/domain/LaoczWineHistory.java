@@ -125,11 +125,19 @@ public class LaoczWineHistory extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long samplingWeight;
     /**
+     * 场区信息ID
+     */
+    private Long areaId;
+    /**
      * 场区名称
      */
     @Excel(name = "场区名称")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String areaName;
+    /**
+     * 防火区主键ID
+     */
+    private Long fireZoneId;
     /**
      * 防火区名称
      */

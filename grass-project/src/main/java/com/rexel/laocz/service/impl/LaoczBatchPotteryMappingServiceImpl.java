@@ -62,6 +62,11 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
         }
     }
 
+    @Override
+    public List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActualList(Long fireZoneId, String liquorBatchId, Long areaId) {
+        return baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, null, null, areaId);
+    }
+
     /**
      * 酒液存储报表查询所有
      *
