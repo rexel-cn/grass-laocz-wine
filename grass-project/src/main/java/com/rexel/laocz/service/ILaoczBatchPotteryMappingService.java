@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.vo.BoardDataListVO;
 import com.rexel.laocz.domain.vo.BoardDataVO;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
@@ -63,5 +64,5 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
      * @param fireZoneId 防火区编号
      * @return
      */
-    List<BoardDataVO> selectBoardData(Long areaId, Long fireZoneId);
+    BoardDataListVO selectBoardData(Long areaId, Long fireZoneId);
 }

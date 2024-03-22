@@ -9,6 +9,7 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.vo.BoardDataListVO;
 import com.rexel.laocz.domain.vo.BoardDataVO;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
@@ -107,8 +108,18 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
      * @return
      */
     @Override
-    public List<BoardDataVO> selectBoardData(Long areaId, Long fireZoneId) {
-        return baseMapper.selectBoardData(areaId, fireZoneId);
+    public BoardDataListVO selectBoardData(Long areaId, Long fireZoneId) {
+        List<BoardDataVO> boardDataVOS;
+        try {
+            PageUtils.startPage();
+            boardDataVOS = baseMapper.selectBoardData(areaId, fireZoneId);
+        } finally {
+            PageUtils.clearPage();
+        }
+        BoardDataListVO boardDataListVO = new BoardDataListVO();
+        boardDataListVO.setBoardDataVOList(boardDataVOS);
+        boardDataListVO.setTableTotal(baseMapper.selectBoardData(areaId, fireZoneId).size());
+        return boardDataListVO;
     }
 
     /**
