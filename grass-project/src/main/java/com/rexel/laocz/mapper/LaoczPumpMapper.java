@@ -2,6 +2,7 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczPump;
+import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface LaoczPumpMapper extends BaseMapper<LaoczPump> {
      * @param laoczPump 泵管理
      * @return 泵管理集合
      */
-    List<LaoczPump> selectLaoczPumpList(LaoczPump laoczPump);
+    List<LaoczPumpVo> selectLaoczPumpList(LaoczPump laoczPump);
 
     /**
      * 批量新增泵管理
@@ -30,4 +31,5 @@ public interface LaoczPumpMapper extends BaseMapper<LaoczPump> {
      */
     int batchLaoczPump(List<LaoczPump> laoczPumpList);
 
+    List<LaoczPumpVo> selectPumpDetails(Long pumpId);
 }

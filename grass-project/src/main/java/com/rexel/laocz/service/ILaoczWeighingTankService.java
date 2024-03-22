@@ -2,7 +2,9 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczWeighingTank;
+import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
+import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 
 import java.util.List;
@@ -29,17 +31,19 @@ public interface ILaoczWeighingTankService extends IService<LaoczWeighingTank> {
     /**
      * 获取称重罐管理详细信息
      */
-    WeighingTankVo getByIdWithTank(Long weighingTankId);
+    WeighingTankAddDto getByIdWithTank(Long weighingTankId);
     /**
      * 修改称重罐管理
      */
-    boolean updateByIdWithWeighingTank(LaoczWeighingTank laoczWeighingTank);
+    boolean updateByIdWithWeighingTank(WeighingTankAddDto weighingTankAddDto);
     /**
      * 新增称重罐管理
      */
-    boolean addWeighingTank(LaoczWeighingTank laoczWeighingTank);
+    boolean addWeighingTank(WeighingTankAddDto weighingTankAddDto);
     /**
      * 导入称重罐管理列表
      */
     boolean importWeighingTank(List<WeighingTankDto> WeighingTankDtos);
+
+    List<WeighingTankAddVo> getAddVo();
 }

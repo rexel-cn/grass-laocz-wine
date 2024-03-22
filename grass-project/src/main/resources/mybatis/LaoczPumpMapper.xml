@@ -16,6 +16,15 @@
         <result property="remark" column="remark"/>
     </resultMap>
 
+    <resultMap type="com.rexel.laocz.domain.vo.LaoczPumpVo" id="LaoczPumpVo">
+
+        <result property="pumpNumber" column="pump_number"/>
+        <result property="areaName" column="area_name"/>
+        <result property="fireZoneName" column="fire_zone_name"/>
+        <result property="pointKey" column="point_key"/>
+
+    </resultMap>
+
     <sql id="selectLaoczPumpVo">
         select pump_id,
                tenant_id,
@@ -29,17 +38,53 @@
         from laocz_pump
     </sql>
 
-    <select id="selectLaoczPumpList" parameterType="LaoczPump" resultMap="LaoczPumpResult">
-        <include refid="selectLaoczPumpVo"/>
+    <select id="selectLaoczPumpList" parameterType="LaoczPumpVo" resultMap="LaoczPumpVo">
+        SELECT
+        lp.pump_id,
+        lp.pump_number,
+        lai.area_name,
+        lfzi.fire_zone_name
+        FROM
+        laocz_pump lp
+        LEFT JOIN
+        laocz_fire_zone_info lfzi on lp.fire_zone_id = lfzi.fire_zone_id
+        LEFT JOIN
+        laocz_area_info lai on lfzi.area_id = lai.area_id
         <where>
             <if test="tenantId != null  and tenantId != ''">
                 and tenant_id = #{tenantId}
             </if>
             <if test="fireZoneId != null ">
-                and fire_zone_id = #{fireZoneId}
+                and lp.fire_zone_id = #{fireZoneId}
             </if>
             <if test="pumpNumber != null ">
                 and pump_number = #{pumpNumber}
+            </if>
+        </where>
+    </select>
+    <select id="selectPumpDetails" resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
+        SELECT
+        lp.pump_id,
+        lp.pump_number,
+        lai.area_name,
+        lfzi.fire_zone_name,
+        lpp.use_mark,
+        gpi.point_id,
+        gpi.point_name,
+        gpi.id as point_key
+        FROM
+        laocz_pump lp
+        LEFT JOIN
+        laocz_fire_zone_info lfzi on lp.fire_zone_id = lfzi.fire_zone_id
+        LEFT JOIN
+        laocz_area_info lai on lfzi.area_id = lai.area_id
+        LEFT JOIN
+        laocz_pump_point lpp on lpp.pump_id = lp.pump_id
+        LEFT JOIN
+        grass_point_info gpi on gpi.id = lpp.point_primary_key
+        <where>
+            <if test="pumpId != null ">
+                and lp.pump_id = #{pumpNumber}
             </if>
         </where>
     </select>

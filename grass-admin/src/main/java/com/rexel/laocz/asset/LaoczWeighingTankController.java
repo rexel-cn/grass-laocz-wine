@@ -8,8 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import com.rexel.laocz.domain.LaoczWeighingTank;
+import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.LiquorVo;
+import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.service.ILaoczWeighingTankService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +69,8 @@ public class LaoczWeighingTankController extends BaseController {
      */
     @Log(title = "称重罐管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody LaoczWeighingTank laoczWeighingTank) {
-        return toAjax(laoczWeighingTankService.addWeighingTank(laoczWeighingTank));
+    public AjaxResult add(@RequestBody WeighingTankAddDto weighingTankAddDto) {
+        return toAjax(laoczWeighingTankService.addWeighingTank(weighingTankAddDto));
     }
 
     /**
@@ -76,8 +78,8 @@ public class LaoczWeighingTankController extends BaseController {
      */
     @Log(title = "称重罐管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody LaoczWeighingTank laoczWeighingTank) {
-        return toAjax(laoczWeighingTankService.updateByIdWithWeighingTank(laoczWeighingTank));
+    public AjaxResult edit(@RequestBody WeighingTankAddDto weighingTankAddDto) {
+        return toAjax(laoczWeighingTankService.updateByIdWithWeighingTank(weighingTankAddDto));
     }
 
     /**
@@ -107,5 +109,13 @@ public class LaoczWeighingTankController extends BaseController {
         ExcelUtil<WeighingTankDto> util = new ExcelUtil<>(WeighingTankDto.class);
         List<WeighingTankDto> weighingTankVos = util.importExcel(file.getInputStream());
         return AjaxResult.success(laoczWeighingTankService.importWeighingTank(weighingTankVos));
+    }
+    /**
+     * 返回前端动态列
+     */
+    @GetMapping("/getAddVo")
+    public AjaxResult getAddVo(){
+        List<WeighingTankAddVo> weighingTankAddVos = laoczWeighingTankService.getAddVo();
+        return AjaxResult.success(weighingTankAddVos);
     }
 }

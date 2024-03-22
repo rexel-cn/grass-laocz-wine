@@ -1,7 +1,9 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczPump;
+import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.mapper.LaoczPumpMapper;
 import com.rexel.laocz.service.ILaoczPumpService;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,19 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
      * @return 泵管理
      */
     @Override
-    public List<LaoczPump> selectLaoczPumpList(LaoczPump laoczPump) {
-        return baseMapper.selectLaoczPumpList(laoczPump);
+    public List<LaoczPumpVo> selectLaoczPumpList(LaoczPump laoczPump) {
+        List<LaoczPumpVo> laoczPumps = baseMapper.selectLaoczPumpList(laoczPump);
+        return laoczPumps;
+    }
+
+    @Override
+    public LaoczPumpVo getPumpDetail(Long pumpId) {
+        List<LaoczPumpVo> laoczPumpVos = baseMapper.selectPumpDetails(pumpId);
+        LaoczPumpVo laoczPumpVo = new LaoczPumpVo();
+        BeanUtil.copyProperties(laoczPumpVos.get(0),laoczPumpVo);
+
+
+        return laoczPumpVo;
     }
 
 }
