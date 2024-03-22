@@ -8,16 +8,20 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 当前酒液
+ * 看板数据
  *
  * @author Yiyang.Hu
  * @version 1.0
- * @date 2024-03-19 4:34 PM
+ * @date 2024-03-22 2:12 PM
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CurrentWineIndustryVO {
+public class BoardDataVO {
+    /**
+     * 陶坛管理编号
+     */
+    private String potteryAltarNumber;
     /**
      * 酒品名称
      */
@@ -29,11 +33,11 @@ public class CurrentWineIndustryVO {
     /**
      * 该批次在此陶坛中的实际酒重量
      */
-    private Long actualWeight;
+    private Double actualWeight;
     /**
      * 存储时长
      */
-    private String StorageDuration;
+    private Long retentionDays;
     /**
      * 酒类等级——酒品字典维护
      */
@@ -63,9 +67,4 @@ public class CurrentWineIndustryVO {
      * 酒精度数
      */
     private String liquorContent;
-    /**
-     * 入酒时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date storingTime;
 }

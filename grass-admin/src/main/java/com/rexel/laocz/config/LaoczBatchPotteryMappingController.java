@@ -2,6 +2,7 @@ package com.rexel.laocz.config;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.rexel.common.core.controller.BaseController;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
@@ -71,4 +72,17 @@ public class LaoczBatchPotteryMappingController extends BaseController {
         List<LaoczBatchPotteryMappingVO> laoczWineHistories = laoczBatchPotteryMappingService.selectTableDataInfoReportActualList(fireZoneId, liquorBatchId, areaId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchPotteryMappingVO.class), "酒液存储报表");
     }
+
+    /**
+     * 看板场区概览
+     *
+     * @param areaId     场区编号
+     * @param fireZoneId 防火区编号
+     * @return
+     */
+    @GetMapping("/getBoardData")
+    private AjaxResult getBoardData(Long areaId, Long fireZoneId) {
+        return AjaxResult.success(laoczBatchPotteryMappingService.selectBoardData(areaId, fireZoneId));
+    }
+
 }

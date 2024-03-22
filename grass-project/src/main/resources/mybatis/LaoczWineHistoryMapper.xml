@@ -291,6 +291,62 @@
             </if>
         </where>
     </select>
+    <select id="selectLaoczWineHistoryLossList" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
+        select
+        lwh.win_his_id,
+        lwh.busy_id,
+        lwh.tenant_id,
+        lwh.work_order_id,
+        lwh.liquor_batch_id,
+        lwh.pottery_altar_id,
+        sdd.dict_label AS operation_type,
+        lwh.pottery_altar_apply_weight,
+        lwh.operating_weight,
+        lwh.remaining_weight,
+        lwh.loss_weight,
+        lwh.weighing_tank,
+        lwh.pump_id,
+        lwh.weighing_tank_weight,
+        lwh.operation_time,
+        lwh.sampling_purpose,
+        lwh.sampling_weight,
+        lwh.area_name,
+        lwh.area_id,
+        lwh.fire_zone_name,
+        lwh.fire_zone_id,
+        lwh.pottery_altar_number,
+        lwh.pottery_altar_qr_code_address,
+        lwh.pottery_altar_full_altar_weight,
+        lwh.liquor_name,
+        lwh.liquor_level,
+        lwh.liquor_round,
+        lwh.liquor_flavor_name,
+        lwh.liquor_source,
+        lwh.liquor_year,
+        lwh.liquor_brewing_time,
+        lwh.liquor_content,
+        lwh.create_by,
+        lwh.create_time,
+        lwh.update_by,
+        lwh.update_time,
+        lwh.remark
+        from laocz_wine_history lwh
+        LEFT JOIN sys_dict_data sdd ON lwh.operation_type = sdd.dict_value AND sdd.dict_type = 'operation_type'
+        <where>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="areaId != null and areaId != ''">
+                and lwh.area_id = #{areaId}
+            </if>
+            <if test="fireZoneId != null and fireZoneId != ''">
+                and lwh.fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="potteryAltarId != null and potteryAltarId != ''">
+                and lwh.pottery_altar_id = #{potteryAltarId}
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczWineHistory" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="winHisId">

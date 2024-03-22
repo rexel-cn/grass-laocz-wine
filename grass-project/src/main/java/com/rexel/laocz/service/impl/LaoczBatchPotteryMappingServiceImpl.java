@@ -9,6 +9,7 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.vo.BoardDataVO;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
 import com.rexel.laocz.mapper.LaoczBatchPotteryMappingMapper;
@@ -96,6 +97,18 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
             log.error("查询失败", e);
             throw new ServiceException("查询失败");
         }
+    }
+
+    /**
+     * 看板场区概览
+     *
+     * @param areaId     场区编号
+     * @param fireZoneId 防火区编号
+     * @return
+     */
+    @Override
+    public List<BoardDataVO> selectBoardData(Long areaId, Long fireZoneId) {
+        return baseMapper.selectBoardData(areaId, fireZoneId);
     }
 
     /**

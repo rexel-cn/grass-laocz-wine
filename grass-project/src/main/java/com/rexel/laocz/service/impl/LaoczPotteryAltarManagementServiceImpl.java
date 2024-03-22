@@ -97,7 +97,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             return Optional.ofNullable(currentWineIndustryVO).orElseGet(CurrentWineIndustryVO::new);
         }
         String date = DateUtils.getTime();
-        Date storageDuration = currentWineIndustryVO.getLiquorBrewingTime();
+        Date storageDuration = currentWineIndustryVO.getStoringTime();
         Date date1 = formatter.parse(date);
         String datePoor = DateUtils.getDatePoor(date1, storageDuration);
         currentWineIndustryVO.setStorageDuration(datePoor);

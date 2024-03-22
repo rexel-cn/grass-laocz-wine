@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
 import com.rexel.common.core.domain.SysHeaderMetadata;
@@ -9,15 +10,18 @@ import com.rexel.common.core.service.ISysHeaderMetadataService;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
+import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
+import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 酒历史Service业务层处理
@@ -29,6 +33,8 @@ import java.util.List;
 public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMapper, LaoczWineHistory> implements ILaoczWineHistoryService {
     @Autowired
     private ISysHeaderMetadataService headerMetadataService;
+    @Autowired
+    private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
 
 
     /**
@@ -139,16 +145,148 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     }
 
     /**
+     * 批次亏损查询一
+     *
+     * @param liquorBatchId 批次ID
+     * @return
+     */
+    @Override
+    public TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId) {
+        List<LaoczWineHistoryVO> laoczWineHistoryListVO;
+        try {
+            Double totalApplications;
+            Double inventoryQuantity;
+            Double totalLiquorOutput;
+            Double totalSampling;
+            Double totalLoss;
+            List<LaoczWineHistoryVO> laoczWineHistoryList = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+            try {
+                PageUtils.startPage();
+                laoczWineHistoryListVO = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+            } finally {
+                PageUtils.clearPage();
+            }
+            if (CollectionUtil.isEmpty(laoczWineHistoryList)) {
+                TableDataInfoDataReportLossVO tableDataInfoDataReportLossVO = new TableDataInfoDataReportLossVO();
+                return Optional.ofNullable(tableDataInfoDataReportLossVO).orElseGet(TableDataInfoDataReportLossVO::new);
+            }
+            //申请总重量
+            totalApplications = laoczWineHistoryList.stream()
+                    .filter(history -> history.getPotteryAltarApplyWeight() != null)
+                    .mapToDouble(LaoczWineHistoryVO::getPotteryAltarApplyWeight)
+                    .sum();
+            LaoczBatchPotteryMapping laoczBatchPotteryMapping = new LaoczBatchPotteryMapping();
+            laoczBatchPotteryMapping.setLiquorBatchId(liquorBatchId);
+            //实际陶坛状态
+            List<LaoczBatchPotteryMapping> laoczBatchPotteryMappings = iLaoczBatchPotteryMappingService.selectLaoczBatchPotteryMappingList(laoczBatchPotteryMapping);
+            //库存总量
+            inventoryQuantity = laoczBatchPotteryMappings.stream()
+                    .filter(batchPottery -> batchPottery.getActualWeight() != null)
+                    .mapToDouble(LaoczBatchPotteryMapping::getActualWeight)
+                    .sum();
+            //出酒总量
+            totalLiquorOutput = laoczWineHistoryList.stream()
+                    .filter(history -> history.getOperationType().equals("出酒"))
+                    .filter(history -> history.getOperatingWeight() != null)
+                    .mapToDouble(LaoczWineHistoryVO::getOperatingWeight)
+                    .sum();
+            //取样总量
+            totalSampling = laoczWineHistoryList.stream()
+                    .filter(history -> history.getOperationType().equals("取样"))
+                    .filter(history -> history.getSamplingWeight() != null)
+                    .mapToDouble(LaoczWineHistoryVO::getSamplingWeight)
+                    .sum();
+            //亏损总量
+            totalLoss = laoczWineHistoryList.stream()
+                    .filter(history -> history.getLossWeight() != null)
+                    .mapToDouble(LaoczWineHistoryVO::getLossWeight)
+                    .sum();
+            return getDataTableLoss(totalApplications, inventoryQuantity, totalLiquorOutput, totalSampling, totalLoss, laoczWineHistoryListVO, "lossStatement");
+        } catch (Exception e) {
+            log.error("查询失败", e);
+            throw new ServiceException("查询失败");
+        }
+    }
+
+    /**
+     * 批次亏损查询二
+     *
+     * @param potteryAltarId 陶坛编号
+     * @param fireZoneId     防火区编号
+     * @param areaId         区域编号
+     * @return
+     */
+    @Override
+    public List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarId, Long fireZoneId, Long areaId) {
+        return baseMapper.selectLaoczWineHistoryLossList(null, potteryAltarId, fireZoneId, areaId);
+    }
+
+    /**
+     * 批次报表导出
+     *
+     * @param liquorBatchId 批次ID
+     * @return
+     */
+    @Override
+    public List<LaoczWineHistoryVO> batchLossReportExport(String liquorBatchId) {
+        return baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+    }
+
+
+    /**
      * 响应请求分页数据
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private TableDataInfoDataReportVO getDataTable(long totalOperand, long entryOperation, long distillingOperation, long invertedJarOperation, long samplingOperation, List<?> list, String headerName) {
+    private TableDataInfoDataReportVO getDataTable(long totalOperand,
+                                                   long entryOperation,
+                                                   long distillingOperation,
+                                                   long invertedJarOperation,
+                                                   long samplingOperation,
+                                                   List<?> list,
+                                                   String headerName) {
         TableDataInfoDataReportVO rspData = new TableDataInfoDataReportVO();
         rspData.setTotalOperand(totalOperand);
         rspData.setEntryOperation(entryOperation);
         rspData.setDistillingOperation(distillingOperation);
         rspData.setInvertedJarOperation(invertedJarOperation);
         rspData.setSamplingOperation(samplingOperation);
+        rspData.setCode(org.springframework.http.HttpStatus.OK.value());
+        rspData.setMsg(org.springframework.http.HttpStatus.OK.getReasonPhrase());
+        //列表信息组装
+
+        PageInfo<?> pageInfo = new PageInfo<>(list == null ? new ArrayList<>() : list);
+        //表头信息
+        if (StringUtils.isNotBlank(headerName)) {
+            SysHeaderMetadata headerMetadataPo = new SysHeaderMetadata();
+            headerMetadataPo.setHeaderName(headerName);
+            headerMetadataPo.setIsDelete(0L);
+            List<PageHeader> pageHeaders = headerMetadataService.selectSysHeaderMetadataList(headerMetadataPo);
+            if (null != pageHeaders) {
+                rspData.setTableColumnList(pageHeaders);
+            }
+        }
+        rspData.setTotal(pageInfo.getTotal());
+        rspData.setRows(list == null ? new ArrayList<>() : list);
+        return rspData;
+    }
+
+    /**
+     * 亏损请求分页数据
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private TableDataInfoDataReportLossVO getDataTableLoss(Double totalApplications,
+                                                           Double inventoryQuantity,
+                                                           Double totalLiquorOutput,
+                                                           Double totalSampling,
+                                                           Double totalLoss,
+                                                           List<?> list,
+                                                           String headerName) {
+        TableDataInfoDataReportLossVO rspData = new TableDataInfoDataReportLossVO();
+        rspData.setTotalApplications(totalApplications);
+        rspData.setInventoryQuantity(inventoryQuantity);
+        rspData.setTotalLiquorOutput(totalLiquorOutput);
+        rspData.setTotalLoss(totalLoss);
+        rspData.setTotalSampling(totalSampling);
         rspData.setCode(org.springframework.http.HttpStatus.OK.value());
         rspData.setMsg(org.springframework.http.HttpStatus.OK.getReasonPhrase());
         //列表信息组装

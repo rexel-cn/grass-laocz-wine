@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryInfoVO;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
+import com.rexel.laocz.domain.vo.TableDataInfoDataReportLossVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportVO;
 
 import java.util.List;
@@ -46,7 +47,12 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @param areaId         场区ID
      * @return
      */
-    TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId);
+    TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId,
+                                                  String fromTime,
+                                                  String endTime,
+                                                  String liquorBatchId,
+                                                  Long fireZoneId,
+                                                  Long areaId);
 
     /**
      * 数据报表-淘坛操作记录查询2
@@ -76,4 +82,28 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @return
      */
     LaoczWineHistoryInfoVO selectLaoczWineHistoryInfo(Long winHisId);
+
+    /**
+     * 批次亏损查询一
+     *
+     * @param liquorBatchId 批次ID
+     * @return
+     */
+    TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId);
+
+    /**
+     * 批次亏损查询二
+     * @param potteryAltarId 陶坛编号
+     * @param fireZoneId 防火区编号
+     * @param areaId 区域编号
+     * @return
+     */
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarId, Long fireZoneId, Long areaId);
+
+    /**
+     * 批次报表导出
+     * @param liquorBatchId 批次ID
+     * @return
+     */
+    List<LaoczWineHistoryVO> batchLossReportExport(String liquorBatchId);
 }

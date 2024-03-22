@@ -34,6 +34,7 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
     int batchLaoczWineHistory(List<LaoczWineHistory> laoczWineHistoryList);
 
     Long saveHistory(Long wineDetailsId);
+
     /**
      * 查询历史信息
      *
@@ -43,7 +44,7 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param operationType  操作类型
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime")String fromTime, @Param("endTime")String endTime, @Param("operationType")String operationType);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("operationType") String operationType);
 
     /**
      * 数据报表-淘坛操作记录
@@ -54,12 +55,23 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param liquorBatchId  批次ID
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement (@Param("potteryAltarId") Long potteryAltarId,
-                                                              @Param("fromTime")String fromTime,
-                                                              @Param("endTime")String endTime,
-                                                              @Param("liquorBatchId")String liquorBatchId,
-                                                              @Param("fireZoneId") Long fireZoneId,
-                                                              @Param("areaId") Long areaId);
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(@Param("potteryAltarId") Long potteryAltarId,
+                                                             @Param("fromTime") String fromTime,
+                                                             @Param("endTime") String endTime,
+                                                             @Param("liquorBatchId") String liquorBatchId,
+                                                             @Param("fireZoneId") Long fireZoneId,
+                                                             @Param("areaId") Long areaId);
 
     PotteryAltarInfomationDInfoVO selectPotteryAltarFullAltarWeight(Long winHisId);
+
+    /**
+     * 查询酒历史列表
+     *
+     * @param liquorBatchId 批次ID
+     * @return 酒历史集合
+     */
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryLossList(@Param("liquorBatchId") String liquorBatchId,
+                                                            @Param("potteryAltarId") Long potteryAltarId,
+                                                            @Param("fireZoneId") Long fireZoneId,
+                                                            @Param("areaId") Long areaId);
 }

@@ -39,6 +39,7 @@
         llm.liquor_name,
         lbpm.liquor_batch_id,
         lbpm.actual_weight,
+        lbpm.storing_time,
         lbpm.storing_time as StorageDuration,
         llm.liquor_level,
         llm.liquor_round,

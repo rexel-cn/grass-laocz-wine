@@ -76,25 +76,25 @@ public class LaoczWineHistory extends BaseEntity {
      */
     @Excel(name = "申请重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long potteryAltarApplyWeight;
+    private Double potteryAltarApplyWeight;
     /**
      * 操作重量
      */
     @Excel(name = "操作重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long operatingWeight;
+    private Double operatingWeight;
     /**
      * 剩余重量
      */
     @Excel(name = "剩余重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long remainingWeight;
+    private Double remainingWeight;
     /**
      * 亏损重量
      */
     @Excel(name = "亏损重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long lossWeight;
+    private Double lossWeight;
     /**
      * 称重罐ID
      */
@@ -112,7 +112,7 @@ public class LaoczWineHistory extends BaseEntity {
      */
     @Excel(name = "称重罐重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long weighingTankWeight;
+    private Double weighingTankWeight;
     /**
      * 业务时间（出酒、入酒、取样时间）
      */
@@ -129,7 +129,7 @@ public class LaoczWineHistory extends BaseEntity {
      */
     @Excel(name = "取样重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long samplingWeight;
+    private Double samplingWeight;
     /**
      * 场区信息ID
      */
@@ -171,7 +171,7 @@ public class LaoczWineHistory extends BaseEntity {
      */
     @Excel(name = "满坛重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long potteryAltarFullAltarWeight;
+    private Double potteryAltarFullAltarWeight;
     /**
      * 酒品名称
      */
