@@ -193,6 +193,7 @@
         lwh.pottery_altar_id,
         sdd.dict_label AS operation_type,
         lwh.pottery_altar_apply_weight,
+        lwh.operating_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
         lwh.weighing_tank,
@@ -252,6 +253,7 @@
                 and fire_zone_id = #{fireZoneId}
             </if>
         </where>
+        order by operation_time desc
     </select>
     <select id="selectPotteryAltarFullAltarWeight"
             resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">

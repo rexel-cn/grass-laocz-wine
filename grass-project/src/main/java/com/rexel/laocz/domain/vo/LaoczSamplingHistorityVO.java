@@ -1,5 +1,6 @@
 package com.rexel.laocz.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rexel.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,10 +61,12 @@ public class LaoczSamplingHistorityVO extends BaseEntity {
     /**
      * 取样时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date samplingDate;
     /**
      * 取样文件上传时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date samplingFileDate;
     /**
      * 取样文件上传地址

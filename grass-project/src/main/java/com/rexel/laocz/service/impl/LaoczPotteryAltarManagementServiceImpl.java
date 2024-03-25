@@ -94,7 +94,18 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         CurrentWineIndustryVO currentWineIndustryVO = baseMapper.setCurrentWineIndustry(potteryAltarId);
         if (ObjectUtil.isEmpty(currentWineIndustryVO)) {
-            return Optional.ofNullable(currentWineIndustryVO).orElseGet(CurrentWineIndustryVO::new);
+            CurrentWineIndustryVO currentWineIndustryVO1 = new CurrentWineIndustryVO();
+            currentWineIndustryVO1.setLiquorName("--");
+            currentWineIndustryVO1.setLiquorBatchId("--");
+            currentWineIndustryVO1.setActualWeight(0l);
+            currentWineIndustryVO1.setStorageDuration("--");
+            currentWineIndustryVO1.setLiquorLevel("--");
+            currentWineIndustryVO1.setLiquorRound("--");
+            currentWineIndustryVO1.setLiquorFlavorName("--");
+            currentWineIndustryVO1.setLiquorSource("--");
+            currentWineIndustryVO1.setLiquorYear("--");
+            currentWineIndustryVO1.setLiquorContent("--");
+            return currentWineIndustryVO1;
         }
         String date = DateUtils.getTime();
         Date storageDuration = currentWineIndustryVO.getStoringTime();

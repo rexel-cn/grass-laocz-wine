@@ -115,10 +115,10 @@
         lm.liquor_brewing_time AS liquorBrewingTime,
         lm.liquor_content AS liquorContent
         FROM
-        laocz_batch_pottery_mapping bpm
+        laocz_pottery_altar_management pam
+        LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id
         LEFT JOIN laocz_liquor_batch lb ON bpm.liquor_batch_id = lb.liquor_batch_id
         LEFT JOIN laocz_liquor_management lm ON lb.liquor_management_id = lm.liquor_management_id
-        LEFT JOIN laocz_pottery_altar_management pam ON bpm.pottery_altar_id = pam.pottery_altar_id
         LEFT JOIN laocz_fire_zone_info fzi ON pam.fire_zone_id = fzi.fire_zone_id
         LEFT JOIN laocz_area_info ai ON fzi.area_id = ai.area_id
         <where>
