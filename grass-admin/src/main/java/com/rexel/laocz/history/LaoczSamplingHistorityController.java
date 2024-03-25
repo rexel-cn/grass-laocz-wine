@@ -35,4 +35,26 @@ public class LaoczSamplingHistorityController extends BaseController {
         startPage();
         return getDataTable(laoczSamplingHistorityService.selectLaoczSamplingHist(potteryAltarId, fromTime, endTime, liquorBatchId), "SamplingHistory");
     }
+
+    /**
+     * 取样管理
+     *
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param areaId             场区编号
+     * @param fireZoneId         防火区编号
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorBatchId      酒品批次
+     * @return
+     */
+    @GetMapping("/samplingList")
+    public TableDataInfo getSamplingListTableData(String fromTime,
+                                                  String endTime,
+                                                  Long areaId,
+                                                  Long fireZoneId,
+                                                  String potteryAltarNumber,
+                                                  String liquorBatchId) {
+        startPage();
+        return getDataTable(laoczSamplingHistorityService.selectLaoczSamplingList(fromTime, endTime, areaId, fireZoneId, potteryAltarNumber, liquorBatchId), "SamplingHistory");
+    }
 }

@@ -187,8 +187,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
             //出酒总量
             totalLiquorOutput = laoczWineHistoryList.stream()
                     .filter(history -> history.getOperationType().equals("出酒"))
-                    .filter(history -> history.getOperatingWeight() != null)
-                    .mapToDouble(LaoczWineHistoryVO::getOperatingWeight)
+                    .filter(history -> history.getWeighingTankWeight() != null)
+                    .mapToDouble(LaoczWineHistoryVO::getWeighingTankWeight)
                     .sum();
             //取样总量
             totalSampling = laoczWineHistoryList.stream()

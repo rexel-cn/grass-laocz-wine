@@ -78,12 +78,6 @@ public class LaoczWineHistory extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double potteryAltarApplyWeight;
     /**
-     * 操作重量
-     */
-    @Excel(name = "操作重量")
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Double operatingWeight;
-    /**
      * 剩余重量
      */
     @Excel(name = "剩余重量")

@@ -3,6 +3,7 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
+import com.rexel.laocz.domain.vo.LaoczSamplingVO;
 
 import java.util.List;
 
@@ -35,4 +36,23 @@ public interface ILaoczSamplingHistorityService extends IService<LaoczSamplingHi
      * @return
      */
     List<LaoczSamplingHistorityVO> selectLaoczSamplingHist(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId);
+
+    /**
+     * 取样管理
+     *
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param areaId             场区编号
+     * @param fireZoneId         防火区编号
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorBatchId      酒品批次
+     * @return
+     */
+    List<LaoczSamplingVO> selectLaoczSamplingList(String fromTime,
+                                                  String endTime,
+                                                  Long areaId,
+                                                  Long fireZoneId,
+                                                  String potteryAltarNumber,
+                                                  String liquorBatchId);
+
 }

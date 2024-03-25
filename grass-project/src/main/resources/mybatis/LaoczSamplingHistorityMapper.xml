@@ -114,6 +114,52 @@
             </if>
         </where>
     </select>
+    <select id="selectLaoczSamplingList" resultType="com.rexel.laocz.domain.vo.LaoczSamplingVO">
+        SELECT
+        lsh.sampling_histority_id,
+        lsh.work_order_id,
+        lsh.tenant_id,
+        lsh.liquor_batch_id,
+        llm.liquor_name,
+        lsh.pottery_altar_id,
+        lsh.sampling_purpose,
+        lsh.sampling_weight,
+        lsh.sampling_date,
+        lsh.sampling_file_date,
+        lsh.sampling_file,
+        lai.area_name,
+        lfzi.fire_zone_name,
+        lsh.pottery_altar_number,
+        lsh.create_by,
+        lsh.create_time,
+        lsh.update_by,
+        lsh.update_time,
+        lsh.remark
+        FROM
+        laocz_sampling_histority lsh
+        LEFT JOIN laocz_liquor_batch llb ON llb.liquor_batch_id = lsh.liquor_batch_id
+        LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
+        LEFT JOIN laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lsh.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id
+        LEFT JOIN laocz_area_info lai ON lai.area_id = lfzi.area_id
+        <where>
+            <if test="potteryAltarNumber != null and potteryAltarNumber != ''">
+                and lpam.pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
+            </if>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and lsh.sampling_date between #{fromTime} and #{endTime}
+            </if>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and lsh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="areaId != null and areaId != ''">
+                and lai.area_id = #{areaId}
+            </if>
+            <if test="fireZoneId != null and fireZoneId != ''">
+                and lfzi.fire_zone_id = #{fireZoneId}
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczSamplingHistority" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="samplingHistorityId">

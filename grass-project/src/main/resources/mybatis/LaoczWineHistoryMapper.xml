@@ -13,7 +13,6 @@
         <result property="potteryAltarId" column="pottery_altar_id"/>
         <result property="operationType" column="operation_type"/>
         <result property="potteryAltarApplyWeight" column="pottery_altar_apply_weight"/>
-        <result property="operatingWeight" column="operating_weight"/>
         <result property="remainingWeight" column="remaining_weight"/>
         <result property="lossWeight" column="loss_weight"/>
         <result property="weighingTank" column="weighing_tank"/>
@@ -53,7 +52,6 @@
                pottery_altar_id,
                operation_type,
                pottery_altar_apply_weight,
-               operating_weight,
                remaining_weight,
                loss_weight,
                weighing_tank,
@@ -108,9 +106,6 @@
             </if>
             <if test="potteryAltarApplyWeight != null ">
                 and pottery_altar_apply_weight = #{potteryAltarApplyWeight}
-            </if>
-            <if test="operatingWeight != null ">
-                and operating_weight = #{operatingWeight}
             </if>
             <if test="remainingWeight != null ">
                 and remaining_weight = #{remainingWeight}
@@ -193,7 +188,6 @@
         lwh.pottery_altar_id,
         sdd.dict_label AS operation_type,
         lwh.pottery_altar_apply_weight,
-        lwh.operating_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
         lwh.weighing_tank,
@@ -303,7 +297,6 @@
         lwh.pottery_altar_id,
         sdd.dict_label AS operation_type,
         lwh.pottery_altar_apply_weight,
-        lwh.operating_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
         lwh.weighing_tank,
@@ -354,7 +347,7 @@
             useGeneratedKeys="true" keyProperty="winHisId">
         insert into laocz_wine_history
         ( win_his_id , busy_id , tenant_id , work_order_id , liquor_batch_id , pottery_altar_id , operation_type ,
-        pottery_altar_apply_weight ,operating_weight, remaining_weight , loss_weight , weighing_tank , pump_id ,
+        pottery_altar_apply_weight , remaining_weight , loss_weight , weighing_tank , pump_id ,
         weighing_tank_weight ,
         operation_time , sampling_purpose , sampling_weight ,area_id, area_name ,fire_zone_id, fire_zone_name ,
         pottery_altar_number ,
@@ -363,7 +356,7 @@
         create_time , update_by , update_time , remark) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.winHisId}, #{item.busyId}, #{item.tenantId}, #{item.workOrderId}, #{item.liquorBatchId},
-            #{item.potteryAltarId}, #{item.operationType}, #{item.potteryAltarApplyWeight},#{item.operatingWeight},
+            #{item.potteryAltarId}, #{item.operationType}, #{item.potteryAltarApplyWeight},
             #{item.remainingWeight},
             #{item.lossWeight}, #{item.weighingTank}, #{item.pumpId}, #{item.weighingTankWeight}, #{item.operationTime},
             #{item.samplingPurpose}, #{item.samplingWeight},#{item.areaId}, #{item.areaName},#{item.fireZoneId},

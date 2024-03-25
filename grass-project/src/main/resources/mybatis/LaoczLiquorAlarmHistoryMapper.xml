@@ -128,7 +128,7 @@
         LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
         <where>
             <if test="liquorRuleId != null and liquorRuleId != ''">
-                and llah.liquor_rule_id = like concat('%', #{liquorRuleId}, '%')
+                and llah.liquor_rule_id like concat('%', #{liquorRuleId}, '%')
             </if>
             <if test="liquorRuleName != null and liquorRuleName != ''">
                 and llah.liquor_rule_name like concat('%', #{liquorRuleName}, '%')

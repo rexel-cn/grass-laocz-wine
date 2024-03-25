@@ -3,6 +3,7 @@ package com.rexel.laocz.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
+import com.rexel.laocz.domain.vo.LaoczSamplingVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -49,4 +50,22 @@ public interface LaoczSamplingHistorityMapper extends BaseMapper<LaoczSamplingHi
                                                            @Param("fromTime") String fromTime,
                                                            @Param("endTime") String endTime,
                                                            @Param("liquorBatchId") String liquorBatchId);
+
+    /**
+     * 取样管理
+     *
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param areaId             场区编号
+     * @param fireZoneId         防火区编号
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorBatchId      酒品批次
+     * @return
+     */
+    List<LaoczSamplingVO> selectLaoczSamplingList(@Param("fromTime") String fromTime,
+                                                  @Param("endTime") String endTime,
+                                                  @Param("areaId") Long areaId,
+                                                  @Param("fireZoneId") Long fireZoneId,
+                                                  @Param("potteryAltarNumber") String potteryAltarNumber,
+                                                  @Param("liquorBatchId") String liquorBatchId);
 }
