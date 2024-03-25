@@ -36,4 +36,19 @@ public class LaoczLiquorAlarmHistoryController extends BaseController {
         startPage();
         return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorRuleId, liquorRuleName), "alarmRecord");
     }
+
+    /**
+     * 报警查询
+     *
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorRuleId   批次ID
+     * @param liquorRuleName 规则名称
+     * @return
+     */
+    @GetMapping("/alarmHistoryList")
+    public TableDataInfo getAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
+        startPage();
+        return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistoryList(fromTime, endTime, liquorRuleId, liquorRuleName), "alarmHistoryList");
+    }
 }

@@ -2,6 +2,7 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczLiquorAlarmHistory;
+import com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -42,4 +43,15 @@ public interface LaoczLiquorAlarmHistoryMapper extends BaseMapper<LaoczLiquorAla
      * @return
      */
     List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorRuleId") Long liquorRuleId, @Param("liquorRuleName") String liquorRuleName);
+
+    /**
+     * 报警查询
+     *
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorRuleId   批次ID
+     * @param liquorRuleName 规则名称
+     * @return
+     */
+    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryVOList(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorRuleId") Long liquorRuleId, @Param("liquorRuleName") String liquorRuleName);
 }

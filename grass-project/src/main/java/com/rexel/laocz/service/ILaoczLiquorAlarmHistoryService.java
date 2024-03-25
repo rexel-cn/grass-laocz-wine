@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorAlarmHistory;
+import com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO;
 
 import java.util.List;
 
@@ -32,4 +33,15 @@ public interface ILaoczLiquorAlarmHistoryService extends IService<LaoczLiquorAla
      * @return
      */
     List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName);
+
+    /**
+     * 报警查询
+     *
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorRuleId   批次ID
+     * @param liquorRuleName 规则名称
+     * @return
+     */
+    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName);
 }

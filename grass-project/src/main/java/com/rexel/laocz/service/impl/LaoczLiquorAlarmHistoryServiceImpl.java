@@ -1,7 +1,9 @@
 package com.rexel.laocz.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczLiquorAlarmHistory;
+import com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO;
 import com.rexel.laocz.mapper.LaoczLiquorAlarmHistoryMapper;
 import com.rexel.laocz.service.ILaoczLiquorAlarmHistoryService;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,25 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
     @Override
     public List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
         return baseMapper.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorRuleId, liquorRuleName);
+    }
+
+    /**
+     * 报警查询
+     *
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param liquorRuleId   批次ID
+     * @param liquorRuleName 规则名称
+     * @return
+     */
+    @Override
+    public List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
+        try {
+            return baseMapper.selectLaoczLiquorAlarmHistoryVOList(fromTime, endTime, liquorRuleId, liquorRuleName);
+        } catch (Exception e) {
+            log.error("查询失败", e);
+            throw new ServiceException("查询失败");
+        }
     }
 
 }
