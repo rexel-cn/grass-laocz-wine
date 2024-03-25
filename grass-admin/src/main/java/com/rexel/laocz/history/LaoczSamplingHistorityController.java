@@ -1,10 +1,12 @@
 package com.rexel.laocz.history;
 
 import com.rexel.common.core.controller.BaseController;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +58,17 @@ public class LaoczSamplingHistorityController extends BaseController {
                                                   String liquorBatchId) {
         startPage();
         return getDataTable(laoczSamplingHistorityService.selectLaoczSamplingList(fromTime, endTime, areaId, fireZoneId, potteryAltarNumber, liquorBatchId), "SamplingHistory");
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param samplingHistorityId 取样历史数据
+     * @param url                 链接
+     * @return
+     */
+    @PutMapping("/uploadFiles")
+    public AjaxResult uploadFile(Long samplingHistorityId, String url) {
+        return AjaxResult.success(laoczSamplingHistorityService.updateLaoczSampling(samplingHistorityId, url));
     }
 }

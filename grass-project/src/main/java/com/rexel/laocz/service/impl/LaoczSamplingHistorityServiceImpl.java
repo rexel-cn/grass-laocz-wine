@@ -7,6 +7,7 @@ import com.rexel.laocz.domain.vo.LaoczSamplingVO;
 import com.rexel.laocz.mapper.LaoczSamplingHistorityMapper;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,4 +67,18 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 上传文件
+     *
+     * @param samplingHistorityId 取样历史数据
+     * @param url                 链接
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateLaoczSampling(Long samplingHistorityId, String url) {
+        LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
+        laoczSamplingHistority.setSamplingFile(url);
+        return this.lambdaUpdate().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).update(laoczSamplingHistority);
+    }
 }

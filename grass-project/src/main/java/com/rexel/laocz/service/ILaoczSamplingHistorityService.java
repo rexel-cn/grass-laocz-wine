@@ -55,4 +55,14 @@ public interface ILaoczSamplingHistorityService extends IService<LaoczSamplingHi
                                                   String potteryAltarNumber,
                                                   String liquorBatchId);
 
+    /**
+     * 上传文件
+     *
+     * @param samplingHistorityId 取样历史数据
+     * @param url                 链接
+     * @return
+     */
+    Boolean updateLaoczSampling(Long samplingHistorityId, String url);
+
+
 }
