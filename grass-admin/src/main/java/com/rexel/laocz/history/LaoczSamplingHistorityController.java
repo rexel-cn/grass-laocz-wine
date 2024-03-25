@@ -71,4 +71,12 @@ public class LaoczSamplingHistorityController extends BaseController {
     public AjaxResult uploadFile(Long samplingHistorityId, String url) {
         return AjaxResult.success(laoczSamplingHistorityService.updateLaoczSampling(samplingHistorityId, url));
     }
+
+    /**
+     *
+     */
+    @GetMapping("/getLaoczSamplingHistoryInfo")
+    public AjaxResult getLaoczSamplingHistoryInfo(Long samplingHistorityId) {
+        return AjaxResult.success(laoczSamplingHistorityService.getLaoczSamplingHistoryInfo(samplingHistorityId));
+    }
 }

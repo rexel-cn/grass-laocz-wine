@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.LaoczSamplingVO;
+import com.rexel.laocz.domain.vo.LaoczWineHistoryInfoVO;
 
 import java.util.List;
 
@@ -58,11 +59,17 @@ public interface ILaoczSamplingHistorityService extends IService<LaoczSamplingHi
     /**
      * 上传文件
      *
-     * @param samplingHistorityId 取样历史数据
+     * @param samplingHistorityId 取样历史数据主键
      * @param url                 链接
      * @return
      */
     Boolean updateLaoczSampling(Long samplingHistorityId, String url);
 
-
+    /**
+     * 取样管理详情
+     *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
+     */
+    LaoczWineHistoryInfoVO getLaoczSamplingHistoryInfo(Long samplingHistorityId);
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.LaoczSamplingVO;
+import com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -68,4 +69,12 @@ public interface LaoczSamplingHistorityMapper extends BaseMapper<LaoczSamplingHi
                                                   @Param("fireZoneId") Long fireZoneId,
                                                   @Param("potteryAltarNumber") String potteryAltarNumber,
                                                   @Param("liquorBatchId") String liquorBatchId);
+
+    /**
+     * 取样管理详情
+     *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
+     */
+    PotteryAltarInfomationDInfoVO getLaoczSamplingHistoryInfo(Long samplingHistorityId);
 }

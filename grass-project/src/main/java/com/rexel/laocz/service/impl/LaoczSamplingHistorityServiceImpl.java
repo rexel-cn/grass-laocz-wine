@@ -1,9 +1,10 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
-import com.rexel.laocz.domain.vo.LaoczSamplingVO;
+import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczSamplingHistorityMapper;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
 import org.springframework.stereotype.Service;
@@ -80,5 +81,26 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
         LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
         laoczSamplingHistority.setSamplingFile(url);
         return this.lambdaUpdate().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).update(laoczSamplingHistority);
+    }
+
+    /**
+     * 取样管理详情
+     *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
+     */
+    @Override
+    public LaoczWineHistoryInfoVO getLaoczSamplingHistoryInfo(Long samplingHistorityId) {
+        try {
+            PotteryAltarInfomationDInfoVO potteryAltarInfomationDInfoVO = baseMapper.getLaoczSamplingHistoryInfo(samplingHistorityId);
+            LaoczWineHistoryInfoVO laoczWineHistoryInfoVO = new LaoczWineHistoryInfoVO();
+            laoczWineHistoryInfoVO.setWorkOrderId(potteryAltarInfomationDInfoVO.getWorkOrderId());
+            laoczWineHistoryInfoVO.setCurrentWineIndustryVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, CurrentWineIndustryInfoVO.class));
+            laoczWineHistoryInfoVO.setPotteryAltarInformationInfoVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, PotteryAltarInformationInfoVO.class));
+            return laoczWineHistoryInfoVO;
+        } catch (Exception e) {
+            log.error("查询失败", e);
+            throw new SecurityException("查询失败");
+        }
     }
 }
