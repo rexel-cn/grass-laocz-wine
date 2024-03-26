@@ -48,6 +48,46 @@
             </if>
         </where>
     </select>
+    <select id="getPointInfo" resultType="com.rexel.laocz.domain.vo.PointInfo">
+        SELECT
+        gpi.point_type,
+        gpi.point_id,
+        gpi.point_name
+        FROM
+        laocz_weighing_tank lwt
+        LEFT JOIN laocz_weighing_tank_point lwtp ON lwt.weighing_tank_id = lwtp.weighing_tank_id
+        LEFT JOIN grass_point_info gpi ON gpi.id = lwtp.point_primary_key
+        <where>
+            <if test="weighingTankId != null">
+                and weighing_tank_id = #{weighingTankId}
+            </if>
+        </where>
+    </select>
+    <select id="selectLaoczWeighingTankListDetail" resultType="com.rexel.laocz.domain.vo.WeighingTankVo">
+        select lwt.weighing_tank_id,
+        lwt.weighing_tank_number,
+        lai.area_name,
+        lfzi.fire_zone_name,
+        lwt.full_tank_upper_limit,
+        lai.area_id,
+        lfzi.fire_zone_id
+        FROM laocz_weighing_tank lwt
+        LEFT JOIN
+        laocz_fire_zone_info lfzi on lwt.fire_zone_id = lfzi.fire_zone_id
+        LEFT JOIN
+        laocz_area_info lai on lfzi.area_id = lai.area_id
+        <where>
+            <if test="areaId!=null and areaId!=''">
+                AND lfzi.area_id = #{areaId}
+            </if>
+            <if test="fireZoneId!=null and fireZoneId!=''">
+                AND lfzi.fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="weighingTankNumber!=null and weighingTankNumber!=''">
+                AND lwt.weighing_tank_number like concat('%', #{weighingTankNumber}, '%')
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczWeighingTank" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="weighingTankId">

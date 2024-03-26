@@ -11,6 +11,7 @@ import com.rexel.laocz.domain.LaoczWeighingTank;
 import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.LiquorVo;
+import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.service.ILaoczWeighingTankService;
@@ -37,23 +38,13 @@ public class LaoczWeighingTankController extends BaseController {
     private ILaoczWeighingTankService laoczWeighingTankService;
 
     /**
-     * 查询称重罐管理列表
-     */
-    @GetMapping("/list")
-    public TableDataInfo list(LaoczWeighingTank laoczWeighingTank) {
-        startPage();
-        List<LaoczWeighingTank> list = laoczWeighingTankService.selectLaoczWeighingTankList(laoczWeighingTank);
-        return getDataTable(list);
-    }
-
-    /**
      * 查询称重罐管理列表详细信息
      */
     @GetMapping("/listDetail")
     public TableDataInfo listDetail(LaoczWeighingTank laoczWeighingTank) {
         startPage();
         List<WeighingTankVo> list = laoczWeighingTankService.selectLaoczWeighingTankListDetail(laoczWeighingTank);
-        return getDataTable(list);
+        return getDataTable(list,"tank");
     }
 
     /**
@@ -86,9 +77,9 @@ public class LaoczWeighingTankController extends BaseController {
      * 删除称重罐管理
      */
     @Log(title = "称重罐管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{weighingTankIds}")
-    public AjaxResult remove(@PathVariable Long[] weighingTankIds) {
-        return toAjax(laoczWeighingTankService.removeByIds(Arrays.asList(weighingTankIds)));
+    @DeleteMapping("/{weighingTankId}")
+    public AjaxResult remove(@PathVariable Long weighingTankId) {
+        return toAjax(laoczWeighingTankService.removeByIdWithPoint(weighingTankId));
     }
 
     /**
@@ -114,8 +105,16 @@ public class LaoczWeighingTankController extends BaseController {
      * 返回前端动态列
      */
     @GetMapping("/getAddVo")
-    public AjaxResult getAddVo(){
-        List<WeighingTankAddVo> weighingTankAddVos = laoczWeighingTankService.getAddVo();
+    public AjaxResult getAddVo(String dictType){
+        List<WeighingTankAddVo> weighingTankAddVos = laoczWeighingTankService.getAddVo(dictType);
         return AjaxResult.success(weighingTankAddVos);
+    }
+    /**
+     * 获取绑定测点详情
+     */
+    @GetMapping("/getPointInfo")
+    public AjaxResult getPointInfo(Long weighingTankId){
+        List<PointInfo> pointInfos = laoczWeighingTankService.getPointInfo(weighingTankId);
+        return AjaxResult.success(pointInfos);
     }
 }

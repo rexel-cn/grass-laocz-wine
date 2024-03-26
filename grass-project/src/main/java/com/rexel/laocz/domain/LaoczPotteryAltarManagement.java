@@ -69,6 +69,12 @@ public class LaoczPotteryAltarManagement extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String potteryAltarQrCodeAddress;
 
+    /**
+     * 区域名称
+     */
+    @TableField(exist = false)
+    private String areaId;
+
 
     @Override
     public String toString() {

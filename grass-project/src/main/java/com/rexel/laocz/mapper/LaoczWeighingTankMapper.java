@@ -2,6 +2,8 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczWeighingTank;
+import com.rexel.laocz.domain.vo.PointInfo;
+import com.rexel.laocz.domain.vo.WeighingTankVo;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,4 +32,7 @@ public interface LaoczWeighingTankMapper extends BaseMapper<LaoczWeighingTank> {
      */
     int batchLaoczWeighingTank(List<LaoczWeighingTank> laoczWeighingTankList);
 
+    List<PointInfo> getPointInfo();
+
+    List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank);
 }

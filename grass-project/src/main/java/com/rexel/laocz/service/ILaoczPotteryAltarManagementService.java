@@ -85,5 +85,10 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      */
     List<PotteryAltarVo> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO);
 
-
+    /**
+     * 删除陶坛管理
+     * @param potteryAltarId 陶坛Id
+     * @return 返回标识
+     */
+    boolean removeWithReal(Long potteryAltarId);
 }

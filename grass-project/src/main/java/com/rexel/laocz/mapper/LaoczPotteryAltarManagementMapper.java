@@ -45,4 +45,6 @@ public interface LaoczPotteryAltarManagementMapper extends BaseMapper<LaoczPotte
     CurrentWineIndustryVO setCurrentWineIndustry(Long potteryAltarId);
 
     List<PotteryAltarVo> selectWineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO);
+
+    List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
 }
