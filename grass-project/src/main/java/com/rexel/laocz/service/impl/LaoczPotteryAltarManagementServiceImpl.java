@@ -97,7 +97,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             CurrentWineIndustryVO currentWineIndustryVO1 = new CurrentWineIndustryVO();
             currentWineIndustryVO1.setLiquorName("--");
             currentWineIndustryVO1.setLiquorBatchId("--");
-            currentWineIndustryVO1.setActualWeight(0l);
+            currentWineIndustryVO1.setActualWeight(0L);
             currentWineIndustryVO1.setStorageDuration("--");
             currentWineIndustryVO1.setLiquorLevel("--");
             currentWineIndustryVO1.setLiquorRound("--");
