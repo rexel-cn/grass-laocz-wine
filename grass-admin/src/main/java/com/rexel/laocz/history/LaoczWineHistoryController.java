@@ -50,7 +50,7 @@ public class LaoczWineHistoryController extends BaseController {
     /**
      * 数据报表-淘坛操作记录
      *
-     * @param potteryAltarId 陶坛ID
+     * @param potteryAltarNumber 陶坛编号
      * @param fromTime       开始时间
      * @param endTime        结束时间
      * @param liquorBatchId  批次ID
@@ -59,21 +59,21 @@ public class LaoczWineHistoryController extends BaseController {
      * @return
      */
     @GetMapping("/getPotteryJarOperationList")
-    public TableDataInfoDataReportVO getList(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
-        return laoczWineHistoryService.selectTableDataInfo(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+    public TableDataInfoDataReportVO getList(String potteryAltarNumber, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
+        return laoczWineHistoryService.selectTableDataInfo(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
     }
 
     /**
      * 数据报表-淘坛操作记录查询2
      *
-     * @param potteryAltarId 陶坛ID
+     * @param potteryAltarNumber 陶坛编号
      * @param fireZoneId     防火区ID
      * @param areaId         场区ID
      * @return
      */
     @GetMapping("/getPotteryJarOperationTableList")
-    public TableDataInfo getPotteryJarOperationTableList(Long potteryAltarId, Long fireZoneId, Long areaId) {
-        return getDataTable(laoczWineHistoryService.getLaoczWineHistoryTableList(potteryAltarId, fireZoneId, areaId), "PotteryReport");
+    public TableDataInfo getPotteryJarOperationTableList(String potteryAltarNumber, Long fireZoneId, Long areaId) {
+        return getDataTable(laoczWineHistoryService.getLaoczWineHistoryTableList(potteryAltarNumber, fireZoneId, areaId), "PotteryReport");
     }
 
     /**

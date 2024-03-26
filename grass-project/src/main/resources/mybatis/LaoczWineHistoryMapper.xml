@@ -234,8 +234,8 @@
             <if test="liquorBatchId != null  and liquorBatchId != ''">
                 and liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
-            <if test="potteryAltarId != null ">
-                and pottery_altar_id = #{potteryAltarId}
+            <if test="potteryAltarNumber != null and potteryAltarNumber != ''">
+                and pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
             </if>
             <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
                 and operation_time between #{fromTime} and #{endTime}

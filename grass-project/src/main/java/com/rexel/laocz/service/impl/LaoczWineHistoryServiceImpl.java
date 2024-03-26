@@ -74,16 +74,16 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      * @return
      */
     @Override
-    public TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
+    public TableDataInfoDataReportVO selectTableDataInfo(String potteryAltarNumber, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
         try {
             List<LaoczWineHistoryVO> laoczWineHistoryVOS;
             try {
                 PageUtils.startPage();
-                laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+                laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
             } finally {
                 PageUtils.clearPage();
             }
-            List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+            List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
             Long totalOperand = (long) laoczWineHistoryVOSList.size();
             long entryOperation = laoczWineHistoryVOSList.stream()
                     .filter(history -> "1".equals(history.getOperationType()))
@@ -114,8 +114,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      * @return
      */
     @Override
-    public List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(Long potteryAltarId, Long fireZoneId, Long areaId) {
-        return baseMapper.selectLaoczWineHistoryStatement(potteryAltarId, null, null, null, fireZoneId, areaId);
+    public List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(String potteryAltarNumber, Long fireZoneId, Long areaId) {
+        return baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, null, null, null, fireZoneId, areaId);
     }
 
     @Override

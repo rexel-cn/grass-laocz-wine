@@ -28,6 +28,7 @@ public class LaoczFireZoneInfoController extends BaseController {
 
     /**
      * 查询防火区信息列表
+     *
      * @param laoczFireZoneInfo
      */
     @GetMapping("/list")
@@ -70,6 +71,16 @@ public class LaoczFireZoneInfoController extends BaseController {
     @DeleteMapping("/{fireZoneIds}")
     public AjaxResult remove(@PathVariable Long[] fireZoneIds) {
         return toAjax(laoczFireZoneInfoService.removeByIds(Arrays.asList(fireZoneIds)));
+    }
+
+    /**
+     * 树状下拉框
+     *
+     * @return
+     */
+    @GetMapping("/treePullDown")
+    public AjaxResult getTreePullDown() {
+        return AjaxResult.success(laoczFireZoneInfoService.selectTreePullDown());
     }
 
 }

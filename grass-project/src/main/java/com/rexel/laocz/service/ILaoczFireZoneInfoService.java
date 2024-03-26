@@ -3,6 +3,7 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.FireZoneInfoVo;
+import com.rexel.laocz.domain.vo.TreePullDownVO;
 
 import java.util.List;
 
@@ -22,4 +23,10 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
      */
     List<FireZoneInfoVo> selectLaoczFireZoneInfoList(LaoczFireZoneInfo laoczFireZoneInfo);
 
+    /**
+     * 树状下拉框
+     *
+     * @return
+     */
+    List<TreePullDownVO> selectTreePullDown();
 }

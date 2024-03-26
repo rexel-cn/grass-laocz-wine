@@ -39,7 +39,7 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
     /**
      * 数据报表-淘坛操作记录查询1
      *
-     * @param potteryAltarId 陶坛ID
+     * @param potteryAltarNumber 陶坛编号
      * @param fromTime       开始时间
      * @param endTime        结束时间
      * @param liquorBatchId  批次ID
@@ -47,7 +47,7 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @param areaId         场区ID
      * @return
      */
-    TableDataInfoDataReportVO selectTableDataInfo(Long potteryAltarId,
+    TableDataInfoDataReportVO selectTableDataInfo(String potteryAltarNumber,
                                                   String fromTime,
                                                   String endTime,
                                                   String liquorBatchId,
@@ -57,12 +57,12 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
     /**
      * 数据报表-淘坛操作记录查询2
      *
-     * @param potteryAltarId 陶坛ID
+     * @param potteryAltarNumber 陶坛编号
      * @param fireZoneId     防火区ID
      * @param areaId         场区ID
      * @return
      */
-    List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(Long potteryAltarId, Long fireZoneId, Long areaId);
+    List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(String potteryAltarNumber, Long fireZoneId, Long areaId);
 
     /**
      * 数据报表-导出

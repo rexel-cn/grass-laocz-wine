@@ -49,13 +49,13 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
     /**
      * 数据报表-淘坛操作记录
      *
-     * @param potteryAltarId 陶坛ID
+     * @param potteryAltarNumber 陶坛编号
      * @param fromTime       开始时间
      * @param endTime        结束时间
      * @param liquorBatchId  批次ID
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(@Param("potteryAltarId") Long potteryAltarId,
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(@Param("potteryAltarNumber") String potteryAltarNumber,
                                                              @Param("fromTime") String fromTime,
                                                              @Param("endTime") String endTime,
                                                              @Param("liquorBatchId") String liquorBatchId,
