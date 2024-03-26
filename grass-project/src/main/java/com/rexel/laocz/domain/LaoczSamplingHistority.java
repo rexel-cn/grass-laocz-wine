@@ -97,6 +97,12 @@ public class LaoczSamplingHistority extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String samplingFile;
     /**
+     * 取样文件名称
+     */
+    @Excel(name = "取样文件名称")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private String samplingFileName;
+    /**
      * 场区名称
      */
     @Excel(name = "场区名称")

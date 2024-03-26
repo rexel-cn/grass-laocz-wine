@@ -16,6 +16,7 @@
         <result property="samplingDate" column="sampling_date"/>
         <result property="samplingFileDate" column="sampling_file_date"/>
         <result property="samplingFile" column="sampling_file"/>
+        <result property="samplingFileName" column="sampling_file_name"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
@@ -35,6 +36,7 @@
                sampling_date,
                sampling_file_date,
                sampling_file,
+               sampling_file_name,
                create_by,
                create_time,
                update_by,
@@ -77,6 +79,9 @@
             <if test="samplingFile != null  and samplingFile != ''">
                 and sampling_file = #{samplingFile}
             </if>
+            <if test="samplingFileName != null  and samplingFileName != ''">
+                and sampling_file_name = #{samplingFileName}
+            </if>
         </where>
     </select>
     <select id="selectLaoczSamplingHist" resultType="com.rexel.laocz.domain.LaoczSamplingHistorityVO">
@@ -92,6 +97,7 @@
         lsh.sampling_date,
         lsh.sampling_file_date,
         lsh.sampling_file,
+        lsh.sampling_file_name,
         lai.area_name,
         lfzi.fire_zone_name,
         lsh.pottery_altar_number,
@@ -132,6 +138,7 @@
         lsh.sampling_date,
         lsh.sampling_file_date,
         lsh.sampling_file,
+        lsh.sampling_file_name,
         lai.area_name,
         lfzi.fire_zone_name,
         lsh.pottery_altar_number,

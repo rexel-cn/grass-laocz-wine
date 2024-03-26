@@ -73,6 +73,10 @@ public class LaoczSamplingHistorityVO extends BaseEntity {
      */
     private String samplingFile;
     /**
+     * 取样文件名称
+     */
+    private String samplingFileName;
+    /**
      * 场区名称
      */
     private String areaName;
