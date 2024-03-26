@@ -253,7 +253,7 @@
             resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">
         SELECT
         lwh.work_order_id,
-        lwd.pottery_altar_apply_weight as ApplyWeight,
+        lwh.pottery_altar_apply_weight as ApplyWeight,
         lwh.liquor_name,
         lwh.liquor_batch_id,
         lwh.liquor_level,
@@ -267,20 +267,15 @@
         lwt.weighing_tank_number,
         lwh.remaining_weight,
         lpam.pottery_altar_number,
-        sdd.dict_label as potteryAltarState,
         lwh.area_name,
         lwh.fire_zone_name,
         lpam.pottery_altar_full_altar_weight
         FROM
         laocz_wine_history lwh
         LEFT JOIN
-        laocz_wine_details lwd ON lwd.liquor_batch_id = lwh.liquor_batch_id
-        LEFT JOIN
         laocz_weighing_tank lwt ON lwh.weighing_tank = lwt.weighing_tank_id
         LEFT JOIN
         laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lwh.pottery_altar_id
-        LEFT JOIN sys_dict_data sdd ON lpam.pottery_altar_state = sdd.dict_value AND sdd.dict_type =
-        'Ceramide_condition'
         <where>
             <if test="winHisId != null and winHisId != ''">
                 and lwh.win_his_id = #{winHisId}

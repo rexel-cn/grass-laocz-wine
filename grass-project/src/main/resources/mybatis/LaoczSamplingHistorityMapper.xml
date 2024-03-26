@@ -129,18 +129,16 @@
         SELECT
         lsh.sampling_histority_id,
         lsh.work_order_id,
-        lsh.tenant_id,
         lsh.liquor_batch_id,
-        llm.liquor_name,
-        lsh.pottery_altar_id,
+        lwh.liquor_name,
         lsh.sampling_purpose,
         lsh.sampling_weight,
         lsh.sampling_date,
-        lsh.sampling_file_date,
         lsh.sampling_file,
+        lsh.sampling_file_date,
         lsh.sampling_file_name,
-        lai.area_name,
-        lfzi.fire_zone_name,
+        lwh.area_name,
+        lwh.fire_zone_name,
         lsh.pottery_altar_number,
         lsh.create_by,
         lsh.create_time,
@@ -149,14 +147,10 @@
         lsh.remark
         FROM
         laocz_sampling_histority lsh
-        LEFT JOIN laocz_liquor_batch llb ON llb.liquor_batch_id = lsh.liquor_batch_id
-        LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
-        LEFT JOIN laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lsh.pottery_altar_id
-        LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id
-        LEFT JOIN laocz_area_info lai ON lai.area_id = lfzi.area_id
+        LEFT JOIN laocz_wine_history lwh ON lsh.busy_id = lwh.busy_id
         <where>
             <if test="potteryAltarNumber != null and potteryAltarNumber != ''">
-                and lpam.pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
+                and lsh.pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
             </if>
             <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
                 and lsh.sampling_date between #{fromTime} and #{endTime}
@@ -165,17 +159,17 @@
                 and lsh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
             <if test="areaId != null and areaId != ''">
-                and lai.area_id = #{areaId}
+                and lwh.area_id = #{areaId}
             </if>
             <if test="fireZoneId != null and fireZoneId != ''">
-                and lfzi.fire_zone_id = #{fireZoneId}
+                and lwh.fire_zone_id = #{fireZoneId}
             </if>
         </where>
     </select>
     <select id="getLaoczSamplingHistoryInfo" resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">
         SELECT
         lwh.work_order_id,
-        lwd.pottery_altar_apply_weight AS ApplyWeight,
+        lwh.pottery_altar_apply_weight AS ApplyWeight,
         lwh.liquor_name,
         lwh.liquor_batch_id,
         lwh.liquor_level,
@@ -189,18 +183,14 @@
         lwt.weighing_tank_number,
         lwh.remaining_weight,
         lpam.pottery_altar_number,
-        sdd.dict_label AS potteryAltarState,
         lwh.area_name,
         lwh.fire_zone_name,
         lpam.pottery_altar_full_altar_weight
         FROM
         laocz_sampling_histority lsh
         LEFT JOIN laocz_wine_history lwh ON lsh.busy_id = lwh.busy_id
-        LEFT JOIN laocz_wine_details lwd ON lwd.liquor_batch_id = lwh.liquor_batch_id
         LEFT JOIN laocz_weighing_tank lwt ON lwh.weighing_tank = lwt.weighing_tank_id
         LEFT JOIN laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lwh.pottery_altar_id
-        LEFT JOIN sys_dict_data sdd ON lpam.pottery_altar_state = sdd.dict_value
-        AND sdd.dict_type = 'Ceramide_condition'
         <where>
             <if test="samplingHistorityId != null and samplingHistorityId != ''">
                 and lsh.sampling_histority_id = #{samplingHistorityId}

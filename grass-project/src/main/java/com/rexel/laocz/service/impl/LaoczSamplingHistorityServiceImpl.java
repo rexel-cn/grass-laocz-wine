@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
@@ -93,6 +94,9 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     public LaoczWineHistoryInfoVO getLaoczSamplingHistoryInfo(Long samplingHistorityId) {
         try {
             PotteryAltarInfomationDInfoVO potteryAltarInfomationDInfoVO = baseMapper.getLaoczSamplingHistoryInfo(samplingHistorityId);
+            if (ObjectUtil.isEmpty(potteryAltarInfomationDInfoVO)) {
+                return null;
+            }
             LaoczWineHistoryInfoVO laoczWineHistoryInfoVO = new LaoczWineHistoryInfoVO();
             laoczWineHistoryInfoVO.setWorkOrderId(potteryAltarInfomationDInfoVO.getWorkOrderId());
             laoczWineHistoryInfoVO.setCurrentWineIndustryVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, CurrentWineIndustryInfoVO.class));

@@ -5,6 +5,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.exception.file.FileNameLengthLimitExceededException;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
 import com.rexel.oss.exception.InvalidExtensionException;
@@ -99,6 +100,7 @@ public class LaoczSamplingHistorityController extends BaseController {
             }
             LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
             laoczSamplingHistority.setSamplingFileName(file.getOriginalFilename());
+            laoczSamplingHistority.setSamplingFileDate(DateUtils.getNowDate());
             laoczSamplingHistorityService.lambdaUpdate().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).update(laoczSamplingHistority);
             return AjaxResult.success((Object) attachmentHelper.upload(file, dir));
         } catch (IOException | FileUploadBase.FileSizeLimitExceededException | FileNameLengthLimitExceededException |

@@ -74,10 +74,6 @@ public class PotteryAltarInfomationDInfoVO {
      */
     private String potteryAltarNumber;
     /**
-     * 陶坛状态，1：使用，2封存
-     */
-    private String potteryAltarState;
-    /**
      * 满坛重量
      */
     private Long potteryAltarFullAltarWeight;
