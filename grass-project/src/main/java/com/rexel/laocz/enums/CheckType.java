@@ -16,7 +16,7 @@ public enum CheckType {
     LESS_THAN {
         @Override
         public boolean checkValue(String actual, String expected) {
-            return Double.parseDouble(actual) < Double.parseDouble(expected);
+            return Double.parseDouble(actual) <= Double.parseDouble(expected);
         }
     };
 

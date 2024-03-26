@@ -27,6 +27,10 @@ public class WineDetailVO {
      */
     private String areaName;
     /**
+     * 防火区id
+     */
+    private Long fireZoneId;
+    /**
      * 防火区名称
      */
     private String fireZoneName;
@@ -50,4 +54,13 @@ public class WineDetailVO {
      * 运行状态，0：未开始，1：开始，2：急停，3已完成
      */
     private String busyStatus;
+    /**
+     * 称重罐id
+     */
+    private Long weighingTank;
+    /**
+     * 称重罐名称
+     */
+    private String weighingTankNumber;
+
 }

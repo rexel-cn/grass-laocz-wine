@@ -2,6 +2,7 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczWineDetails;
+import com.rexel.laocz.domain.dto.WineHistoryDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
@@ -66,4 +67,7 @@ public interface LaoczWineDetailsMapper extends BaseMapper<LaoczWineDetails> {
      * @return 称重罐及泵的相关测点
      */
     List<WineDetailPointVO> selectWineDetailPumpPointVOList(Long wineDetailsId);
+
+
+    List<WineHistoryDTO> selectWineHistoryDTOList(Long wineDetailsId);
 }

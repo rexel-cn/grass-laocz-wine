@@ -53,5 +53,5 @@ public interface ILaoczWineOperationsService extends IService<LaoczWineOperation
      *
      * @param weighingTank 称重罐
      */
-    void setWeighingTank(WineEntryApplyParamDTO weighingTank);
+    Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank);
 }

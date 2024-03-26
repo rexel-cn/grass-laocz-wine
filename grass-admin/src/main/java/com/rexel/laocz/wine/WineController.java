@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName WineController
- * @Description
+ * @Description 酒操作共用，控制器
  * @Author 孟开通
  * @Date 2024/3/13 13:55
  **/
@@ -60,7 +60,6 @@ public class WineController extends BaseController {
      */
     @PostMapping("/setWeighingTank")
     public AjaxResult setWeighingTank(@RequestBody WineEntryApplyParamDTO weighingTank) {
-        iLaoczWineOperationsService.setWeighingTank(weighingTank);
-        return AjaxResult.success();
+        return AjaxResult.success(iLaoczWineOperationsService.setWeighingTank(weighingTank));
     }
 }

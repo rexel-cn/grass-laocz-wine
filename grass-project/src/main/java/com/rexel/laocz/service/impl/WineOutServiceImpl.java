@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @Date 2024/3/11 14:26
  **/
 @Service
-public class WineOutServiceImpl implements WineOutService {
+public class WineOutServiceImpl extends WineAbstract implements WineOutService {
     @Autowired
     private ILaoczWineOperationsService iLaoczWineOperationsService;
     @Autowired
@@ -146,11 +146,9 @@ public class WineOutServiceImpl implements WineOutService {
         //更新入酒时间和状态
         iLaoczWineDetailsService.updateById(laoczWineDetails);
         //新增数据到历史表
-        laoczWineHistoryMapper.saveHistory(wineDetailsId);
+        super.saveHistory(wineDetailsId, OperationTypeEnum.WINE_OUT);
 
         //更新实时表，如果酒出完就删除数据
-
-
         LaoczBatchPotteryMapping laoczBatchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
                 .eq(LaoczBatchPotteryMapping::getLiquorBatchId, laoczWineDetails.getLiquorBatchId())
                 .eq(LaoczBatchPotteryMapping::getPotteryAltarId, laoczWineDetails.getPotteryAltarId())

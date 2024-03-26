@@ -15,6 +15,10 @@ public class WineEntryApplyParamDTO {
      */
     private Long wineDetailsId;
     /**
+     * 防火区id
+     */
+    private Long fireZoneId;
+    /**
      * 称重罐id
      */
     private Long weighingTank;

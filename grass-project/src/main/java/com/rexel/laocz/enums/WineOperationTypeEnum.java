@@ -11,13 +11,15 @@ import lombok.Getter;
 @Getter
 public enum WineOperationTypeEnum {
     /**
-     * 操作类型 1:开始 2:急停 3:继续
+     * 操作类型 1:入酒开始 2:入酒急停 3:入酒继续，4：出酒称重
      */
-    START("1", "开始"),
+    START("1", "入酒开始"),
 
-    EMERGENCY_STOP("2", "急停"),
+    EMERGENCY_STOP("2", "入酒急停"),
 
-    CONTINUE("3", "继续");
+    CONTINUE("3", "入酒继续"),
+
+    WEIGH("4", "出酒称重");
 
     private final String value;
 
@@ -31,7 +33,7 @@ public enum WineOperationTypeEnum {
     public static String getNameByValue(String value) {
         for (WineOperationTypeEnum wineOperationTypeEnum : WineOperationTypeEnum.values()) {
             if (wineOperationTypeEnum.getValue().equals(value)) {
-                return wineOperationTypeEnum.getValue();
+                return wineOperationTypeEnum.getName();
             }
         }
         return null;

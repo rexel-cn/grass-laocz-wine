@@ -18,6 +18,7 @@ import com.rexel.laocz.enums.*;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,11 +45,12 @@ import java.util.stream.Collectors;
  * @Date 2024/3/11 11:05
  **/
 @Service
+@Slf4j
 public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntryApplyService {
     private static final AtomicReference<String> atomicReference = new AtomicReference<>();
-    static AtomicInteger atomicInteger = new AtomicInteger(0);
-    private final Map<Long, ScheduledFuture> threadMap = new ConcurrentHashMap<>();
-    private final Map<Long, WineRealRunStatusEnum> wineRealRunStatusEnumMap = new ConcurrentHashMap<>();
+    private static final AtomicInteger atomicInteger = new AtomicInteger(0);
+    private final ReentrantLock lock = new ReentrantLock(true);
+    private final Map<Long, ScheduledFuture<?>> threadMap = new ConcurrentHashMap<>();
     @Autowired
     private ILaoczLiquorBatchService iLaoczLiquorBatchService;
     @Autowired
@@ -164,7 +167,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             //运行状态
             laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.NOT_STARTED.getValue());
             //申请重量
-            laoczWineDetails.setPotteryAltarApplyWeight(wineEntryApplyDTO.getApplyWeight());
+            laoczWineDetails.setPotteryAltarApplyWeight(potteryAltarId.getApplyWeight());
             list.add(laoczWineDetails);
         }
         iLaoczWineDetailsService.saveBatch(list);
@@ -212,7 +215,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * 新增酒批次
      *
      * @param wineEntryApplyDTO 入酒申请参数
-     * @return
      */
     private void saveLiquorBatch(WineEntryApplyDTO wineEntryApplyDTO) {
         LaoczLiquorBatch liquorBatch = new LaoczLiquorBatch();
@@ -231,11 +233,18 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * @param wineEntryDTO 入酒开始参数
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void wineEntry(WineEntryDTO wineEntryDTO) {
-        //获取酒操作状态
-        WineRealRunStatusEnum orDefault = wineRealRunStatusEnumMap.getOrDefault(wineEntryDTO.getWineDetailsId(), WineRealRunStatusEnum.NOT_STARTED);
         //查询酒操作详情
-        LaoczWineDetails wineDetails = iLaoczWineDetailsService.getById(wineEntryDTO.getWineDetailsId());
+        LaoczWineDetails wineDetails;
+        lock.lock();
+        try {
+            //查询酒操作详情
+            wineDetails = iLaoczWineDetailsService.getById(wineEntryDTO.getWineDetailsId());
+            busyStatusJudge(wineDetails, wineEntryDTO.getStatus());
+        } finally {
+            lock.unlock();
+        }
         //查询称重罐测点
         List<WineDetailPointVO> weighingTankPointVOList = laoczWineDetailsMapper.selectWineDetailWeighingTankPointVOList(wineDetails.getWineDetailsId());
         //查询泵测点
@@ -243,35 +252,120 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //查询称重罐，需要的业务字段：称重罐重量上限，称重罐编号等。
         LaoczWeighingTank weighingTank = iLaoczWeighingTankService.getById(wineDetails.getWeighingTank());
 
+        //更新实时表状态 入酒开始
+        updatePotteryMappingState(wineDetails.getPotteryAltarId(), OperatingStatusEnum.WINE_IN);
 
         String eventStatus = WineConstants.SUCCESS;
         try {
             switch (wineEntryDTO.getStatus()) {
                 case "1":
                     //开始
-                    start(wineDetails, orDefault, weighingTankPointVOList, pumpPointVOList, weighingTank);
+                    start(wineDetails, weighingTankPointVOList, pumpPointVOList, weighingTank);
                     break;
                 case "2":
                     //急停
-                    pause(wineDetails, orDefault, pumpPointVOList);
+                    pause(wineDetails, pumpPointVOList);
                     break;
                 case "3":
                     //继续
-                    winContinue(wineDetails, orDefault, pumpPointVOList, weighingTankPointVOList);
+                    winContinue(wineDetails, pumpPointVOList, weighingTankPointVOList);
                     break;
                 default:
                     throw new CustomException("入酒状态错误");
             }
         } catch (Exception e) {
+            log.error("入酒操作异常:{}", e.getMessage());
             eventStatus = WineConstants.FAIL;
+            throw new CustomException("入酒操作异常：{}", e.getMessage());
         } finally {
-            //保存入酒事件
-            saveWineEvent(wineDetails, wineEntryDTO, weighingTankPointVOList, pumpPointVOList, eventStatus);
+            String finalEventStatus = eventStatus;
+            threadPoolTaskScheduler.execute(() -> {
+                //保存入酒事件
+                saveWineEvent(wineDetails, wineEntryDTO, weighingTankPointVOList, pumpPointVOList, finalEventStatus);
+            });
         }
-
-
     }
 
+    /**
+     * 入酒状态判断
+     *
+     * @param wineDetails 酒操作详情
+     * @param status      入酒状态
+     */
+    private void busyStatusJudge(LaoczWineDetails wineDetails, String status) {
+        switch (status) {
+            case "1":
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.STARTED.getValue())) {
+                    throw new CustomException("该任务正在执行中");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.EMERGENCY_STOP.getValue())) {
+                    throw new CustomException("该任务已经急停,通过继续按钮启动");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.COMPLETED.getValue())) {
+                    throw new CustomException("该任务已经完成");
+                }
+                break;
+            case "2":
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.NOT_STARTED.getValue())) {
+                    throw new CustomException("该任务未开始");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.EMERGENCY_STOP.getValue())) {
+                    throw new CustomException("该任务已急停");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.COMPLETED.getValue())) {
+                    throw new CustomException("该任务已经完成");
+                }
+                break;
+            case "3":
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.NOT_STARTED.getValue())) {
+                    throw new CustomException("该任务未开始");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.COMPLETED.getValue())) {
+                    throw new CustomException("该任务已经完成");
+                }
+                if (Objects.equals(wineDetails.getBusyStatus(), WineRealRunStatusEnum.STARTED.getValue())) {
+                    throw new CustomException("该任务正在执行中");
+                }
+                break;
+            default:
+                throw new CustomException("入酒状态错误");
+        }
+    }
+
+    /**
+     * 更新酒操作详情状态
+     *
+     * @param wineDetailsId         酒操作详情id
+     * @param wineRealRunStatusEnum 酒操作状态
+     */
+    private void updateWineDetails(Long wineDetailsId, WineRealRunStatusEnum wineRealRunStatusEnum) {
+        iLaoczWineDetailsService.lambdaUpdate()
+                .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
+                .set(LaoczWineDetails::getBusyStatus, wineRealRunStatusEnum.getValue())
+                .update();
+    }
+
+    /**
+     * 更新陶坛罐状态
+     *
+     * @param potteryAltarId      陶坛罐id
+     * @param operatingStatusEnum 陶坛罐状态
+     */
+    private void updatePotteryMappingState(Long potteryAltarId, OperatingStatusEnum operatingStatusEnum) {
+        iLaoczBatchPotteryMappingService.lambdaUpdate()
+                .eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId)
+                .set(LaoczBatchPotteryMapping::getOperatingState, operatingStatusEnum.getCode())
+                .update();
+    }
+
+    /**
+     * 保存酒事件
+     * @param wineDetails 酒操作详情
+     * @param wineEntryDTO 入酒参数
+     * @param weighingTankPointVOList 称重罐测点
+     * @param pumpPointVOList 泵测点
+     * @param eventStatus 事件状态
+     */
     private void saveWineEvent(LaoczWineDetails wineDetails, WineEntryDTO wineEntryDTO, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, String eventStatus) {
         List<String> weightPoints = weighingTankPointVOList.stream().map(WineDetailPointVO::getPointId).collect(Collectors.toList());
         List<String> pumpPoints = pumpPointVOList.stream().map(WineDetailPointVO::getPointId).collect(Collectors.toList());
@@ -294,60 +388,55 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
 
     }
 
-    private void winContinue(LaoczWineDetails wineDetails, WineRealRunStatusEnum orDefault, List<WineDetailPointVO> pumpPointVOList, List<WineDetailPointVO> weighingTank) {
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.NOT_STARTED.getValue())) {
-            throw new CustomException("该任务未开始");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.COMPLETED.getValue())) {
-            throw new CustomException("该任务已经完成");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.STARTED.getValue())) {
-            throw new CustomException("该任务正在执行中");
-        }
-        try {
-            continuePlc(pumpPointVOList, weighingTank);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * 入酒继续.并继续监听
+     *
+     * @param wineDetails     酒操作详情
+     * @param pumpPointVOList 泵测点
+     * @param weighingTank    称重罐
+     * @throws IOException 异常
+     */
+    private void winContinue(LaoczWineDetails wineDetails, List<WineDetailPointVO> pumpPointVOList, List<WineDetailPointVO> weighingTank) throws IOException {
+        //更新酒操作详情状态，开始
+        updateWineDetails(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.STARTED);
+        //下发继续测点
+        continuePlc(pumpPointVOList, weighingTank);
+        //继续监听
         startListener(wineDetails.getWineDetailsId(), weighingTank, pumpPointVOList);
-        wineRealRunStatusEnumMap.put(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.STARTED);
-
     }
 
-    private void pause(LaoczWineDetails wineDetails, WineRealRunStatusEnum orDefault, List<WineDetailPointVO> pumpPointVOList) {
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.NOT_STARTED.getValue())) {
-            throw new CustomException("该任务未开始");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.EMERGENCY_STOP.getValue())) {
-            throw new CustomException("该任务已经急停");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.COMPLETED.getValue())) {
-            throw new CustomException("该任务已经完成");
-        }
+    /**
+     * 下发急停，并取消监听
+     *
+     * @param wineDetails     酒操作详情
+     * @param pumpPointVOList 泵测点
+     */
+    private void pause(LaoczWineDetails wineDetails, List<WineDetailPointVO> pumpPointVOList) {
+        //更新酒操作详情状态，开始
+        updateWineDetails(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.EMERGENCY_STOP);
         //下发急停测点
-        pausePlc(wineDetails, pumpPointVOList);
+        pausePlc(pumpPointVOList);
+        //取消监听
         pauseListener(wineDetails.getWineDetailsId());
-        wineRealRunStatusEnumMap.put(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.EMERGENCY_STOP);
     }
 
-    private void start(LaoczWineDetails wineDetails, WineRealRunStatusEnum orDefault, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, LaoczWeighingTank weighingTank) {
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.STARTED.getValue())) {
-            throw new CustomException("该任务正在执行中");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.EMERGENCY_STOP.getValue())) {
-            throw new CustomException("该任务已经急停,通过继续按钮启动");
-        }
-        if (Objects.equals(orDefault.getValue(), WineRealRunStatusEnum.COMPLETED.getValue())) {
-            throw new CustomException("该任务已经完成");
-        }
-        try {
-            startPlc(wineDetails, weighingTankPointVOList, pumpPointVOList, weighingTank);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * 下发启动并开始监听
+     *
+     * @param wineDetails             酒操作详情
+     * @param weighingTankPointVOList 称重罐测点
+     * @param pumpPointVOList         泵测点
+     * @param weighingTank            称重罐
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void start(LaoczWineDetails wineDetails, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
+        //更新酒操作详情状态，开始
+        updateWineDetails(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.STARTED);
+        //下发测点
+        startPlc(wineDetails, weighingTankPointVOList, pumpPointVOList, weighingTank);
+        //开始监听
         startListener(wineDetails.getWineDetailsId(), weighingTankPointVOList, pumpPointVOList);
-        wineRealRunStatusEnumMap.put(wineDetails.getWineDetailsId(), WineRealRunStatusEnum.STARTED);
-
     }
 
     /**
@@ -361,8 +450,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
         WineRealDataVO wineRealDataVO = new WineRealDataVO();
         wineRealDataVO.setPotteryAltarApplyWeight(laoczWineDetails.getPotteryAltarApplyWeight());
-        wineRealDataVO.setBusyStatus(wineRealRunStatusEnumMap.getOrDefault(laoczWineDetails.getWineDetailsId(), WineRealRunStatusEnum.NOT_STARTED).getValue());
-
+        wineRealDataVO.setBusyStatus(laoczWineDetails.getBusyStatus());
         //查询称重罐测点
         List<WineDetailPointVO> weighingTankPointVOList = laoczWineDetailsMapper.selectWineDetailWeighingTankPointVOList(wineDetailsId);
         Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
@@ -385,12 +473,16 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     @Transactional(rollbackFor = Exception.class)
     public void wineEntryFinish(Long wineDetailsId) {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-        laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.COMPLETED.getValue());
         laoczWineDetails.setOperationTime(new Date());
         //更新入酒时间和状态
         iLaoczWineDetailsService.updateById(laoczWineDetails);
+
+        //更新实时表状态
+        updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), OperatingStatusEnum.STORAGE);
+
         //新增数据到历史表
-        laoczWineHistoryMapper.saveHistory(wineDetailsId);
+        super.saveHistory(wineDetailsId,OperationTypeEnum.WINE_ENTRY);
+
     }
 
     private void pauseListener(Long wineDetailsId) {
@@ -401,6 +493,10 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     }
 
     private void startListener(Long wineDetailsId, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList) {
+        ScheduledFuture<?> future = threadMap.get(wineDetailsId);
+        if(future!=null){
+            return;
+        }
         Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
         Map<String, WineDetailPointVO> pointVOMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
         //完成测点
@@ -420,7 +516,12 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                     ScheduledFuture<?> scheduledFuture = threadMap.get(wineDetailsId);
                     if (scheduledFuture != null) {
                         scheduledFuture.cancel(true);
-                        wineRealRunStatusEnumMap.put(wineDetailsId, WineRealRunStatusEnum.COMPLETED);
+                        lock.lock();
+                        try {
+                            updateWineDetails(wineDetailsId, WineRealRunStatusEnum.COMPLETED);
+                        }finally {
+                            lock.unlock();
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -526,7 +627,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         DviewUtilsPro.writePointValue(new DviewPointDTO(startSignalPoint.getPointId(), startSignalPoint.getPointType(), startSignalPoint.getPointName(), "1"));
     }
 
-    private void pausePlc(LaoczWineDetails wineDetails, List<WineDetailPointVO> pumpPointVOList) {
+    private void pausePlc(List<WineDetailPointVO> pumpPointVOList) {
         /*
             【下发测点】
             以泵为单位急停信号（待提供）
@@ -584,13 +685,19 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             if (value.name().equals(MonitorPointConfig.ZL_OUT.name())) {
                 continue;
             }
+            if (value.name().equals(MonitorPointConfig.ES.name())) {
+                continue;
+            }
+            if (value.name().equals(MonitorPointConfig.RUN.name())) {
+                continue;
+            }
             //其他都按照配置进行判断即可
-            if (!value.getCheck().checkValue(dViewVarInfo.getValue().toString(), value.getValue())) {
+            if (value.getCheck().checkValue(dViewVarInfo.getValue().toString(), value.getValue())) {
                 throw new CustomException(value.getException());
             }
         }
         //继续测点
-        WineDetailPointVO weightPoint = wineDetailPointVOMap.get(WinePointConstants.POINT_CONTINUE);
+        WineDetailPointVO weightPoint = pumpMap.get(WinePointConstants.POINT_CONTINUE);
         DviewUtils.writePointValue(weightPoint.getPointId(), weightPoint.getPointType(), "1");
     }
 

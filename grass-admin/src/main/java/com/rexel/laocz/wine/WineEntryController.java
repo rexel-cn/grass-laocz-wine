@@ -2,6 +2,7 @@ package com.rexel.laocz.wine;
 
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.laocz.domain.dto.WinBaseDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyDTO;
 import com.rexel.laocz.domain.dto.WineEntryDTO;
 import com.rexel.laocz.service.WineEntryApplyService;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName WineEntryController
- * @Description 入酒
+ * @Description 入酒 控制器
  * @Author 孟开通
  * @Date 2024/3/11 16:55
  **/
@@ -68,4 +69,18 @@ public class WineEntryController extends BaseController {
     public AjaxResult getWineRealData(@PathVariable("wineDetailsId") Long wineDetailsId) {
         return AjaxResult.success(wineEntryApplyService.getWineRealData(wineDetailsId));
     }
+
+
+    /**
+     * 入酒结束
+     *
+     * @param wineDetailsId 酒操作业务详情id
+     * @return 结束结果
+     */
+    @PostMapping("/wineEntryFinish")
+    public AjaxResult wineEntryFinish(@RequestBody WinBaseDTO winBaseDTO) {
+        wineEntryApplyService.wineEntryFinish(winBaseDTO.getWineDetailsId());
+        return AjaxResult.success();
+    }
+
 }

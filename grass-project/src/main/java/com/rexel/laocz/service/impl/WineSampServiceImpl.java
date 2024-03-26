@@ -2,7 +2,9 @@ package com.rexel.laocz.service.impl;
 
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
-import com.rexel.laocz.domain.*;
+import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.LaoczWineDetails;
+import com.rexel.laocz.domain.LaoczWineOperations;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.WineRealRunStatusEnum;
@@ -21,7 +23,7 @@ import java.util.Date;
  * @Date 2024/3/19 18:18
  **/
 @Service
-public class WineSampServiceImpl implements WineSampService {
+public class WineSampServiceImpl extends WineAbstract implements WineSampService {
     @Autowired
     private ILaoczWineOperationsService iLaoczWineOperationsService;
     @Autowired
@@ -30,8 +32,7 @@ public class WineSampServiceImpl implements WineSampService {
     private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
     @Autowired
     private LaoczWineHistoryMapper laoczWineHistoryMapper;
-    @Autowired
-    private ILaoczSamplingHistorityService iLaoczSamplingHistorityService;
+
 
     /**
      * 酒取样申请
@@ -102,36 +103,8 @@ public class WineSampServiceImpl implements WineSampService {
         //更新入酒时间和状态
         iLaoczWineDetailsService.updateById(laoczWineDetails);
         //新增数据到历史表
-        Long l = laoczWineHistoryMapper.saveHistory(wineDetailsId);
-        LaoczWineHistory laoczWineHistory = laoczWineHistoryMapper.selectById(l);
-        //新增数据到laocz_sampling_histority
-        saveSamplingHistory(laoczWineDetails, laoczWineHistory);
+        super.saveHistory(wineDetailsId, OperationTypeEnum.SAMPLING);
     }
 
-    private void saveSamplingHistory(LaoczWineDetails laoczWineDetails, LaoczWineHistory laoczWineHistory) {
-        //新增数据到laocz_sampling_histority
-        LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
-        //工单id
-        laoczSamplingHistority.setWorkOrderId(laoczWineDetails.getWorkOrderId());
-        //业务标识
-        laoczSamplingHistority.setBusyId(laoczWineDetails.getBusyId());
-        //酒批次
-        laoczSamplingHistority.setLiquorBatchId(laoczWineDetails.getLiquorBatchId());
-        //陶坛罐id
-        laoczSamplingHistority.setPotteryAltarId(laoczWineDetails.getPotteryAltarId());
-        //取样用途
-        laoczSamplingHistority.setSamplingPurpose(laoczWineDetails.getSamplingPurpose());
-        //取样重量
-        laoczSamplingHistority.setSamplingWeight(laoczWineDetails.getPotteryAltarApplyWeight());
-        //取样时间
-        laoczSamplingHistority.setSamplingDate(laoczWineDetails.getOperationTime());
-        //场区名称
-        laoczSamplingHistority.setAreaName(laoczWineHistory.getAreaName());
-        //防火区名称
-        laoczSamplingHistority.setFireZoneName(laoczWineHistory.getFireZoneName());
-        //陶坛管理编号
-        laoczSamplingHistority.setPotteryAltarNumber(laoczWineHistory.getPotteryAltarNumber());
-        //新增取样记录表
-        iLaoczSamplingHistorityService.save(laoczSamplingHistority);
-    }
+
 }

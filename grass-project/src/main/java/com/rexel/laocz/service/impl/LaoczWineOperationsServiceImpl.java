@@ -1,6 +1,8 @@
 package com.rexel.laocz.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.LaoczWineOperations;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
@@ -8,8 +10,11 @@ import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
 import com.rexel.laocz.enums.OperationTypeEnum;
+import com.rexel.laocz.enums.WineRealRunStatusEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineOperationsMapper;
+import com.rexel.laocz.service.ILaoczFireZoneInfoService;
+import com.rexel.laocz.service.ILaoczPumpService;
 import com.rexel.laocz.service.ILaoczWineDetailsService;
 import com.rexel.laocz.service.ILaoczWineOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +35,10 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     private ILaoczWineDetailsService iLaoczWineDetailsService;
     @Autowired
     private LaoczWineDetailsMapper laoczWineDetailsMapper;
+    @Autowired
+    private ILaoczPumpService iLaoczPumpService;
+    @Autowired
+    private ILaoczFireZoneInfoService iLaoczFireZoneInfoService;
 
     /**
      * 查询酒操作业务列表
@@ -56,6 +65,7 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
             matterVO.setWorkOrderId(laoczWineOperations.getWorkOrderId());
             matterVO.setApplyTime(laoczWineOperations.getCreateTime());
             matterVO.setOperationType(OperationTypeEnum.getNameByValue(laoczWineOperations.getOperationType()));
+            matterVO.setOperationTypeNumber(laoczWineOperations.getOperationType());
             return matterVO;
         }).collect(Collectors.toList());
     }
@@ -90,9 +100,20 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
      * @param weighingTank 称重罐
      */
     @Override
-    public void setWeighingTank(WineEntryApplyParamDTO weighingTank) {
-        iLaoczWineDetailsService.lambdaUpdate().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId())
-                .set(LaoczWineDetails::getWeighingTank, weighingTank.getWeighingTank()).update();
+    public Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank) {
+        LaoczWineDetails details = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId()).one();
+        if (!WineRealRunStatusEnum.NOT_STARTED.getValue().equals(details.getBusyStatus())) {
+            throw new RuntimeException("酒操作已开始，无法设置称重罐");
+        }
+        LaoczPump one = iLaoczPumpService.lambdaQuery().eq(LaoczPump::getFireZoneId, weighingTank.getFireZoneId()).one();
+        if (one == null) {
+            LaoczFireZoneInfo byId = iLaoczFireZoneInfoService.getById(weighingTank.getFireZoneId());
+            throw new RuntimeException("请联系管理员在防火区:{}，设置泵信息" + byId.getFireZoneName());
+        }
+        return iLaoczWineDetailsService.lambdaUpdate().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId())
+                .set(LaoczWineDetails::getWeighingTank, weighingTank.getWeighingTank())
+                .set(LaoczWineDetails::getPumpId, one.getPumpId())
+                .update();
     }
 
 

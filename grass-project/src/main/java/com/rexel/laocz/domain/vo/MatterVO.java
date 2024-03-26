@@ -32,6 +32,10 @@ public class MatterVO {
      * 操作类型
      */
     private String operationType;
+    /**
+     * 操作类型编号
+     */
+    private Long operationTypeNumber;
 
     /**
      * 审批结果
