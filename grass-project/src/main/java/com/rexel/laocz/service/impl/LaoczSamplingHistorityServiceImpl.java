@@ -112,6 +112,7 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
             }
             LaoczWineHistoryInfoVO laoczWineHistoryInfoVO = new LaoczWineHistoryInfoVO();
             laoczWineHistoryInfoVO.setWorkOrderId(potteryAltarInfomationDInfoVO.getWorkOrderId());
+            laoczWineHistoryInfoVO.setHeadline(potteryAltarInfomationDInfoVO.getOperationType());
             laoczWineHistoryInfoVO.setCurrentWineIndustryVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, CurrentWineIndustryInfoVO.class));
             laoczWineHistoryInfoVO.setPotteryAltarInformationInfoVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, PotteryAltarInformationInfoVO.class));
             return laoczWineHistoryInfoVO;
@@ -141,7 +142,7 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
                     // 对文件名进行URL编码，确保非ASCII字符正确编码
                     String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, encodedFileName.replaceAll("\\+", "%20"));
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName.replaceAll("\\+", "%20"));
                     headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                     return ResponseEntity.ok()
                             .headers(headers)

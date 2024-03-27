@@ -255,6 +255,7 @@
         lwh.work_order_id,
         lwh.pottery_altar_apply_weight as ApplyWeight,
         lwh.liquor_name,
+        lwh.operation_type,
         lwh.liquor_batch_id,
         lwh.liquor_level,
         lwh.liquor_source,
@@ -269,6 +270,8 @@
         lpam.pottery_altar_number,
         lwh.area_name,
         lwh.fire_zone_name,
+        lwh.create_by,
+        lwh.operation_time,
         lpam.pottery_altar_full_altar_weight
         FROM
         laocz_wine_history lwh
