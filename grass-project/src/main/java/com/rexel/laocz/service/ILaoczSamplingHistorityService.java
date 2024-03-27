@@ -5,6 +5,8 @@ import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.LaoczSamplingVO;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryInfoVO;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -72,4 +74,12 @@ public interface ILaoczSamplingHistorityService extends IService<LaoczSamplingHi
      * @return
      */
     LaoczWineHistoryInfoVO getLaoczSamplingHistoryInfo(Long samplingHistorityId);
+
+    /**
+     * 下载文件
+     *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
+     */
+    ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId);
 }

@@ -1,6 +1,7 @@
 package com.rexel.laocz.history;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
@@ -12,6 +13,8 @@ import com.rexel.oss.exception.InvalidExtensionException;
 import com.rexel.oss.utils.AttachmentHelper;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,13 +70,18 @@ public class LaoczSamplingHistorityController extends BaseController {
     /**
      * 上传文件
      *
-     * @param samplingHistorityId 取样历史数据
-     * @param url                 链接
+     * @param requestParams
      * @return
      */
     @PutMapping("/uploadFiles")
-    public AjaxResult uploadFile(Long samplingHistorityId, String url) {
-        return AjaxResult.success(laoczSamplingHistorityService.updateLaoczSampling(samplingHistorityId, url));
+    public AjaxResult uploadFile(@RequestBody JSONObject requestParams) {
+        Long samplingHistorityId = requestParams.getLong("samplingHistorityId");
+        String url = requestParams.getString("url");
+        if (laoczSamplingHistorityService.updateLaoczSampling(samplingHistorityId, url)) {
+            return AjaxResult.success("上传文件成功");
+        } else {
+            return AjaxResult.error("上传文件失败");
+        }
     }
 
     /**
@@ -107,5 +115,16 @@ public class LaoczSamplingHistorityController extends BaseController {
                  com.rexel.oss.exception.FileNameLengthLimitExceededException | InvalidExtensionException e) {
             return AjaxResult.error("上传失败");
         }
+    }
+
+    /**
+     * 文件下载
+     *
+     * @param samplingHistorityId 取样记录ID
+     * @return
+     */
+    @GetMapping("/downloadFile")
+    private ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId) {
+        return laoczSamplingHistorityService.downloadFile(samplingHistorityId);
     }
 }

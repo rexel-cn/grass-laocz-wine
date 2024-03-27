@@ -8,9 +8,22 @@ import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczSamplingHistorityMapper;
 import com.rexel.laocz.service.ILaoczSamplingHistorityService;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,6 +118,41 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
         } catch (Exception e) {
             log.error("查询失败", e);
             throw new SecurityException("查询失败");
+        }
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
+     */
+    @Override
+    public ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId) {
+        LaoczSamplingHistority laoczSamplingHistority = this.lambdaQuery().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).one();
+        String samplingFile = laoczSamplingHistority.getSamplingFile();
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet httpGet = new HttpGet(samplingFile);
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+                    byte[] content = EntityUtils.toByteArray(entity);
+                    String fileName = laoczSamplingHistority.getSamplingFileName();
+                    // 对文件名进行URL编码，确保非ASCII字符正确编码
+                    String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, encodedFileName.replaceAll("\\+", "%20"));
+                    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                    return ResponseEntity.ok()
+                            .headers(headers)
+                            .contentType(MediaType.APPLICATION_PDF)
+                            .body(new ByteArrayResource(content));
+                } else {
+                    throw new RuntimeException("从URL获取文件失败，服务器响应状态码:" + response.getStatusLine().getStatusCode());
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("获取文件时发生错误", e);
         }
     }
 }
