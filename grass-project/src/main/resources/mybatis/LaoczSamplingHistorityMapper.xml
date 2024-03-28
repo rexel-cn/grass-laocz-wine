@@ -189,7 +189,8 @@
         lwh.fire_zone_name,
         lwh.create_by,
         lwh.operation_time,
-        lpam.pottery_altar_full_altar_weight
+        lpam.pottery_altar_full_altar_weight,
+        IFNULL(TIMESTAMPDIFF(DAY, lwh.operation_time, lwh.storing_time), 0) AS StorageDuration
         FROM
         laocz_sampling_histority lsh
         LEFT JOIN laocz_wine_history lwh ON lsh.busy_id = lwh.busy_id

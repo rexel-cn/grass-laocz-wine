@@ -85,7 +85,10 @@ public class LaoczSamplingHistorityController extends BaseController {
     }
 
     /**
+     * 取样管理详情
      *
+     * @param samplingHistorityId 取样历史数据主键
+     * @return
      */
     @GetMapping("/getLaoczSamplingHistoryInfo")
     public AjaxResult getLaoczSamplingHistoryInfo(Long samplingHistorityId) {

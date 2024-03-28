@@ -102,4 +102,8 @@ public class PotteryAltarInfomationDInfoVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date operationTime;
+    /**
+     * 存储时长
+     */
+    private String StorageDuration;
 }

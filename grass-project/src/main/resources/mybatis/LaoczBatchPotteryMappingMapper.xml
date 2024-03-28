@@ -69,10 +69,10 @@
         lm.liquor_name AS liquorName,
         lpm.liquor_batch_id AS liquorBatchId,
         lpm.actual_weight AS actualWeight,
-        TIMESTAMPDIFF(
+        IFNULL(TIMESTAMPDIFF(
         DAY,
         lpm.storing_time,
-        NOW()) AS StorageDuration
+        NOW()), 0) AS StorageDuration
         FROM
         laocz_batch_pottery_mapping lpm
         LEFT JOIN laocz_liquor_batch lb ON lpm.liquor_batch_id = lb.liquor_batch_id
