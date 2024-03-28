@@ -10,7 +10,7 @@
         <result property="liquorBatchId" column="liquor_batch_id"/>
         <result property="potteryAltarId" column="pottery_altar_id"/>
         <result property="actualWeight" column="actual_weight"/>
-        <result property="operatingState" column="operating_state"/>
+        <result property="realStatus" column="real_status"/>
         <result property="storingTime" column="storing_time"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
@@ -25,7 +25,7 @@
                liquor_batch_id,
                pottery_altar_id,
                actual_weight,
-               operating_state,
+               real_status,
                storing_time,
                create_time,
                create_by,
@@ -51,8 +51,8 @@
             <if test="actualWeight != null ">
                 and actual_weight = #{actualWeight}
             </if>
-            <if test="operatingState != null ">
-                and operating_state = #{operatingState}
+            <if test="realStatus != null ">
+                and real_status = #{realStatus}
             </if>
             <if test="storingTime != null ">
                 and storing_time = #{storingTime}
@@ -136,11 +136,11 @@
     <insert id="batchLaoczBatchPotteryMapping" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="mappingId">
         insert into laocz_batch_pottery_mapping
-        ( mapping_id , tenant_id , liquor_batch_id , pottery_altar_id , actual_weight , operating_state , storing_time ,
+        ( mapping_id , tenant_id , liquor_batch_id , pottery_altar_id , actual_weight , real_status , storing_time ,
         create_time , create_by , update_time , update_by , remark) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.mappingId}, #{item.tenantId}, #{item.liquorBatchId}, #{item.potteryAltarId}, #{item.actualWeight},
-            #{item.operatingState}, #{item.storingTime}, #{item.createTime}, #{item.createBy}, #{item.updateTime},
+            #{item.realStatus}, #{item.storingTime}, #{item.createTime}, #{item.createBy}, #{item.updateTime},
             #{item.updateBy}, #{item.remark})
         </foreach>
     </insert>

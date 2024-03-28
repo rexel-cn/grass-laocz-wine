@@ -124,6 +124,12 @@ public class LaoczPotteryAltarManagementController extends BaseController {
         return toAjax(iLaoczPotteryAltarManagementService.addPotteryAltar(laoczPotteryAltarManagement));
     }
 
+    /**
+     * 入酒申请，查询筛选陶坛罐
+     *
+     * @param wineEntryPotteryAltarDTO 入酒申请参数：  防火区主键ID，陶坛管理编号，陶坛管理主键ID（过滤去除用）
+     * @return 筛选陶坛罐列表
+     */
     @PostMapping("/wineEntryPotteryAltarList")
     public AjaxResult wineEntryPotteryAltarList(@RequestBody WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
         return AjaxResult.success(iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO));

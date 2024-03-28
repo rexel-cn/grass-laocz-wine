@@ -65,7 +65,7 @@ public class SysDictDataController extends BaseController {
     public AjaxResult dictType(@PathVariable String dictType) {
         List<SysDictData> data = dictTypeService.selectDictDataByType(dictType);
         if (StringUtils.isNull(data)) {
-            data = new ArrayList<SysDictData>();
+            data = new ArrayList<>();
         }
         return AjaxResult.success(data);
     }

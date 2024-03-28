@@ -1,6 +1,10 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.exception.CustomException;
+import com.rexel.common.utils.DictUtils;
+import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.LaoczWineDetails;
@@ -10,7 +14,7 @@ import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
 import com.rexel.laocz.enums.OperationTypeEnum;
-import com.rexel.laocz.enums.WineRealRunStatusEnum;
+import com.rexel.laocz.enums.WineBusyStatusEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineOperationsMapper;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
@@ -91,7 +95,25 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
      */
     @Override
     public WineDetailVO getWineDetailVO(Long wineDetailsId) {
-        return laoczWineDetailsMapper.selectWineDetailVOById(wineDetailsId);
+        WineDetailVO wineDetailVO = laoczWineDetailsMapper.selectWineDetailVOById(wineDetailsId);
+        buildSamplingPurpose(wineDetailVO);
+        return wineDetailVO;
+    }
+
+    /**
+     * 取样用途
+     *
+     * @param wineDetailVO
+     */
+    private void buildSamplingPurpose(WineDetailVO wineDetailVO) {
+        if (wineDetailVO == null) {
+            return;
+        }
+        String samplingPurpose = wineDetailVO.getSamplingPurpose();
+        if (StrUtil.isEmpty(samplingPurpose)) {
+            return;
+        }
+        wineDetailVO.setSamplingPurpose(DictUtils.getDictLabel(WineDictConstants.SAMPLING_PURPOSE, samplingPurpose));
     }
 
     /**
@@ -102,13 +124,13 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     @Override
     public Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank) {
         LaoczWineDetails details = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId()).one();
-        if (!WineRealRunStatusEnum.NOT_STARTED.getValue().equals(details.getBusyStatus())) {
-            throw new RuntimeException("酒操作已开始，无法设置称重罐");
+        if (!WineBusyStatusEnum.NOT_STARTED.getValue().equals(details.getBusyStatus())) {
+            throw new CustomException("酒操作已开始，无法设置称重罐");
         }
         LaoczPump one = iLaoczPumpService.lambdaQuery().eq(LaoczPump::getFireZoneId, weighingTank.getFireZoneId()).one();
         if (one == null) {
             LaoczFireZoneInfo byId = iLaoczFireZoneInfoService.getById(weighingTank.getFireZoneId());
-            throw new RuntimeException("请联系管理员在防火区:{}，设置泵信息" + byId.getFireZoneName());
+            throw new CustomException("请联系管理员在防火区:{}，设置泵信息" + byId.getFireZoneName());
         }
         return iLaoczWineDetailsService.lambdaUpdate().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId())
                 .set(LaoczWineDetails::getWeighingTank, weighingTank.getWeighingTank())

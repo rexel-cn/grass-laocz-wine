@@ -26,7 +26,7 @@ public class WineEntryApplyDTO {
      */
     @NotNull(message = "未选择陶坛罐")
     @Valid
-    private List<PotteryAltar> potteryAltars;
+    private List<WineOutApplyDTO> potteryAltars;
 
     /**
      * 酒品管理ID
@@ -40,16 +40,4 @@ public class WineEntryApplyDTO {
     @NotEmpty(message = "酒品批次号错误，请重新申请")
     private String liquorBatchId;
 
-    @Data
-    public static class PotteryAltar {
-        /**
-         * 陶坛罐id
-         */
-        private Long potteryAltarId;
-        /**
-         * 陶坛罐申请重量
-         */
-        @NotNull(message = "陶坛申请重量不能为空")
-        private Double applyWeight;
-    }
 }

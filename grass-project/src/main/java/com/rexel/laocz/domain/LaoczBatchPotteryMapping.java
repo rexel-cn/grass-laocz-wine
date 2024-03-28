@@ -63,7 +63,7 @@ public class LaoczBatchPotteryMapping extends BaseEntity {
      * 运行状态（0：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中）
      */
     @Excel(name = "运行状态", readConverterExp = "0=：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中")
-    private Long operatingState;
+    private Long realStatus;
     /**
      * 入酒时间
      */
@@ -80,7 +80,7 @@ public class LaoczBatchPotteryMapping extends BaseEntity {
                 .append("liquorBatchId", getLiquorBatchId())
                 .append("potteryAltarId", getPotteryAltarId())
                 .append("actualWeight", getActualWeight())
-                .append("operatingState", getOperatingState())
+                .append("operatingState", getRealStatus())
                 .append("storingTime", getStoringTime())
                 .append("createTime", getCreateTime())
                 .append("createBy", getCreateBy())

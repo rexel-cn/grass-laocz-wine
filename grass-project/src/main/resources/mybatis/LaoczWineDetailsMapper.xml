@@ -102,6 +102,7 @@
         lwd.liquor_batch_id,
         lwd.busy_status,
         lwd.weighing_tank,
+        lwd.sampling_purpose,
         lpam.pottery_altar_number,
         lpam.pottery_altar_full_altar_weight,
         lfzi.fire_zone_id,
@@ -109,7 +110,8 @@
         lai.area_name,
         llm.liquor_management_id,
         llm.liquor_name,
-        lwt.weighing_tank_number
+        lwt.weighing_tank_number,
+        lbpm.actual_weight
         FROM
         laocz_wine_details lwd
         LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
@@ -118,6 +120,7 @@
         LEFT JOIN laocz_liquor_batch llb ON lwd.liquor_batch_id = llb.liquor_batch_id
         LEFT JOIN laocz_liquor_management llm ON llb.liquor_management_id = llm.liquor_management_id
         LEFT JOIN laocz_weighing_tank lwt ON lwd.weighing_tank=lwt.weighing_tank_id
+        LEFT JOIN laocz_batch_pottery_mapping lbpm ON lbpm.pottery_altar_id=lwd.pottery_altar_id
         <where>
             <choose>
                 <when test="wineDetailsId != null">

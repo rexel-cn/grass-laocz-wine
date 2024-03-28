@@ -17,7 +17,7 @@ public class PotteryAltarVo {
      */
     private String potteryAltarState;
     /**
-     * 区域名称
+     * 区域id
      */
     private Long areaId;
     /**
@@ -40,4 +40,17 @@ public class PotteryAltarVo {
      * 陶坛二维码地址
      */
     private String potteryAltarQrCodeAddress;
+    /**
+     * 陶坛实际重量
+     */
+    private Double actualWeight;
+    /**
+     * 酒品id
+     */
+    private Long liquorManagementId;
+    /**
+     * 酒批次id
+     */
+    private Long liquorBatchId;
+
 }

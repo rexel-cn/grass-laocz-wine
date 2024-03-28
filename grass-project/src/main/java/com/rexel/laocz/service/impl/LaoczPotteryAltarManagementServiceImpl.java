@@ -3,6 +3,7 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
@@ -26,7 +27,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -114,6 +114,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         currentWineIndustryVO.setStorageDuration(datePoor);
         return currentWineIndustryVO;
     }
+
     /**
      * 查询陶坛管理列表详细信息
      *
@@ -145,6 +146,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         return list;
     }
+
     /**
      * 编辑回显,通过Id查询陶坛管理详情
      */
@@ -169,6 +171,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         return potteryAltarVo;
     }
+
     /**
      * 新增陶坛
      *
@@ -192,6 +195,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             return this.save(laoczPotteryAltarManagement);
         }
     }
+
     /**
      * 修改陶坛
      *
@@ -224,8 +228,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<PotteryAltarVo> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
-        List<PotteryAltarVo> list = baseMapper.selectWineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
-
-        return list;
+        //条件查询，1有酒（取样，出酒，倒坛（出酒）），2没酒（入酒）   3倒坛（入酒）：空罐子，或者倒坛入酒同一批次的有酒的坛子
+        if (StrUtil.isEmpty(wineEntryPotteryAltarDTO.getConditionQuery())
+                || (wineEntryPotteryAltarDTO.getConditionQuery().equals("3")
+                && StrUtil.isEmpty(wineEntryPotteryAltarDTO.getLiquorBatchId()))) {
+            throw new ServiceException("条件错误");
+        }
+        return baseMapper.selectWineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
     }
 }

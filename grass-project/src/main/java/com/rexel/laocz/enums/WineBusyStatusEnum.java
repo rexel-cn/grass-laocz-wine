@@ -3,13 +3,13 @@ package com.rexel.laocz.enums;
 import lombok.Getter;
 
 /**
- * @ClassName WineRealRunStatusEnum
+ * @ClassName WineBusyStatusEnum
  * @Description 酒实时运行状态
  * @Author 孟开通
  * @Date 2024/3/12 17:04
  **/
 @Getter
-public enum WineRealRunStatusEnum {
+public enum WineBusyStatusEnum {
 
     /**
      * 0：未开始，1：开始，2：急停，3已完成
@@ -27,7 +27,7 @@ public enum WineRealRunStatusEnum {
     private final String name;
 
 
-    WineRealRunStatusEnum(Long value, String name) {
+    WineBusyStatusEnum(Long value, String name) {
         this.value = value;
         this.name = name;
     }

@@ -71,6 +71,12 @@ public class LaoczWineDetails extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long busyStatus;
     /**
+     * 操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样
+     */
+    @Excel(name = "1:入酒，2出酒，3倒坛入，4倒坛出，5取样")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Long detailType;
+    /**
      * 申请重量
      */
     @Excel(name = "申请重量")

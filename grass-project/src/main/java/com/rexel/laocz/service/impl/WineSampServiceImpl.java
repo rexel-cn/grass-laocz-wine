@@ -4,17 +4,15 @@ import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
-import com.rexel.laocz.domain.LaoczWineOperations;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
 import com.rexel.laocz.enums.OperationTypeEnum;
-import com.rexel.laocz.enums.WineRealRunStatusEnum;
+import com.rexel.laocz.enums.RealStatusEnum;
+import com.rexel.laocz.enums.WineBusyStatusEnum;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 /**
  * @ClassName WineSampServiceImpl
@@ -48,6 +46,11 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         if (laoczBatchPotteryMapping == null) {
             throw new CustomException("陶坛罐没有酒不允许取样");
         }
+        if (!RealStatusEnum.STORAGE.getCode().equals(laoczBatchPotteryMapping.getRealStatus())) {
+            throw new CustomException("陶坛罐还未存储不允许取样");
+        }
+
+
         //新增酒操作业务表
         //新增酒操作业务详情
         //新增 工单表（流程审批创建）,然后需要把laocz_liquor_batch的liquor_batch_id字段作为业务id来和流程关联
@@ -55,7 +58,7 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         //生成busy_id
         String busyId = SequenceUtils.nextId().toString();
         //新增laocz_wine_operations
-        saveLaoczWineOperations(busyId, workId);
+        saveLaoczWineOperations(busyId, workId, OperationTypeEnum.SAMPLING);
         //新增laocz_wine_details
         saveLaoczWineDetails(wineSampApplyDTO, busyId, workId, laoczBatchPotteryMapping);
     }
@@ -71,22 +74,12 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         //陶坛罐id
         laoczWineDetails.setPotteryAltarId(wineSampApplyDTO.getPotteryAltarId());
         //运行状态
-        laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.NOT_STARTED.getValue());
+        laoczWineDetails.setBusyStatus(WineBusyStatusEnum.NOT_STARTED.getValue());
         //申请重量
         laoczWineDetails.setPotteryAltarApplyWeight(wineSampApplyDTO.getSamplingWeight());
         iLaoczWineDetailsService.save(laoczWineDetails);
     }
 
-    private void saveLaoczWineOperations(String busyId, String workId) {
-        LaoczWineOperations operations = new LaoczWineOperations();
-        //业务id
-        operations.setBusyId(busyId);
-        //工单id
-        operations.setWorkOrderId(workId);
-        //操作类型 入酒
-        operations.setOperationType(OperationTypeEnum.SAMPLING.getValue());
-        iLaoczWineOperationsService.save(operations);
-    }
 
     /**
      * 酒取样完成
@@ -96,14 +89,16 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void wineSampFinish(Long wineDetailsId) {
-        //新增取样记录表
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-        laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.COMPLETED.getValue());
-        laoczWineDetails.setOperationTime(new Date());
-        //更新入酒时间和状态
-        iLaoczWineDetailsService.updateById(laoczWineDetails);
         //新增数据到历史表
         super.saveHistory(wineDetailsId, OperationTypeEnum.SAMPLING);
+        //备份酒操作业务表
+        super.backupWineDetails(laoczWineDetails);
+        //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
+        super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
+                laoczWineDetails.getPotteryAltarApplyWeight(), RealStatusEnum.STORAGE);
+        //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
+        super.taskVerify(laoczWineDetails.getBusyId());
     }
 
 

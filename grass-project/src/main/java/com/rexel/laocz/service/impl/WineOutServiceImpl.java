@@ -1,18 +1,19 @@
 package com.rexel.laocz.service.impl;
 
-import com.alibaba.fastjson2.JSON;
+import cn.hutool.core.util.StrUtil;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
+import com.rexel.laocz.constant.WineConstants;
 import com.rexel.laocz.constant.WinePointConstants;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
-import com.rexel.laocz.domain.LaoczWineEvent;
-import com.rexel.laocz.domain.LaoczWineOperations;
 import com.rexel.laocz.domain.dto.WineOutApplyDTO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.dview.DviewUtils;
 import com.rexel.laocz.enums.OperationTypeEnum;
-import com.rexel.laocz.enums.WineRealRunStatusEnum;
+import com.rexel.laocz.enums.RealStatusEnum;
+import com.rexel.laocz.enums.WineBusyStatusEnum;
+import com.rexel.laocz.enums.WineOperationTypeEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.*;
@@ -22,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         //生成busy_id
         String busyId = SequenceUtils.nextId().toString();
         //新增laocz_wine_operations
-        saveLaoczWineOperations(busyId, workId);
+        saveLaoczWineOperations(busyId, workId, OperationTypeEnum.WINE_OUT);
         //新增laocz_wine_details
         saveLaoczWineDetails(list, busyId, workId, batchPotteryMappings);
     }
@@ -96,40 +97,29 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
     @Override
     public String wineOutStart(Long wineDetailsId) {
         LaoczWineDetails wineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-
         //查询称重罐测点
         List<WineDetailPointVO> weighingTankPointVOList = laoczWineDetailsMapper.selectWineDetailWeighingTankPointVOList(wineDetailsId);
         WineDetailPointVO zlOut = getZlOut(weighingTankPointVOList);
+        String eventStatus = WineConstants.SUCCESS;
         try {
-            String value = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
-            iLaoczWineDetailsService.lambdaUpdate()
-                    .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
-                    .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(value))
-                    .set(LaoczWineDetails::getBusyStatus, WineRealRunStatusEnum.COMPLETED.getValue())
-                    .update();
-            saveWineEvent(wineDetails, weighingTankPointVOList);
-            return value;
+            String pointValue = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
+            wineDetails.setWeighingTankWeight(Double.parseDouble(pointValue));
+            wineDetails.setBusyStatus(WineBusyStatusEnum.COMPLETED.getValue());
+            iLaoczWineDetailsService.updateById(wineDetails);
+            return pointValue;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            eventStatus = WineConstants.FAIL;
+            throw new CustomException("采集称重罐重量失败，请重试");
+        } finally {
+            String finalEventStatus = eventStatus;
+            threadPoolTaskScheduler.execute(() -> saveWineEvent(wineDetails, weighingTankPointVOList, finalEventStatus));
         }
+
     }
 
-    private void saveWineEvent(LaoczWineDetails wineDetails, List<WineDetailPointVO> weighingTankPointVOList) {
+    private void saveWineEvent(LaoczWineDetails wineDetails, List<WineDetailPointVO> weighingTankPointVOList, String finalEventStatus) {
         List<String> weightPoints = weighingTankPointVOList.stream().map(WineDetailPointVO::getPointId).collect(Collectors.toList());
-        LaoczWineEvent laoczWineEvent = new LaoczWineEvent();
-        laoczWineEvent.setWorkOrderId(wineDetails.getWorkOrderId());
-        laoczWineEvent.setBusyId(wineDetails.getBusyId());
-        laoczWineEvent.setLiquorBatchId(wineDetails.getLiquorBatchId());
-        laoczWineEvent.setPotteryAltarId(wineDetails.getPotteryAltarId());
-        laoczWineEvent.setEventId("");
-        laoczWineEvent.setEventTime(new Date());
-        laoczWineEvent.setEventStatus("");
-        laoczWineEvent.setEventParam(JSON.toJSONString(wineDetails.getWineDetailsId()));
-        //转换为，号分割
-        laoczWineEvent.setPointArray(String.join(",", weightPoints));
-
-        iLaoczWineEventService.save(laoczWineEvent);
-
+        super.saveWineEvent(wineDetails, WineOperationTypeEnum.WEIGH.getValue(), weightPoints, finalEventStatus);
     }
 
     /**
@@ -140,35 +130,39 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void wineOutFinish(Long wineDetailsId) {
+        //更新实时表重量（为申请重量），如果出完就删除数据
+        //酒操作业务表+酒操作业务详情表，删除并备份
+        //更新酒操作业务详情表的出酒时间
+        //新增酒历史表\
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-        laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.COMPLETED.getValue());
-        laoczWineDetails.setOperationTime(new Date());
-        //更新入酒时间和状态
-        iLaoczWineDetailsService.updateById(laoczWineDetails);
+        //判断是否已经有了称重罐重量以及是否已经完成
+        winOutfinishCheck(laoczWineDetails);
         //新增数据到历史表
         super.saveHistory(wineDetailsId, OperationTypeEnum.WINE_OUT);
+        //备份酒操作业务表
+        super.backupWineDetails(laoczWineDetails);
+        //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
+        super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
+                laoczWineDetails.getPotteryAltarApplyWeight(), RealStatusEnum.STORAGE);
+        //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
+        super.taskVerify(laoczWineDetails.getBusyId());
+    }
 
-        //更新实时表，如果酒出完就删除数据
-        LaoczBatchPotteryMapping laoczBatchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
-                .eq(LaoczBatchPotteryMapping::getLiquorBatchId, laoczWineDetails.getLiquorBatchId())
-                .eq(LaoczBatchPotteryMapping::getPotteryAltarId, laoczWineDetails.getPotteryAltarId())
-                .one();
-        //陶坛罐重量
-        Double weighingTankWeight = laoczWineDetails.getWeighingTankWeight();
-        //实际储存的重量
-        Double actualWeight = laoczBatchPotteryMapping.getActualWeight();
-        if (weighingTankWeight >= actualWeight) {
-            iLaoczBatchPotteryMappingService.removeById(laoczBatchPotteryMapping);
-        } else {
-            laoczBatchPotteryMapping.setActualWeight(actualWeight - weighingTankWeight);
-            iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
+    private void winOutfinishCheck(LaoczWineDetails laoczWineDetails) {
+        if (laoczWineDetails.getWeighingTankWeight() == null) {
+            throw new CustomException("称重罐重量未获取");
         }
-
+        if (!Objects.equals(laoczWineDetails.getBusyStatus(), WineBusyStatusEnum.COMPLETED.getValue())) {
+            throw new CustomException("该任务未完成");
+        }
     }
 
     private WineDetailPointVO getZlOut(List<WineDetailPointVO> weighingTankPointVOList) {
         for (WineDetailPointVO weighingTankPointVO : weighingTankPointVOList) {
             if (WinePointConstants.ZL_OUT.equals(weighingTankPointVO.getUseMark())) {
+                if (StrUtil.isEmpty(weighingTankPointVO.getPointId()) || StrUtil.isEmpty(weighingTankPointVO.getPointType())) {
+                    throw new RuntimeException("称重罐测点信息不全,请联系管理员");
+                }
                 return weighingTankPointVO;
             }
         }
@@ -177,39 +171,13 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
 
     private void saveLaoczWineDetails(List<WineOutApplyDTO> wineOutApplyDTOS, String busyId, String workId, List<LaoczBatchPotteryMapping> batchPotteryMappings) {
         Map<Long, LaoczBatchPotteryMapping> map = batchPotteryMappings.stream().collect(Collectors.toMap(LaoczBatchPotteryMapping::getPotteryAltarId, Function.identity()));
-
         List<LaoczWineDetails> list = new ArrayList<>();
         for (WineOutApplyDTO wineOutApplyDTO : wineOutApplyDTOS) {
             Long potteryAltarId = wineOutApplyDTO.getPotteryAltarId();
             LaoczBatchPotteryMapping laoczBatchPotteryMapping = map.get(potteryAltarId);
-
-            LaoczWineDetails laoczWineDetails = new LaoczWineDetails();
-            //业务id
-            laoczWineDetails.setBusyId(busyId);
-            //工单id
-            laoczWineDetails.setWorkOrderId(workId);
-            //酒品批次号
-            laoczWineDetails.setLiquorBatchId(laoczBatchPotteryMapping.getLiquorBatchId());
-            //陶坛罐id
-            laoczWineDetails.setPotteryAltarId(wineOutApplyDTO.getPotteryAltarId());
-            //运行状态
-            laoczWineDetails.setBusyStatus(WineRealRunStatusEnum.NOT_STARTED.getValue());
-            //申请重量
-            laoczWineDetails.setPotteryAltarApplyWeight(wineOutApplyDTO.getApplyWeight());
-            list.add(laoczWineDetails);
+            list.add(buildLaoczWineDetails(busyId, workId, laoczBatchPotteryMapping.getLiquorBatchId(), potteryAltarId, wineOutApplyDTO.getApplyWeight()));
         }
         iLaoczWineDetailsService.saveBatch(list);
-    }
-
-    private void saveLaoczWineOperations(String busyId, String workId) {
-        LaoczWineOperations operations = new LaoczWineOperations();
-        //业务id
-        operations.setBusyId(busyId);
-        //工单id
-        operations.setWorkOrderId(workId);
-        //操作类型 入酒
-        operations.setOperationType(OperationTypeEnum.WINE_ENTRY.getValue());
-        iLaoczWineOperationsService.save(operations);
     }
 
 
