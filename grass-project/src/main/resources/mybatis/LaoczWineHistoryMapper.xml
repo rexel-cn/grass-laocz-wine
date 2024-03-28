@@ -378,7 +378,7 @@
         lwh.update_time,
         lwh.remark
         from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.dict_label = sdd.dict_value AND sdd.dict_type = 'detail_type'
+        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
         <where>
             <if test="liquorBatchId != null and liquorBatchId != ''">
                 and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
