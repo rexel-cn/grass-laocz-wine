@@ -9,10 +9,7 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
-import com.rexel.laocz.domain.vo.BoardDataListVO;
-import com.rexel.laocz.domain.vo.BoardDataVO;
-import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
-import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
+import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczBatchPotteryMappingMapper;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +117,23 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
         boardDataListVO.setBoardDataVOList(boardDataVOS);
         boardDataListVO.setTableTotal(baseMapper.selectBoardData(areaId, fireZoneId).size());
         return boardDataListVO;
+    }
+    /**
+     * 移动端场区概览
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 详情数据
+     */
+    @Override
+    public OverviewVo getOverview(String potteryAltarNumber) {
+        OverviewVo overviewVo = baseMapper.selectOverviewVo(potteryAltarNumber);
+        return overviewVo;
+    }
+
+    @Override
+    public List<BatchInfoVo> getBatchInfo(String liquorBatchId) {
+        List<BatchInfoVo> batchInfoVos = baseMapper.selectBatchInfo(liquorBatchId);
+        return batchInfoVos;
     }
 
     /**

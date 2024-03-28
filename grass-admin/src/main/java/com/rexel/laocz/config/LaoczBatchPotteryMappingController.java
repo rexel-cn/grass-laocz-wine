@@ -5,6 +5,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.utils.poi.ExcelUtil;
+import com.rexel.laocz.domain.vo.BatchInfoVo;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -83,6 +85,28 @@ public class LaoczBatchPotteryMappingController extends BaseController {
     @GetMapping("/getBoardData")
     private AjaxResult getBoardData(Long areaId, Long fireZoneId) {
         return AjaxResult.success(laoczBatchPotteryMappingService.selectBoardData(areaId, fireZoneId));
+    }
+
+    /**
+     * 移动端场区概览
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 详情数据
+     */
+    @GetMapping("/getOverview")
+    public AjaxResult getOverview(String potteryAltarNumber) {
+        return AjaxResult.success(laoczBatchPotteryMappingService.getOverview(potteryAltarNumber));
+    }
+
+    /**
+     * 批次查询
+     * @param liquorBatchId 酒批次Id
+     * @return 分页数据
+     */
+    @GetMapping("/getBatchInfo")
+    public TableDataInfo getBatchInfo(String liquorBatchId){
+        List<BatchInfoVo> batchInfoVos = laoczBatchPotteryMappingService.getBatchInfo(liquorBatchId);
+        return getDataTable(batchInfoVos,"batchInfo");
     }
 
 }

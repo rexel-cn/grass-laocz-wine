@@ -74,7 +74,11 @@ public class LaoczPotteryAltarManagement extends BaseEntity {
      */
     @TableField(exist = false)
     private String areaId;
-
+    /**
+     * 酒液批次Id
+     */
+    @TableField(exist = false)
+    private String liquorBatchId;
 
     @Override
     public String toString() {

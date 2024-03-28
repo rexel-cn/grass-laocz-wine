@@ -131,6 +131,52 @@
             </if>
         </where>
     </select>
+    <select id="selectOverviewVo" resultType="com.rexel.laocz.domain.vo.OverviewVo">
+        SELECT
+        pam.pottery_altar_number AS potteryAltarNumber,
+        lm.liquor_name AS liquorName,
+        lb.liquor_batch_id AS liquorBatchId,
+        bpm.actual_weight AS actualWeight,
+        DATEDIFF(CURRENT_DATE, bpm.storing_time) AS retentionDays,
+        lm.liquor_level AS liquorLevel,
+        lm.liquor_round AS liquorRound,
+        lm.liquor_flavor_name AS liquorFlavorName,
+        lm.liquor_source AS liquorSource,
+        lm.liquor_year AS liquorYear,
+        lm.liquor_brewing_time AS liquorBrewingTime,
+        lm.liquor_content AS liquorContent,
+        fzi.fire_zone_name AS fireZoneName,
+        ai.area_name AS areaName
+        FROM
+        laocz_pottery_altar_management pam
+        LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id
+        LEFT JOIN laocz_liquor_batch lb ON bpm.liquor_batch_id = lb.liquor_batch_id
+        LEFT JOIN laocz_liquor_management lm ON lb.liquor_management_id = lm.liquor_management_id
+        LEFT JOIN laocz_fire_zone_info fzi ON pam.fire_zone_id = fzi.fire_zone_id
+        LEFT JOIN laocz_area_info ai ON fzi.area_id = ai.area_id
+        <where>
+            <!-- 根据传入参数添加条件 -->
+            <if test="potteryAltarNumber != null and potteryAltarNumber != ''">
+                pam.pottery_altar_number = #{potteryAltarNumber}
+            </if>
+        </where>
+    </select>
+    <select id="selectBatchInfo" resultType="com.rexel.laocz.domain.vo.BatchInfoVo">
+        SELECT
+        lm.liquor_name,
+        lb.liquor_batch_id,
+        count(bpm.liquor_batch_id) as count
+        FROM
+        laocz_liquor_batch lb
+        LEFT JOIN laocz_liquor_management lm ON lb.liquor_management_id = lm.liquor_management_id
+        left join laocz_batch_pottery_mapping bpm on bpm.liquor_batch_id = lb.liquor_batch_id
+        <where>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                bpm.liquor_batch_id = #{liquorBatchId}
+            </if>
+        </where>
+        GROUP BY bpm.liquor_batch_id
+    </select>
 
 
     <insert id="batchLaoczBatchPotteryMapping" parameterType="java.util.List"

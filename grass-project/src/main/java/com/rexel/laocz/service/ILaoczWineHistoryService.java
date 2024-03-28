@@ -34,7 +34,7 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @param operationType  操作类型
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber);
 
     /**
      * 数据报表-淘坛操作记录查询1

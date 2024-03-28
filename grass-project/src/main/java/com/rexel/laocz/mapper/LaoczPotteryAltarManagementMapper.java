@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
+import com.rexel.laocz.domain.vo.OverviewVo;
 import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import org.springframework.stereotype.Repository;

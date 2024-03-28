@@ -58,8 +58,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      * @return
      */
     @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType) {
-        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType);
+    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber) {
+        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType,potteryAltarNumber);
     }
 
     /**

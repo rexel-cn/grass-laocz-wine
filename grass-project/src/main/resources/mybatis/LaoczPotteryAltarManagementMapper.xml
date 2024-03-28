@@ -170,6 +170,7 @@
         laocz_fire_zone_info lfzi on lpam.fire_zone_id = lfzi.fire_zone_id
         LEFT JOIN
         laocz_area_info lai on lfzi.area_id = lai.area_id
+        left join laocz_batch_pottery_mapping bpm on bpm.pottery_altar_id = lpam.pottery_altar_id
         <where>
             <if test="areaId!=null and areaId!=''">
                 AND lfzi.area_id = #{areaId}
@@ -179,6 +180,9 @@
             </if>
             <if test="potteryAltarNumber!=null and potteryAltarNumber!=''">
                 AND lpam.pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
+            </if>
+            <if test="liquorBatchId!=null and liquorBatchId!=''">
+                AND bpm.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
         </where>
     </select>

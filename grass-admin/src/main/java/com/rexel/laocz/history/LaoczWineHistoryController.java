@@ -5,6 +5,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.utils.poi.ExcelUtil;
+import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportLossVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportVO;
@@ -42,20 +43,20 @@ public class LaoczWineHistoryController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType) {
+    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber) {
         startPage();
-        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType), "historyInfo");
+        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType,potteryAltarNumber), "historyInfo");
     }
 
     /**
      * 数据报表-淘坛操作记录
      *
      * @param potteryAltarNumber 陶坛编号
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param liquorBatchId  批次ID
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param liquorBatchId      批次ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     @GetMapping("/getPotteryJarOperationList")
@@ -67,8 +68,8 @@ public class LaoczWineHistoryController extends BaseController {
      * 数据报表-淘坛操作记录查询2
      *
      * @param potteryAltarNumber 陶坛编号
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     @GetMapping("/getPotteryJarOperationTableList")
@@ -136,5 +137,16 @@ public class LaoczWineHistoryController extends BaseController {
         ExcelUtil<LaoczWineHistoryVO> util = new ExcelUtil<>(LaoczWineHistoryVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.batchLossReportExport(liquorBatchId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczWineHistoryVO.class), "批次亏损报表");
+    }
+
+    /**
+     * 获取操作记录详情
+     * @param winHisId 酒历史表id
+     * @return 酒历史详情数据
+     */
+    @GetMapping("/getOperationdetails")
+    public AjaxResult getOperationdetails(Long winHisId){
+        LaoczWineHistory laoczWineHistory = laoczWineHistoryService.getById(winHisId);
+        return AjaxResult.success(laoczWineHistory);
     }
 }

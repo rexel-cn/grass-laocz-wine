@@ -226,7 +226,11 @@
             <if test="operationType != null and operationType != ''">
                 and lwh.operation_type = #{operationType}
             </if>
+            <if test="potteryAltarNumber != null and potteryAltarNumber != ''">
+                and lwh.pottery_altar_number = #{potteryAltarNumber}
+            </if>
         </where>
+        order by lwh.operation_time desc
     </select>
     <select id="selectLaoczWineHistoryStatement" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
         <include refid="selectLaoczWineHistoryVo"/>

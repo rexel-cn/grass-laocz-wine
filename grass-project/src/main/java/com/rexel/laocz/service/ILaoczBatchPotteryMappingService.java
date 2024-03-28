@@ -2,10 +2,7 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
-import com.rexel.laocz.domain.vo.BoardDataListVO;
-import com.rexel.laocz.domain.vo.BoardDataVO;
-import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
-import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
+import com.rexel.laocz.domain.vo.*;
 
 import java.util.List;
 
@@ -65,4 +62,13 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
      * @return
      */
     BoardDataListVO selectBoardData(Long areaId, Long fireZoneId);
+    /**
+     * 移动端场区概览
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 详情数据
+     */
+    OverviewVo  getOverview(String potteryAltarNumber);
+
+    List<BatchInfoVo> getBatchInfo(String liquorBatchId);
 }

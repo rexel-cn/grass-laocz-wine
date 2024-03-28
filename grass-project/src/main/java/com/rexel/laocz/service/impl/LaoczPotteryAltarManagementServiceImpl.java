@@ -13,10 +13,7 @@ import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
-import com.rexel.laocz.domain.vo.CurrentWineIndustryVO;
-import com.rexel.laocz.domain.vo.PotteryAltarInformationVO;
-import com.rexel.laocz.domain.vo.PotteryAltarVo;
-import com.rexel.laocz.domain.vo.PotteryPullDownFrameVO;
+import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
@@ -24,13 +21,11 @@ import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 陶坛管理Service业务层处理
