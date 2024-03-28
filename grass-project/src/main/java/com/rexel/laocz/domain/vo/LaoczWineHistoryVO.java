@@ -68,6 +68,12 @@ public class LaoczWineHistoryVO extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String operationType;
     /**
+     * 操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样
+     */
+    @Excel(name = "操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private String detailType;
+    /**
      * 申请重量
      */
     @Excel(name = "申请重量")
@@ -109,6 +115,11 @@ public class LaoczWineHistoryVO extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "业务时间", readConverterExp = "出=酒、入酒、取样时间")
     private Date operationTime;
+    /**
+     * 酒液 入酒时间
+     */
+    @Excel(name = "酒液", readConverterExp = "酒液 入酒时间")
+    private Date storingTime;
     /**
      * 取样用途
      */

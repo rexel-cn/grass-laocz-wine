@@ -36,22 +36,24 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
     /**
      * 查询历史信息
      *
-     * @param potteryAltarId 陶坛ID
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param operationType  操作类型
-     * @param potteryAltarNumber  陶坛编号
+     * @param potteryAltarId     陶坛ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param detailType         操作类型
+     * @param potteryAltarNumber 陶坛编号
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("operationType") String operationType,@Param("potteryAltarNumber") String potteryAltarNumber);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("potteryAltarNumber") String potteryAltarNumber);
 
     /**
      * 数据报表-淘坛操作记录
      *
      * @param potteryAltarNumber 陶坛编号
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param liquorBatchId  批次ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param liquorBatchId      批次ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             区域ID
      * @return
      */
     List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(@Param("potteryAltarNumber") String potteryAltarNumber,
@@ -70,7 +72,7 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @return 酒历史集合
      */
     List<LaoczWineHistoryVO> selectLaoczWineHistoryLossList(@Param("liquorBatchId") String liquorBatchId,
-                                                            @Param("potteryAltarId") Long potteryAltarId,
+                                                            @Param("potteryAltarNumber") Long potteryAltarNumber,
                                                             @Param("fireZoneId") Long fireZoneId,
                                                             @Param("areaId") Long areaId);
 }

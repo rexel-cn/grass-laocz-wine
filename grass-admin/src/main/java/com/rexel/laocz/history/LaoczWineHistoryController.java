@@ -43,9 +43,9 @@ public class LaoczWineHistoryController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber) {
+    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType, String potteryAltarNumber) {
         startPage();
-        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType,potteryAltarNumber), "historyInfo");
+        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType, potteryAltarNumber), "historyInfo");
     }
 
     /**
@@ -115,15 +115,15 @@ public class LaoczWineHistoryController extends BaseController {
     /**
      * 批次亏损查询二
      *
-     * @param potteryAltarId 陶坛编号
-     * @param fireZoneId     防火区编号
-     * @param areaId         区域编号
+     * @param potteryAltarNumber 陶坛编号
+     * @param fireZoneId         防火区编号
+     * @param areaId             区域编号
      * @return
      */
     @GetMapping("/selectLaoczWineHistoryInfoTwo")
-    public TableDataInfo selectLaoczWineHistoryInfoTwo(Long potteryAltarId, Long fireZoneId, Long areaId) {
+    public TableDataInfo selectLaoczWineHistoryInfoTwo(Long potteryAltarNumber, Long fireZoneId, Long areaId) {
         startPage();
-        return getDataTable(laoczWineHistoryService.selectLaoczWineHistoryInfoTwo(potteryAltarId, fireZoneId, areaId), "lossStatement");
+        return getDataTable(laoczWineHistoryService.selectLaoczWineHistoryInfoTwo(potteryAltarNumber, fireZoneId, areaId), "lossStatement");
     }
 
     /**
@@ -141,11 +141,12 @@ public class LaoczWineHistoryController extends BaseController {
 
     /**
      * 获取操作记录详情
+     *
      * @param winHisId 酒历史表id
      * @return 酒历史详情数据
      */
     @GetMapping("/getOperationdetails")
-    public AjaxResult getOperationdetails(Long winHisId){
+    public AjaxResult getOperationdetails(Long winHisId) {
         LaoczWineHistory laoczWineHistory = laoczWineHistoryService.getById(winHisId);
         return AjaxResult.success(laoczWineHistory);
     }

@@ -51,26 +51,28 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     /**
      * 查询历史信息
      *
-     * @param potteryAltarId 陶坛ID
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param operationType  操作类型
+     * @param potteryAltarId     陶坛ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param detailType         操作类型
+     * @param potteryAltarNumber 陶坛编号
      * @return
      */
+
     @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber) {
-        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType,potteryAltarNumber);
+    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String potteryAltarNumber) {
+        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, detailType, potteryAltarNumber);
     }
 
     /**
      * 数据报表-淘坛操作记录
      *
-     * @param potteryAltarId 陶坛ID
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param liquorBatchId  批次ID
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param potteryAltarNumber 陶坛ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param liquorBatchId      批次ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     @Override
@@ -86,19 +88,22 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
             List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
             Long totalOperand = (long) laoczWineHistoryVOSList.size();
             long entryOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "1".equals(history.getOperationType()))
+                    .filter(history -> "1".equals(history.getDetailType()))
                     .count();
             long distillingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "2".equals(history.getOperationType()))
+                    .filter(history -> "2".equals(history.getDetailType()))
                     .count();
-            long invertedJarOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "3".equals(history.getOperationType()))
+            long invertedJarOperationIn = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "3".equals(history.getDetailType()))
+                    .count();
+            long invertedJarOperationOut = laoczWineHistoryVOSList.stream()
+                    .filter(history -> "4".equals(history.getDetailType()))
                     .count();
             long samplingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "4".equals(history.getOperationType()))
+                    .filter(history -> "5".equals(history.getDetailType()))
                     .count();
 
-            return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperation, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
+            return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperationIn, invertedJarOperationOut, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
         } catch (Exception e) {
             log.error("查询失败", e);
             throw new ServiceException("查询失败");
@@ -108,9 +113,9 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     /**
      * 数据报表-淘坛操作记录查询2
      *
-     * @param potteryAltarId 陶坛ID
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param potteryAltarNumber 陶坛ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     @Override
@@ -187,13 +192,13 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
                     .sum();
             //出酒总量
             totalLiquorOutput = laoczWineHistoryList.stream()
-                    .filter(history -> history.getOperationType().equals("出酒"))
+                    .filter(history -> history.getDetailType().equals("出酒"))
                     .filter(history -> history.getWeighingTankWeight() != null)
                     .mapToDouble(LaoczWineHistoryVO::getWeighingTankWeight)
                     .sum();
             //取样总量
             totalSampling = laoczWineHistoryList.stream()
-                    .filter(history -> history.getOperationType().equals("取样"))
+                    .filter(history -> history.getDetailType().equals("取样"))
                     .filter(history -> history.getSamplingWeight() != null)
                     .mapToDouble(LaoczWineHistoryVO::getSamplingWeight)
                     .sum();
@@ -212,14 +217,14 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     /**
      * 批次亏损查询二
      *
-     * @param potteryAltarId 陶坛编号
-     * @param fireZoneId     防火区编号
-     * @param areaId         区域编号
+     * @param potteryAltarNumber 陶坛编号
+     * @param fireZoneId         防火区编号
+     * @param areaId             区域编号
      * @return
      */
     @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarId, Long fireZoneId, Long areaId) {
-        return baseMapper.selectLaoczWineHistoryLossList(null, potteryAltarId, fireZoneId, areaId);
+    public List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarNumber, Long fireZoneId, Long areaId) {
+        return baseMapper.selectLaoczWineHistoryLossList(null, potteryAltarNumber, fireZoneId, areaId);
     }
 
     /**
@@ -241,7 +246,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     private TableDataInfoDataReportVO getDataTable(long totalOperand,
                                                    long entryOperation,
                                                    long distillingOperation,
-                                                   long invertedJarOperation,
+                                                   long invertedJarOperationIn,
+                                                   long invertedJarOperationOut,
                                                    long samplingOperation,
                                                    List<?> list,
                                                    String headerName) {
@@ -249,7 +255,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
         rspData.setTotalOperand(totalOperand);
         rspData.setEntryOperation(entryOperation);
         rspData.setDistillingOperation(distillingOperation);
-        rspData.setInvertedJarOperation(invertedJarOperation);
+        rspData.setInvertedJarOperationIn(invertedJarOperationIn);
+        rspData.setInvertedJarOperationOut(invertedJarOperationOut);
         rspData.setSamplingOperation(samplingOperation);
         rspData.setCode(org.springframework.http.HttpStatus.OK.value());
         rspData.setMsg(org.springframework.http.HttpStatus.OK.getReasonPhrase());

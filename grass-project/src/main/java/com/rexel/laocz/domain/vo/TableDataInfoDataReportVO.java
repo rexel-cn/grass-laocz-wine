@@ -27,14 +27,17 @@ public class TableDataInfoDataReportVO implements Serializable {
      */
     private long distillingOperation;
     /**
-     * 倒坛
+     * 倒坛入
      */
-    private long invertedJarOperation;
+    private long invertedJarOperationIn;
+    /**
+     * 倒坛出
+     */
+    private long invertedJarOperationOut;
     /**
      * 取样
      */
     private long samplingOperation;
-
 
     /**
      * 总记录数

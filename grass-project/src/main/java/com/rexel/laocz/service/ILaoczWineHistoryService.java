@@ -34,17 +34,17 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @param operationType  操作类型
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType,String potteryAltarNumber);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType, String potteryAltarNumber);
 
     /**
      * 数据报表-淘坛操作记录查询1
      *
      * @param potteryAltarNumber 陶坛编号
-     * @param fromTime       开始时间
-     * @param endTime        结束时间
-     * @param liquorBatchId  批次ID
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param fromTime           开始时间
+     * @param endTime            结束时间
+     * @param liquorBatchId      批次ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     TableDataInfoDataReportVO selectTableDataInfo(String potteryAltarNumber,
@@ -58,8 +58,8 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * 数据报表-淘坛操作记录查询2
      *
      * @param potteryAltarNumber 陶坛编号
-     * @param fireZoneId     防火区ID
-     * @param areaId         场区ID
+     * @param fireZoneId         防火区ID
+     * @param areaId             场区ID
      * @return
      */
     List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(String potteryAltarNumber, Long fireZoneId, Long areaId);
@@ -93,15 +93,17 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
 
     /**
      * 批次亏损查询二
-     * @param potteryAltarId 陶坛编号
-     * @param fireZoneId 防火区编号
-     * @param areaId 区域编号
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @param fireZoneId         防火区编号
+     * @param areaId             区域编号
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarId, Long fireZoneId, Long areaId);
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarNumber, Long fireZoneId, Long areaId);
 
     /**
      * 批次报表导出
+     *
      * @param liquorBatchId 批次ID
      * @return
      */
