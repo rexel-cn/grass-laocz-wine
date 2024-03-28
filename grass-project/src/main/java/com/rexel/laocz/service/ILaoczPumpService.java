@@ -2,7 +2,9 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczPump;
+import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
+import com.rexel.laocz.domain.vo.PointInfo;
 
 import java.util.List;
 
@@ -22,5 +24,15 @@ public interface ILaoczPumpService extends IService<LaoczPump> {
      */
     List<LaoczPumpVo> selectLaoczPumpList(LaoczPump laoczPump);
 
-    LaoczPumpVo getPumpDetail(Long pumpId);
+    PumpAddDto getPumpDetail(Long pumpId);
+    /**
+     * 新增泵管理
+     */
+    boolean addPump(PumpAddDto pumpAddDto);
+
+    boolean updateByIdWithPump(PumpAddDto pumpAddDto);
+
+    boolean removeByIdWithPoint(Long pumpId);
+
+    List<PointInfo> getPointInfo(Long pumpId);
 }

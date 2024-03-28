@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.DateUtils;
 import com.rexel.laocz.domain.LaoczAreaInfo;
+import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
@@ -18,10 +19,12 @@ import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.domain.vo.PotteryPullDownFrameVO;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
+import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,6 +47,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     @Autowired
     private ILaoczAreaInfoService iLaoczAreaInfoService;
 
+    @Autowired
+    private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
+
     /**
      * 查询陶坛管理列表
      *
@@ -59,7 +65,6 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      * 查询陶坛下拉框
      *
      * @param fireZoneId 防火区ID
-     * @return
      */
     @Override
     public List<PotteryPullDownFrameVO> selectPotteryPullDownFrameList(Long fireZoneId) {
@@ -76,7 +81,6 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      * 获取陶坛信息
      *
      * @param potteryAltarId 主键ID
-     * @return
      */
     @Override
     public PotteryAltarInformationVO selectPotteryAltarInformation(Long potteryAltarId) {
@@ -118,32 +122,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     /**
      * 查询陶坛管理列表详细信息
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛信息
+     * @return 陶坛回显信息
      */
     @Override
     public List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
-        List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = baseMapper.selectLaoczPotteryAltarManagementList(laoczPotteryAltarManagement);
-
-
-        List<PotteryAltarVo> list = laoczPotteryAltarManagements.stream().map((item) -> {
-
-            PotteryAltarVo potteryAltarVo = new PotteryAltarVo();
-
-            Long fireZoneId = item.getFireZoneId();
-
-            LaoczFireZoneInfo laoczFireZoneInfo = iLaoczFireZoneInfoService.getById(fireZoneId);
-
-            LaoczAreaInfo laoczAreaInfo = iLaoczAreaInfoService.getById(laoczFireZoneInfo.getAreaId());
-
-            BeanUtil.copyProperties(item, potteryAltarVo);
-
-            potteryAltarVo.setAreaName(laoczAreaInfo.getAreaName());
-            potteryAltarVo.setFireZoneName(laoczFireZoneInfo.getFireZoneName());
-
-            return potteryAltarVo;
-        }).collect(Collectors.toList());
-
+        List<PotteryAltarVo> list = baseMapper.selectLaoczPotteryAltarManagementListDetail(laoczPotteryAltarManagement);
         return list;
     }
 
@@ -175,8 +159,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     /**
      * 新增陶坛
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛信息
      */
     @Override
     public boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
@@ -199,8 +182,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     /**
      * 修改陶坛
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛信息
      */
     @Override
     public boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
@@ -235,5 +217,22 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             throw new ServiceException("条件错误");
         }
         return baseMapper.selectWineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
+    }
+
+    /**
+     * 删除陶坛管理
+     *
+     * @param potteryAltarId 陶坛Id
+     * @return 返回标识
+     */
+    @Override
+    public boolean removeWithReal(Long potteryAltarId) {
+        // 陶坛不在实时使用中才可以删除
+        Integer count = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).count();
+        if (count > 0) {
+            throw new ServiceException("陶坛在使用中，禁止删除");
+        } else {
+            return this.removeById(potteryAltarId);
+        }
     }
 }

@@ -56,6 +56,9 @@ public class LaoczWeighingTank extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String fullTankUpperLimit;
 
+    @TableField(exist = false)
+    private Long areaId;
+
 
     @Override
     public String toString() {

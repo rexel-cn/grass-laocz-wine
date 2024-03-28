@@ -21,6 +21,14 @@ public class PotteryAltarInfomationDInfoVO {
      */
     private Double ApplyWeight;
     /**
+     * 操作类型：1：入酒，2出酒，3倒坛，4取样
+     */
+    private Long operationType;
+    /**
+     * 酒液重量
+     */
+    private Double liquorWeight;
+    /**
      * 酒品名称
      */
     private String liquorName;
@@ -60,7 +68,7 @@ public class PotteryAltarInfomationDInfoVO {
     /**
      * 申请重量
      */
-    private Long potteryAltarApplyWeight;
+    private Double potteryAltarApplyWeight;
     /**
      * 称重罐编号
      */
@@ -68,7 +76,7 @@ public class PotteryAltarInfomationDInfoVO {
     /**
      * 剩余重量
      */
-    private Long remainingWeight;
+    private Double remainingWeight;
     /**
      * 陶坛管理编号
      */
@@ -76,7 +84,7 @@ public class PotteryAltarInfomationDInfoVO {
     /**
      * 满坛重量
      */
-    private Long potteryAltarFullAltarWeight;
+    private Double potteryAltarFullAltarWeight;
     /**
      * 场区名称
      */
@@ -85,4 +93,13 @@ public class PotteryAltarInfomationDInfoVO {
      * 防火区名称
      */
     private String fireZoneName;
+    /**
+     * 执行人
+     */
+    private String createBy;
+    /**
+     * 执行时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date operationTime;
 }

@@ -49,8 +49,12 @@ public class LaoczPump extends BaseEntity {
      */
     @Excel(name = "泵编号")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long pumpNumber;
-
+    private String pumpNumber;
+    /**
+     * 区域Id
+     */
+    @TableField(exist = false)
+    private Long areaId;
 
     @Override
     public String toString() {

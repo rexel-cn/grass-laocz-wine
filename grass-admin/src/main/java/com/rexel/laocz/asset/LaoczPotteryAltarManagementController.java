@@ -41,7 +41,7 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * 查询陶坛下拉框
      *
      * @param fireZoneId 防火区ID
-     * @return
+     * @return 返回下拉框数据
      */
     @GetMapping("/getPotteryPullDownFrame")
     private AjaxResult getPotteryPullDownFrame(Long fireZoneId) {
@@ -52,7 +52,7 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * 获取陶坛信息
      *
      * @param potteryAltarId 主键ID
-     * @return
+     * @return 返回陶坛信息
      */
     @GetMapping("/getPotteryAltarInformation")
     private AjaxResult getPotteryAltarInformation(Long potteryAltarId) {
@@ -63,7 +63,7 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * 获取当前陶坛酒液
      *
      * @param potteryAltarId 主键ID
-     * @return
+     * @return 返回数据
      */
     @GetMapping("/getCurrentWineIndustry")
     private AjaxResult getCurrentWineIndustry(Long potteryAltarId) throws ParseException {
@@ -73,8 +73,8 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     /**
      * 查询陶坛管理列表详细信息
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛对象
+     * @return 分页数据
      */
     @GetMapping("listDetail")
     public TableDataInfo listDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
@@ -89,7 +89,7 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     @DeleteMapping("/{potteryAltarId}")
     public AjaxResult remove(@PathVariable Long potteryAltarId) {
 
-        return toAjax(iLaoczPotteryAltarManagementService.removeById(potteryAltarId));
+        return toAjax(iLaoczPotteryAltarManagementService.removeWithReal(potteryAltarId));
     }
 
     /**
@@ -104,8 +104,8 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     /**
      * 修改陶坛
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛信息
+     * @return 返回标识
      */
     @PutMapping
     public AjaxResult edit(@RequestBody LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
@@ -115,8 +115,8 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     /**
      * 新增陶坛
      *
-     * @param laoczPotteryAltarManagement
-     * @return
+     * @param laoczPotteryAltarManagement 陶坛信息
+     * @return 返回标识
      */
     @PostMapping
     public AjaxResult add(@RequestBody LaoczPotteryAltarManagement laoczPotteryAltarManagement) {

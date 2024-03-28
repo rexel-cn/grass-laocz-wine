@@ -135,6 +135,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
             PotteryAltarInfomationDInfoVO potteryAltarInfomationDInfoVO = baseMapper.selectPotteryAltarFullAltarWeight(winHisId);
             LaoczWineHistoryInfoVO laoczWineHistoryInfoVO = new LaoczWineHistoryInfoVO();
             laoczWineHistoryInfoVO.setWorkOrderId(potteryAltarInfomationDInfoVO.getWorkOrderId());
+            laoczWineHistoryInfoVO.setHeadline(potteryAltarInfomationDInfoVO.getOperationType());
             laoczWineHistoryInfoVO.setCurrentWineIndustryVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, CurrentWineIndustryInfoVO.class));
             laoczWineHistoryInfoVO.setPotteryAltarInformationInfoVO(BeanUtil.copyProperties(potteryAltarInfomationDInfoVO, PotteryAltarInformationInfoVO.class));
             return laoczWineHistoryInfoVO;

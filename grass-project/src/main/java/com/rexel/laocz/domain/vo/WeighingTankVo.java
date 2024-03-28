@@ -19,8 +19,4 @@ public class WeighingTankVo extends LaoczWeighingTank {
     @Excel(name = "归属防火区")
     private String fireZoneName;
 
-    /**
-     * 场区Id
-     */
-    private Long areaId;
 }

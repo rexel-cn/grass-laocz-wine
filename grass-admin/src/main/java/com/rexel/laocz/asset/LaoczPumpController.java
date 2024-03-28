@@ -6,7 +6,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.rexel.laocz.domain.LaoczPump;
+import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
+import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.service.ILaoczPumpService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,7 @@ public class LaoczPumpController extends BaseController {
     public TableDataInfo list(LaoczPump laoczPump) {
         startPage();
         List<LaoczPumpVo> list = laoczPumpService.selectLaoczPumpList(laoczPump);
-        return getDataTable(list,"laoczPump");
+        return getDataTable(list, "laoczPump");
     }
 
     /**
@@ -60,8 +62,8 @@ public class LaoczPumpController extends BaseController {
      */
     @Log(title = "泵管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody LaoczPump laoczPump) {
-        return toAjax(laoczPumpService.save(laoczPump));
+    public AjaxResult addPump(@RequestBody PumpAddDto pumpAddDto) {
+        return toAjax(laoczPumpService.addPump(pumpAddDto));
     }
 
     /**
@@ -69,36 +71,35 @@ public class LaoczPumpController extends BaseController {
      */
     @Log(title = "泵管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody LaoczPump laoczPump) {
-        return toAjax(laoczPumpService.updateById(laoczPump));
+    public AjaxResult edit(@RequestBody PumpAddDto pumpAddDto) {
+        return toAjax(laoczPumpService.updateByIdWithPump(pumpAddDto));
     }
 
     /**
-     * 删除泵管理
+     * 删除泵管理以及泵相关测点
      */
     @Log(title = "泵管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{pumpIds}")
-    public AjaxResult remove(@PathVariable Long[] pumpIds) {
-        return toAjax(laoczPumpService.removeByIds(Arrays.asList(pumpIds)));
+    @DeleteMapping("/{pumpId}")
+    public AjaxResult remove(@PathVariable Long pumpId) {
+        return toAjax(laoczPumpService.removeByIdWithPoint(pumpId));
     }
 
     /**
-     * 绑定测点详情
+     * 获取绑定测点详情
      */
     @GetMapping("/getPointInfo")
     public AjaxResult getPointInfo(Long pumpId) {
-
-        //laoczPumpService.getByIdWithPonitInfo();
-
-        return null;
+        List<PointInfo> pointInfos = laoczPumpService.getPointInfo(pumpId);
+        return AjaxResult.success(pointInfos);
     }
+
     /**
      * 查询泵管理详情
      */
     @GetMapping("/getPumpDetail")
-    public AjaxResult getPumpDetail(Long pumpId){
-       LaoczPumpVo laoczPumpVo =  laoczPumpService.getPumpDetail(pumpId);
-        return AjaxResult.success(laoczPumpVo);
+    public AjaxResult getPumpDetail(Long pumpId) {
+        PumpAddDto pumpAddDto = laoczPumpService.getPumpDetail(pumpId);
+        return AjaxResult.success(pumpAddDto);
 
     }
 }

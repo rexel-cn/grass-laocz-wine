@@ -19,9 +19,12 @@ public class LaoczWineHistoryInfoVO {
      * 申请的工单id
      */
     private String workOrderId;
-
     /**
-     * 入酒信息
+     * 标题是入酒信息、出酒信息、倒坛信息、取样信息
+     */
+    private Long headline;
+    /**
+     * 操作酒信息信息
      */
     private CurrentWineIndustryInfoVO currentWineIndustryVO;
 

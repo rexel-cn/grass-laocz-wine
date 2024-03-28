@@ -21,7 +21,6 @@
         <result property="pumpNumber" column="pump_number"/>
         <result property="areaName" column="area_name"/>
         <result property="fireZoneName" column="fire_zone_name"/>
-        <result property="pointKey" column="point_key"/>
 
     </resultMap>
 
@@ -60,6 +59,9 @@
             <if test="pumpNumber != null ">
                 and pump_number = #{pumpNumber}
             </if>
+            <if test="areaId!=null ">
+                AND lfzi.area_id = #{areaId}
+            </if>
         </where>
     </select>
     <select id="selectPumpDetails" resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
@@ -85,6 +87,21 @@
         <where>
             <if test="pumpId != null ">
                 and lp.pump_id = #{pumpNumber}
+            </if>
+        </where>
+    </select>
+    <select id="getPointInfo" resultType="com.rexel.laocz.domain.vo.PointInfo">
+        SELECT
+        gpi.point_type,
+        gpi.point_id,
+        gpi.point_name
+        FROM
+        laocz_pump lp
+        LEFT JOIN laocz_pump_point lpp ON lp.pump_id = lpp.pump_id
+        LEFT JOIN grass_point_info gpi ON gpi.id = lpp.point_primary_key
+        <where>
+            <if test="pumpId != null">
+                and pump_id = #{pumpId}
             </if>
         </where>
     </select>

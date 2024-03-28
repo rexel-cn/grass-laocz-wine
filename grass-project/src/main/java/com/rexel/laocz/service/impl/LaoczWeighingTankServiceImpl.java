@@ -8,19 +8,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.core.domain.entity.SysDictData;
 import com.rexel.common.exception.ServiceException;
-import com.rexel.laocz.domain.LaoczAreaInfo;
-import com.rexel.laocz.domain.LaoczFireZoneInfo;
-import com.rexel.laocz.domain.LaoczWeighingTank;
-import com.rexel.laocz.domain.LaoczWeighingTankPoint;
+import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
+import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.mapper.LaoczWeighingTankMapper;
-import com.rexel.laocz.service.ILaoczAreaInfoService;
-import com.rexel.laocz.service.ILaoczFireZoneInfoService;
-import com.rexel.laocz.service.ILaoczWeighingTankPointService;
-import com.rexel.laocz.service.ILaoczWeighingTankService;
+import com.rexel.laocz.service.*;
 import com.rexel.system.service.ISysDictDataService;
 import com.rexel.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +48,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Autowired
     private ILaoczWeighingTankPointService iLaoczWeighingTankPointService;
 
+    @Autowired
+    private ILaoczWineDetailsService iLaoczWineDetailsService;
+
     /**
      * 查询称重罐管理列表
      *
@@ -69,28 +67,8 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
      */
     @Override
     public List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank) {
-
-        List<LaoczWeighingTank> laoczWeighingTanks = this.selectLaoczWeighingTankList(laoczWeighingTank);
-
-        List<WeighingTankVo> tankVos = laoczWeighingTanks.stream().map((item) -> {
-            WeighingTankVo weighingTankVo = new WeighingTankVo();
-
-            Long fireZoneId = item.getFireZoneId();
-
-            LaoczFireZoneInfo laoczFireZoneInfo = iLaoczFireZoneInfoService.getById(fireZoneId);
-
-            LaoczAreaInfo laoczAreaInfo = iLaoczAreaInfoService.getById(laoczFireZoneInfo.getAreaId());
-
-            BeanUtil.copyProperties(item, weighingTankVo);
-
-            weighingTankVo.setAreaName(laoczAreaInfo.getAreaName());
-            weighingTankVo.setFireZoneName(laoczFireZoneInfo.getFireZoneName());
-            weighingTankVo.setAreaId(laoczAreaInfo.getAreaId());
-
-
-            return weighingTankVo;
-
-        }).collect(Collectors.toList());
+        // 查询称重罐列表详细信息
+        List<WeighingTankVo> tankVos = baseMapper.selectLaoczWeighingTankListDetail(laoczWeighingTank);
 
         return tankVos;
     }
@@ -151,7 +129,7 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
         } else {
             // 称重罐管理更新
             LaoczWeighingTank laoczWeighingTank = new LaoczWeighingTank();
-            BeanUtil.copyProperties(weighingTankAddDto,laoczWeighingTank);
+            BeanUtil.copyProperties(weighingTankAddDto, laoczWeighingTank);
             updateById(laoczWeighingTank);
 
 
@@ -159,10 +137,17 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
                     (item) -> {
                         LaoczWeighingTankPoint laoczWeighingTankPoint = new LaoczWeighingTankPoint();
                         BeanUtil.copyProperties(item, laoczWeighingTankPoint);
+                        laoczWeighingTankPoint.setWeighingTankId(weighingTankAddDto.getWeighingTankId());
                         return laoczWeighingTankPoint;
                     }
             ).collect(Collectors.toList());
-            return iLaoczWeighingTankPointService.updateBatchById(tankPoints);
+
+            //先将所有与该称重罐相关测点数据删除
+            QueryWrapper<LaoczWeighingTankPoint> wrapper = new QueryWrapper<>();
+            wrapper.eq("weighing_tank_id", weighingTankAddDto.getWeighingTankId());
+            iLaoczWeighingTankPointService.remove(wrapper);
+
+            return iLaoczWeighingTankPointService.saveBatch(tankPoints);
         }
     }
 
@@ -251,10 +236,10 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     }
 
     @Override
-    public List<WeighingTankAddVo> getAddVo() {
+    public List<WeighingTankAddVo> getAddVo(String dictType) {
 
         // 查询字典表获取所有的useMark和name
-        List<SysDictData> weightMark = iSysDictTypeService.selectDictDataByType("weight_mark");
+        List<SysDictData> weightMark = iSysDictTypeService.selectDictDataByType(dictType);
 
         List<WeighingTankAddVo> weighingTankAddVos = weightMark.stream().map((item) -> {
             WeighingTankAddVo weighingTankAddVo = new WeighingTankAddVo();
@@ -264,6 +249,29 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
         }).collect(Collectors.toList());
 
         return weighingTankAddVos;
+    }
+
+    @Override
+    public List<PointInfo> getPointInfo(Long weighingTankId) {
+        // 获取所有的测点并根据测点获取测点信息
+        List<PointInfo> pointInfos = baseMapper.getPointInfo();
+        return pointInfos;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeByIdWithPoint(Long weighingTankId) {
+        //称重罐如果在使用中，禁止删除
+        Integer count = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWeighingTank, weighingTankId).count();
+        if (count > 0) {
+            throw new ServiceException("称重罐操作中，禁止删除");
+        }
+        //删除称重罐管理数据
+        this.removeById(weighingTankId);
+        //删除与该称重罐相关测点
+        QueryWrapper<LaoczWeighingTankPoint> wrapper = new QueryWrapper<>();
+        wrapper.eq("weighing_tank_id", weighingTankId);
+        return iLaoczWeighingTankPointService.remove(wrapper);
     }
 
     private void check(List<WeighingTankDto> weighingTankDtos) {
