@@ -44,7 +44,7 @@ public class WineOutController extends BaseController {
     /**
      * 出酒操作完成
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param winBaseDTO 酒操作业务详情id
      * @return 完成
      */
     @PostMapping("/finish")

@@ -103,6 +103,7 @@
         lwd.busy_status,
         lwd.weighing_tank,
         lwd.sampling_purpose,
+        lwd.weighing_tank_weight,
         lpam.pottery_altar_number,
         lpam.pottery_altar_full_altar_weight,
         lfzi.fire_zone_id,
@@ -185,7 +186,7 @@
         llm.liquor_brewing_time,
         llm.liquor_content
         FROM
-        laocz_wine_details lwd
+        laocz_wine_details_his lwd
         INNER JOIN laocz_wine_operations lwo ON lwd.busy_id = lwo.busy_id
         LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
         LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id

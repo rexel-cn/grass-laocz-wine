@@ -7,7 +7,7 @@ import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.RealStatusEnum;
-import com.rexel.laocz.enums.WineBusyStatusEnum;
+import com.rexel.laocz.enums.WineDetailTypeEnum;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,19 +64,7 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     }
 
     private void saveLaoczWineDetails(WineSampApplyDTO wineSampApplyDTO, String busyId, String workId, LaoczBatchPotteryMapping laoczBatchPotteryMapping) {
-        LaoczWineDetails laoczWineDetails = new LaoczWineDetails();
-        //业务id
-        laoczWineDetails.setBusyId(busyId);
-        //工单id
-        laoczWineDetails.setWorkOrderId(workId);
-        //酒品批次号
-        laoczWineDetails.setLiquorBatchId(laoczBatchPotteryMapping.getLiquorBatchId());
-        //陶坛罐id
-        laoczWineDetails.setPotteryAltarId(wineSampApplyDTO.getPotteryAltarId());
-        //运行状态
-        laoczWineDetails.setBusyStatus(WineBusyStatusEnum.NOT_STARTED.getValue());
-        //申请重量
-        laoczWineDetails.setPotteryAltarApplyWeight(wineSampApplyDTO.getSamplingWeight());
+        LaoczWineDetails laoczWineDetails = buildLaoczWineDetails(busyId, workId, laoczBatchPotteryMapping.getLiquorBatchId(), wineSampApplyDTO.getPotteryAltarId(), wineSampApplyDTO.getSamplingWeight(), WineDetailTypeEnum.SAMPLING, wineSampApplyDTO.getSampPurpose());
         iLaoczWineDetailsService.save(laoczWineDetails);
     }
 
@@ -90,13 +78,14 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Transactional(rollbackFor = Exception.class)
     public void wineSampFinish(Long wineDetailsId) {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
+
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
                 laoczWineDetails.getPotteryAltarApplyWeight());
-        //新增数据到历史表
-        super.saveHistory(laoczWineDetails, OperationTypeEnum.SAMPLING);
         //备份酒操作业务表
         super.backupWineDetails(laoczWineDetails);
+        //新增数据到历史表
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.SAMPLING);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
     }

@@ -12,7 +12,7 @@ import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.dview.DviewUtils;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.RealStatusEnum;
-import com.rexel.laocz.enums.WineBusyStatusEnum;
+import com.rexel.laocz.enums.WineDetailTypeEnum;
 import com.rexel.laocz.enums.WineOperationTypeEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,7 +104,6 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         try {
             String pointValue = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
             wineDetails.setWeighingTankWeight(Double.parseDouble(pointValue));
-            wineDetails.setBusyStatus(WineBusyStatusEnum.COMPLETED.getValue());
             iLaoczWineDetailsService.updateById(wineDetails);
             super.updatePotteryMappingState(wineDetails.getPotteryAltarId(), RealStatusEnum.WINE_OUT);
             return pointValue;
@@ -140,23 +138,28 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         //判断是否已经有了称重罐重量以及是否已经完成
         winOutfinishCheck(laoczWineDetails);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
-        super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
+        LaoczBatchPotteryMapping laoczBatchPotteryMapping = super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
                 laoczWineDetails.getPotteryAltarApplyWeight());
-        //新增数据到历史表
-        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_OUT);
         //备份酒操作业务表
         super.backupWineDetails(laoczWineDetails);
-
+        //新增数据到历史表
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_OUT);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
+        //如果陶坛实际重量小于等于0，删除实时关系表
+        potteryMappingFinish(laoczBatchPotteryMapping);
     }
+
+    private void potteryMappingFinish(LaoczBatchPotteryMapping laoczBatchPotteryMapping) {
+        if (laoczBatchPotteryMapping.getActualWeight() <= 0) {
+            iLaoczBatchPotteryMappingService.removeById(laoczBatchPotteryMapping);
+        }
+    }
+
 
     private void winOutfinishCheck(LaoczWineDetails laoczWineDetails) {
         if (laoczWineDetails.getWeighingTankWeight() == null) {
             throw new CustomException("称重罐重量未获取");
-        }
-        if (!Objects.equals(laoczWineDetails.getBusyStatus(), WineBusyStatusEnum.COMPLETED.getValue())) {
-            throw new CustomException("该任务未完成");
         }
     }
 
@@ -178,7 +181,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         for (WineOutApplyDTO wineOutApplyDTO : wineOutApplyDTOS) {
             Long potteryAltarId = wineOutApplyDTO.getPotteryAltarId();
             LaoczBatchPotteryMapping laoczBatchPotteryMapping = map.get(potteryAltarId);
-            list.add(buildLaoczWineDetails(busyId, workId, laoczBatchPotteryMapping.getLiquorBatchId(), potteryAltarId, wineOutApplyDTO.getApplyWeight()));
+            list.add(buildLaoczWineDetails(busyId, workId, laoczBatchPotteryMapping.getLiquorBatchId(), potteryAltarId, wineOutApplyDTO.getApplyWeight(), WineDetailTypeEnum.OUT_WINE, null));
         }
         iLaoczWineDetailsService.saveBatch(list);
     }
