@@ -3,18 +3,18 @@ package com.rexel.laocz.service;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSON;
 import com.rexel.common.exception.CustomException;
+import com.rexel.common.utils.DictUtils;
+import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineHistoryDTO;
-import com.rexel.laocz.enums.OperationTypeEnum;
-import com.rexel.laocz.enums.RealStatusEnum;
-import com.rexel.laocz.enums.WineBusyStatusEnum;
-import com.rexel.laocz.enums.WineOperationTypeEnum;
+import com.rexel.laocz.enums.*;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,7 +52,6 @@ public abstract class WineAbstract {
     private ILaoczWineHistoryService iLaoczWineHistoryService;
 
 
-
     protected void saveWineEvent(LaoczWineDetails wineDetails, String Status, List<String> points, String eventStatus) {
         LaoczWineEvent laoczWineEvent = new LaoczWineEvent();
         //工单id
@@ -86,7 +85,13 @@ public abstract class WineAbstract {
      * @param applyWeight    申请重量
      * @return LaoczWineDetails
      */
-    protected LaoczWineDetails buildLaoczWineDetails(String busyId, String workId, String liquorBatchId, Long potteryAltarId, Double applyWeight) {
+    protected LaoczWineDetails buildLaoczWineDetails(String busyId,
+                                                     String workId,
+                                                     String liquorBatchId,
+                                                     Long potteryAltarId,
+                                                     Double applyWeight,
+                                                     WineDetailTypeEnum wineDetailTypeEnum,
+                                                     String samplingPurpose) {
         LaoczWineDetails laoczWineDetails = new LaoczWineDetails();
         //业务id
         laoczWineDetails.setBusyId(busyId);
@@ -100,6 +105,10 @@ public abstract class WineAbstract {
         laoczWineDetails.setBusyStatus(WineBusyStatusEnum.NOT_STARTED.getValue());
         //申请重量
         laoczWineDetails.setPotteryAltarApplyWeight(applyWeight);
+        //操作详细类型
+        laoczWineDetails.setDetailType(wineDetailTypeEnum.getCode());
+        //取样用途
+        laoczWineDetails.setSamplingPurpose(samplingPurpose);
         return laoczWineDetails;
     }
 
@@ -146,8 +155,11 @@ public abstract class WineAbstract {
                         .one();
                 //剩余重量
                 laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                //入酒时间
+                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
                 //亏损重量=申请重量-称重罐重量
-                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                double lossWeight = BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue();
+                laoczWineHistory.setLossWeight(lossWeight);
                 //出酒历史保存
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 break;
@@ -162,6 +174,9 @@ public abstract class WineAbstract {
                         .one();
                 //剩余重量
                 laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
+                //取样用途
+                laoczWineHistory.setSamplingPurpose(DictUtils.getDictLabel(WineDictConstants.SAMPLING_PURPOSE, laoczWineHistory.getSamplingPurpose()));
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 saveSamplingHistory(wineDetailsId, laoczWineHistory);
                 break;
@@ -169,6 +184,7 @@ public abstract class WineAbstract {
                 throw new IllegalArgumentException("Unexpected value: " + operationTypeEnum);
         }
     }
+
     private void saveSamplingHistory(LaoczWineDetails laoczWineDetails, LaoczWineHistory laoczWineHistory) {
         //新增数据到laocz_sampling_histority
         LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
@@ -181,11 +197,11 @@ public abstract class WineAbstract {
         //陶坛罐id
         laoczSamplingHistority.setPotteryAltarId(laoczWineDetails.getPotteryAltarId());
         //取样用途
-        laoczSamplingHistority.setSamplingPurpose(laoczWineDetails.getSamplingPurpose());
+        laoczSamplingHistority.setSamplingPurpose(laoczWineHistory.getSamplingPurpose());
         //取样重量
         laoczSamplingHistority.setSamplingWeight(laoczWineDetails.getPotteryAltarApplyWeight());
         //取样时间
-        laoczSamplingHistority.setSamplingDate(laoczWineDetails.getOperationTime());
+        laoczSamplingHistority.setSamplingDate(laoczWineHistory.getOperationTime());
         //场区名称
         laoczSamplingHistority.setAreaName(laoczWineHistory.getAreaName());
         //防火区名称
@@ -207,6 +223,7 @@ public abstract class WineAbstract {
         }
         LaoczWineDetailsHis laoczWineDetailsHis = BeanUtil.copyProperties(laoczWineDetails, LaoczWineDetailsHis.class);
         laoczWineDetailsHis.setOperationTime(new Date());
+        laoczWineDetailsHis.setBusyStatus(WineBusyStatusEnum.COMPLETED.getValue());
         iLaoczWineDetailsHisService.save(laoczWineDetailsHis);
         iLaoczWineDetailsService.removeById(laoczWineDetails);
     }
@@ -218,9 +235,12 @@ public abstract class WineAbstract {
      * @param operator       运算符 +  或 -
      * @param actualWeight   实际重量
      */
-    protected void updatePotteryMappingState(Long potteryAltarId, String operator, Double actualWeight) {
+    protected LaoczBatchPotteryMapping updatePotteryMappingState(Long potteryAltarId, String operator, Double actualWeight) {
         LaoczBatchPotteryMapping laoczBatchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).one();
         Double weight = laoczBatchPotteryMapping.getActualWeight();
+        if (weight == null) {
+            weight = 0.0;
+        }
         //判断加减，如果加 更新重量和状态
         //如果减那么判断是否减到0，如果没有到0，更新减法后的重量并更新状态，如果到0，那么就删除此条数据
         if ("+".equals(operator)) {
@@ -229,15 +249,11 @@ public abstract class WineAbstract {
             laoczBatchPotteryMapping.setStoringTime(new Date());
             iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
         } else if ("-".equals(operator)) {
-            if (weight - actualWeight > 0) {
-                laoczBatchPotteryMapping.setActualWeight(weight - actualWeight);
-                laoczBatchPotteryMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
-                iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
-            } else {
-                iLaoczBatchPotteryMappingService.removeById(laoczBatchPotteryMapping);
-            }
+            laoczBatchPotteryMapping.setActualWeight(weight - actualWeight);
+            laoczBatchPotteryMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
+            iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
         }
-
+        return laoczBatchPotteryMapping;
     }
 
     /**

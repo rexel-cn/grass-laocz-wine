@@ -36,7 +36,12 @@ public class LaoczLiquorDictServiceImpl extends ServiceImpl<LaoczLiquorDictMappe
      */
     @Override
     public List<LaoczLiquorDict> selectLaoczLiquorDictList(LaoczLiquorDict laoczLiquorDict) {
-        return baseMapper.selectLaoczLiquorDictList(laoczLiquorDict);
+        List<LaoczLiquorDict> laoczLiquorDicts = baseMapper.selectLaoczLiquorDictList(laoczLiquorDict);
+        if (CollectionUtil.isEmpty(laoczLiquorDicts)){
+            LaoczLiquorDict laoczLiquorDict1 = new LaoczLiquorDict();
+            laoczLiquorDicts.add(laoczLiquorDict1);
+        }
+        return laoczLiquorDicts;
     }
 
     /**

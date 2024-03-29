@@ -14,7 +14,7 @@ public interface WineOutService {
     /**
      * 出酒申请
      *
-     * @param wineOutApplyDTO 出酒申请参数：陶坛罐ID，申请重量
+     * @param list 出酒申请参数：陶坛罐ID，申请重量
      */
     void wineOutApply(List<WineOutApplyDTO> list);
     /**

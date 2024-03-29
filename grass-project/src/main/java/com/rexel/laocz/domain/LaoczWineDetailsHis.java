@@ -66,7 +66,7 @@ public class LaoczWineDetailsHis extends BaseEntity {
      */
     @Excel(name = "0：未开始，1：开始，2：急停，3已完成")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private String busyStatus;
+    private Long busyStatus;
     /**
      * 操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样
      */
@@ -78,7 +78,7 @@ public class LaoczWineDetailsHis extends BaseEntity {
      */
     @Excel(name = "申请重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long potteryAltarApplyWeight;
+    private Double potteryAltarApplyWeight;
     /**
      * 称重罐ID
      */
@@ -96,7 +96,7 @@ public class LaoczWineDetailsHis extends BaseEntity {
      */
     @Excel(name = "称重罐重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long weighingTankWeight;
+    private Double weighingTankWeight;
     /**
      * 业务时间（出酒、入酒、取样时间）
      */

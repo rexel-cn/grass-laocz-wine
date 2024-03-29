@@ -102,59 +102,6 @@
             </if>
         </where>
     </select>
-    <select id="selectWineEntryPotteryAltarList" resultType="com.rexel.laocz.domain.vo.PotteryAltarVo">
-        SELECT
-        lfzi.fire_zone_name,
-        lai.area_name,
-        lpam.pottery_altar_id,
-        lpam.pottery_altar_number,
-        lpam.pottery_altar_state,
-        lpam.pottery_altar_full_altar_weight,
-        lpam.pottery_altar_qr_code_address,
-        lbpm.actual_weight,
-        llb.liquor_management_id,
-        lbpm.liquor_batch_id,
-        lbpm.storing_time
-        FROM
-        laocz_pottery_altar_management AS lpam
-        LEFT JOIN laocz_batch_pottery_mapping AS lbpm ON lpam.pottery_altar_id = lbpm.pottery_altar_id
-        LEFT JOIN laocz_fire_zone_info AS lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
-        LEFT JOIN laocz_area_info AS lai ON lai.area_id = lfzi.area_id
-        LEFT JOIN laocz_liquor_batch AS llb ON lbpm.liquor_batch_id=llb.liquor_batch_id
-        <where>
-            <!--条件查询
-            1有酒（取样，出酒，倒坛（出酒））
-            2没酒（入酒）
-            3倒坛（入酒）：空罐子，或者有酒倒坛入酒同一批次的有酒的坛子-->
-            <if test="conditionQuery!=null and conditionQuery!=''">
-                <if test="conditionQuery=='1'.toString()">
-                    lbpm.pottery_altar_id IS NOT NULL
-                </if>
-                <if test="conditionQuery=='2'.toString()">
-                    lbpm.pottery_altar_id IS NULL
-                </if>
-                <if test="conditionQuery=='3'.toString()">
-                    lbpm.pottery_altar_id IS NULL OR lbpm.liquor_batch_id=#{liquorBatchId}
-                </if>
-            </if>
-            <if test="potteryAltarIds!=null and potteryAltarIds.size()>0">
-                AND NOT EXISTS (
-                SELECT 1 FROM laocz_batch_pottery_mapping lbpm2
-                WHERE lbpm2.pottery_altar_id = lpam.pottery_altar_id
-                AND lbpm2.pottery_altar_id IN
-                <foreach item="id" collection="potteryAltarIds" open="(" separator="," close=")">
-                    #{id}
-                </foreach>
-                )
-            </if>
-            <if test="fireZoneId!=null and fireZoneId!=''">
-                AND lpam.fire_zone_id = #{fireZoneId}
-            </if>
-            <if test="potteryAltarNumber!=null and potteryAltarNumber!=''">
-                AND lpam.pottery_altar_number LIKE CONCAT('%', #{potteryAltarNumber}, '%')
-            </if>
-        </where>
-    </select>
     <select id="selectLaoczPotteryAltarManagementListDetail"
             resultType="com.rexel.laocz.domain.vo.PotteryAltarVo">
         select lpam.pottery_altar_id,
@@ -186,6 +133,7 @@
                 AND bpm.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
         </where>
+        order by lpam.create_time desc
     </select>
     <select id="wineEntryPotteryAltarList" resultType="com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO">
         SELECT

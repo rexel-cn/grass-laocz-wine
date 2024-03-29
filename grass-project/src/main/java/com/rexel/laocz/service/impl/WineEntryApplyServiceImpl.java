@@ -141,7 +141,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     private void saveLaoczWineDetails(WineEntryApplyDTO wineEntryApplyDTO, String busyId, String workId) {
         List<LaoczWineDetails> list = new ArrayList<>();
         for (WineOutApplyDTO wineOutApplyDTO : wineEntryApplyDTO.getPotteryAltars()) {
-            list.add(buildLaoczWineDetails(busyId, workId, wineEntryApplyDTO.getLiquorBatchId(), wineOutApplyDTO.getPotteryAltarId(), wineOutApplyDTO.getApplyWeight()));
+            list.add(buildLaoczWineDetails(busyId, workId, wineEntryApplyDTO.getLiquorBatchId(), wineOutApplyDTO.getPotteryAltarId(), wineOutApplyDTO.getApplyWeight(), WineDetailTypeEnum.IN_WINE, null));
         }
         iLaoczWineDetailsService.saveBatch(list);
     }
@@ -407,10 +407,10 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         finishCheck(laoczWineDetails);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "+", laoczWineDetails.getWeighingTankWeight());
-        //新增数据到历史表
-        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_ENTRY);
         //备份酒操作业务表
         super.backupWineDetails(laoczWineDetails);
+        //新增数据到历史表
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_ENTRY);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
     }
@@ -439,6 +439,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         ScheduledFuture<?> scheduledFuture = threadMap.get(wineDetailsId);
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
+            threadMap.remove(wineDetailsId);
         }
     }
 
@@ -463,23 +464,15 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //监听完成测点,如果完成，查询称重罐重量并保存到数据库中
         final Runnable task = () -> {
             try {
-                String s = DviewUtils.queryPointValue(finishPoint.getPointId(), finishPoint.getPointType());
-                if (Double.parseDouble(s) == 1) {
-                    String s1 = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
+                String finish = DviewUtils.queryPointValue(finishPoint.getPointId(), finishPoint.getPointType());
+                if (Double.parseDouble(finish) == 1) {
+                    String weight = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
                     iLaoczWineDetailsService.lambdaUpdate()
                             .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
-                            .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(s1))
+                            .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(weight))
+                            .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.COMPLETED.getValue())
                             .update();
-                    ScheduledFuture<?> scheduledFuture = threadMap.get(wineDetailsId);
-                    if (scheduledFuture != null) {
-                        scheduledFuture.cancel(true);
-                        lock.lock();
-                        try {
-                            updateWineDetails(wineDetailsId, WineBusyStatusEnum.COMPLETED);
-                        } finally {
-                            lock.unlock();
-                        }
-                    }
+                    pauseListener(wineDetailsId);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -577,15 +570,28 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
 
         //称重罐编号
         String weighingTankWeight = weighingTank.getWeighingTankNumber();
+
         //申请重量
         Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
 
         //申请重量测点
         WineDetailPointVO weightPoint = pumpMap.get(WinePointConstants.WEIGHT_POINT);
+        if (weightPoint == null) {
+            throw new CustomException("申请重量测点不存在");
+        }
         //称重罐号测点
-        WineDetailPointVO weighingTankNumberPoint = wineDetailPointVOMap.get(WinePointConstants.WEIGHING_TANK_NUMBER);
+        WineDetailPointVO weighingTankNumberPoint = pumpMap.get(WinePointConstants.WEIGHING_TANK_NUMBER);
+        if (weighingTankNumberPoint == null) {
+            throw new CustomException("称重罐号测点不存在");
+        }
         //启动信号测点
         WineDetailPointVO startSignalPoint = pumpMap.get(WinePointConstants.START_SIGNAL);
+        if (startSignalPoint == null) {
+            throw new CustomException("启动信号测点不存在");
+        }
+
+
+
         DviewUtilsPro.writePointValue(
                 new DviewPointDTO(weightPoint.getPointId(), weightPoint.getPointType(), weightPoint.getPointName(), String.valueOf(potteryAltarApplyWeight)),
                 new DviewPointDTO(weighingTankNumberPoint.getPointId(), weighingTankNumberPoint.getPointType(), weighingTankNumberPoint.getPointName(), weighingTankWeight)

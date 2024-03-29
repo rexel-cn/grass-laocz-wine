@@ -66,6 +66,13 @@ public class WineDetailVO {
      * 取样用途
      */
     private String samplingPurpose;
+    /**
+     * 实际重量
+     */
     private String actualWeight;
+    /**
+     * 称重罐重量
+     */
+    private String weighingTankWeight;
 
 }

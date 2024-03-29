@@ -2,6 +2,7 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
+import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,4 +35,6 @@ public interface LaoczLiquorRuleInfoMapper extends BaseMapper<LaoczLiquorRuleInf
      * @return
      */
     List<String> dropDown();
+
+    List<LiquorRuleInfoVo> selectLaoczLiquorRuleInfoListVo(LaoczLiquorRuleInfo laoczLiquorRuleInfo);
 }

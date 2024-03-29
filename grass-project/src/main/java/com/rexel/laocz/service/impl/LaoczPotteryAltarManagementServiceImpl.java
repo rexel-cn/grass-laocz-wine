@@ -217,6 +217,16 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         }
     }
 
+    private static List<WineOperaPotteryAltarVO> filterWinOperaPotteryAltar(List<Long> potteryAltarIds, List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS) {
+        if (CollectionUtil.isNotEmpty(potteryAltarIds)) {
+            wineOperaPotteryAltarVOS = wineOperaPotteryAltarVOS.stream()
+                    .filter(wineOperaPotteryAltarVO ->
+                            !potteryAltarIds.contains(wineOperaPotteryAltarVO.getPotteryAltarId()))
+                    .collect(Collectors.toList());
+        }
+        return wineOperaPotteryAltarVOS;
+    }
+
     /**
      * 入酒时，陶坛列表：
      * 1：查询条件如下：
@@ -237,13 +247,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     @Override
     public List<WineOperaPotteryAltarVO> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
         List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
-        if (CollectionUtil.isNotEmpty(wineEntryPotteryAltarDTO.getPotteryAltarIds())) {
-            List<Long> potteryAltarIds = wineEntryPotteryAltarDTO.getPotteryAltarIds();
-            wineOperaPotteryAltarVOS = wineOperaPotteryAltarVOS.stream()
-                    .filter(wineOperaPotteryAltarVO ->
-                            !potteryAltarIds.contains(wineOperaPotteryAltarVO.getPotteryAltarId()))
-                    .collect(Collectors.toList());
-        }
+        wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(wineEntryPotteryAltarDTO.getPotteryAltarIds(), wineOperaPotteryAltarVOS);
         return wineOperaPotteryAltarVOS;
     }
 
@@ -269,7 +273,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     @Override
     public List<WineOperaPotteryAltarVO> wineOutPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
         List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
-
+        wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(wineOutPotteryAltarDTO.getPotteryAltarIds(), wineOperaPotteryAltarVOS);
         //存储时长
         for (WineOperaPotteryAltarVO potteryAltarVo : wineOperaPotteryAltarVOS) {
             if (potteryAltarVo.getStoringTime() != null) {
