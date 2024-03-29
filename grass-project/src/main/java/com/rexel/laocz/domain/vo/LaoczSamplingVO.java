@@ -57,7 +57,7 @@ public class LaoczSamplingVO extends BaseEntity {
     /**
      * 取样重量
      */
-    private Long samplingWeight;
+    private Double samplingWeight;
     /**
      * 取样时间
      */

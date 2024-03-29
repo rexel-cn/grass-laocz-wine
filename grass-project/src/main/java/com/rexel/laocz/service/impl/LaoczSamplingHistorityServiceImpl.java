@@ -78,7 +78,11 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     @Override
     public List<LaoczSamplingVO> selectLaoczSamplingList(String fromTime, String endTime, Long areaId, Long fireZoneId, String potteryAltarNumber, String liquorBatchId) {
         return baseMapper.selectLaoczSamplingList(fromTime, endTime, areaId, fireZoneId, potteryAltarNumber, liquorBatchId).stream()
-                .peek(aaa -> aaa.setState(aaa.getSamplingFile().isEmpty() ? 0 : 1))
+                .peek(aaa -> {
+                    if (aaa != null) {
+                        aaa.setState(aaa.getSamplingFile() == null || aaa.getSamplingFile().isEmpty() ? 0 : 1);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
