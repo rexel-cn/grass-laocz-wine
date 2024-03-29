@@ -82,6 +82,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
      */
     @Override
     public WeighingTankAddDto getByIdWithTank(Long weighingTankId) {
+        //查询使用标识的名字
+        List<WeighingTankAddVo> weightMark = this.getAddVo("weight_mark");
+        //封装
         LaoczWeighingTank laoczWeighingTank = this.getById(weighingTankId);
 
         Long fireZoneId = laoczWeighingTank.getFireZoneId();
@@ -111,6 +114,12 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             GrassPointInfo grassPointInfo = iGrassPointService.getById(item.getPointPrimaryKey());
             weighingTankAddVo.setPointId(grassPointInfo.getPointId());
             weighingTankAddVo.setPointName(grassPointInfo.getPointName());
+
+            for (WeighingTankAddVo tankAddVo : weightMark) {
+                if (tankAddVo.getUseMark().equals(item.getUseMark())){
+                    weighingTankAddVo.setName(tankAddVo.getName());
+                }
+            }
 
             return weighingTankAddVo;
         }).collect(Collectors.toList());
@@ -264,7 +273,7 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Override
     public List<PointInfo> getPointInfo(Long weighingTankId) {
         // 获取所有的测点并根据测点获取测点信息
-        List<PointInfo> pointInfos = baseMapper.getPointInfo();
+        List<PointInfo> pointInfos = baseMapper.getPointInfo(weighingTankId);
         return pointInfos;
     }
 
@@ -277,11 +286,12 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             throw new ServiceException("称重罐操作中，禁止删除");
         }
         //删除称重罐管理数据
-        this.removeById(weighingTankId);
+        boolean remove = this.removeById(weighingTankId);
         //删除与该称重罐相关测点
         QueryWrapper<LaoczWeighingTankPoint> wrapper = new QueryWrapper<>();
         wrapper.eq("weighing_tank_id", weighingTankId);
-        return iLaoczWeighingTankPointService.remove(wrapper);
+        iLaoczWeighingTankPointService.remove(wrapper);
+        return remove;
     }
 
     private void check(List<WeighingTankDto> weighingTankDtos) {

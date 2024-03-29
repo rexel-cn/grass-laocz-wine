@@ -133,6 +133,7 @@
                 AND bpm.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
         </where>
+        order by lpam.create_time desc
     </select>
     <select id="wineEntryPotteryAltarList" resultType="com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO">
         SELECT

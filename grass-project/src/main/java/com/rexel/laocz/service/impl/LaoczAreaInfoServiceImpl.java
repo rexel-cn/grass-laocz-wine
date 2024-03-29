@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.laocz.domain.LaoczAreaInfo;
@@ -59,10 +60,10 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
 
     @Override
     public List<LaoczFireZoneInfo> getByIdWithfireZoneName(Long id) {
-        QueryWrapper<LaoczFireZoneInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("area_id",id);
+        LambdaQueryWrapper<LaoczFireZoneInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(LaoczFireZoneInfo::getAreaId,id);
+        queryWrapper.orderByAsc(LaoczFireZoneInfo::getDispalyOrder);
         List<LaoczFireZoneInfo> list = iLaoczFireZoneInfoService.list(queryWrapper);
-
         return list;
     }
 

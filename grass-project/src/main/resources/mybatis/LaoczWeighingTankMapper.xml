@@ -59,7 +59,7 @@
         LEFT JOIN grass_point_info gpi ON gpi.id = lwtp.point_primary_key
         <where>
             <if test="weighingTankId != null">
-                and weighing_tank_id = #{weighingTankId}
+                and lwt.weighing_tank_id = #{weighingTankId}
             </if>
         </where>
     </select>
@@ -87,6 +87,7 @@
                 AND lwt.weighing_tank_number like concat('%', #{weighingTankNumber}, '%')
             </if>
         </where>
+        order by lwt.create_time desc
     </select>
 
     <insert id="batchLaoczWeighingTank" parameterType="java.util.List"

@@ -63,6 +63,7 @@
                 AND lfzi.area_id = #{areaId}
             </if>
         </where>
+        order by lp.create_time desc
     </select>
     <select id="selectPumpDetails" resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
         SELECT

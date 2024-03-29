@@ -49,6 +49,33 @@
         </where>
         order by laocz_fire_zone_info.dispaly_order
     </select>
+    <select id="selectLaoczFireZoneInfoListWithArea" resultType="com.rexel.laocz.domain.vo.FireZoneInfoVo">
+        SELECT fire_zone_id,
+        ai.area_id,
+        fire_zone_name,
+        fzi.dispaly_order,
+        area_name
+        FROM laocz_fire_zone_info fzi
+        LEFT JOIN laocz_area_info ai ON fzi.area_id = ai.area_id
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="areaId != null ">
+                and area_id = #{areaId}
+            </if>
+            <if test="fireZoneId != null ">
+                and fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="fireZoneName != null  and fireZoneName != ''">
+                and fire_zone_name like concat('%', #{fireZoneName}, '%')
+            </if>
+            <if test="dispalyOrder != null ">
+                and dispaly_order = #{dispalyOrder}
+            </if>
+        </where>
+        ORDER BY fzi.dispaly_order
+    </select>
 
     <insert id="batchLaoczFireZoneInfo" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="fireZoneId">

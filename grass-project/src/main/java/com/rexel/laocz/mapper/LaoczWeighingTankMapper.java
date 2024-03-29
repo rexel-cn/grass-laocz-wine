@@ -32,7 +32,7 @@ public interface LaoczWeighingTankMapper extends BaseMapper<LaoczWeighingTank> {
      */
     int batchLaoczWeighingTank(List<LaoczWeighingTank> laoczWeighingTankList);
 
-    List<PointInfo> getPointInfo();
+    List<PointInfo> getPointInfo(Long weighingTankId);
 
     List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank);
 }

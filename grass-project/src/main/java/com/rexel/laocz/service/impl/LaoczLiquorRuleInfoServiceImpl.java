@@ -40,33 +40,25 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
     @Override
     public List<LiquorRuleInfoVo> selectLaoczLiquorRuleInfoList(LaoczLiquorRuleInfo laoczLiquorRuleInfo) {
 
-        List<LaoczLiquorRuleInfo> laoczLiquorRuleInfos = baseMapper.selectLaoczLiquorRuleInfoList(laoczLiquorRuleInfo);
+        List<LiquorRuleInfoVo> laoczLiquorRuleInfos = baseMapper.selectLaoczLiquorRuleInfoListVo(laoczLiquorRuleInfo);
 
-        List<LiquorRuleInfoVo> list = laoczLiquorRuleInfos.stream().map((item) -> {
-            LiquorRuleInfoVo liquorRuleInfoVo = new LiquorRuleInfoVo();
-
-            BeanUtil.copyProperties(item, liquorRuleInfoVo);
-
-            String liquorRuleNotifyUser = item.getLiquorRuleNotifyUser();
+        for (LiquorRuleInfoVo liquorRuleInfo : laoczLiquorRuleInfos) {
+            String liquorRuleNotifyUser = liquorRuleInfo.getLiquorRuleNotifyUser();
 
             String[] split = liquorRuleNotifyUser.split(",");
 
             int length = split.length;
 
-            liquorRuleInfoVo.setCount(length);
+            liquorRuleInfo.setCount(length);
 
             Long[] result = new Long[split.length];
             for (int i = 0; i < split.length; i++) {
                 result[i] = Long.parseLong(split[i]);
             }
 
-            liquorRuleInfoVo.setNoticePeopleArray(result);
-
-            return liquorRuleInfoVo;
-        }).collect(Collectors.toList());
-
-
-        return list;
+            liquorRuleInfo.setNoticePeopleArray(result);
+        }
+        return laoczLiquorRuleInfos;
     }
 
     /**
@@ -126,8 +118,10 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
 
         save(laoczLiquorRuleInfo);
     }
+
     /**
      * 修改报警规则
+     *
      * @param laoczLiquorRuleInfo 报警规则
      * @return
      */
@@ -141,8 +135,10 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
 
         updateById(laoczLiquorRuleInfo);
     }
+
     /**
      * 酒液批次下拉
+     *
      * @return
      */
     @Override
