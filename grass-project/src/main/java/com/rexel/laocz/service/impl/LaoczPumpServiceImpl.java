@@ -11,6 +11,8 @@ import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.mapper.LaoczPumpMapper;
 import com.rexel.laocz.service.*;
+import com.rexel.system.domain.GrassPointInfo;
+import com.rexel.system.service.IGrassPointService;
 import com.rexel.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,9 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
 
     @Autowired
     private ILaoczWineDetailsService iLaoczWineDetailsService;
+
+    @Autowired
+    private IGrassPointService iGrassPointService;
 
     /**
      * 查询泵管理列表
@@ -86,6 +91,11 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
                     weighingTankAddVo.setEquipmentPointId(item.getEquipmentPointId());
                     weighingTankAddVo.setUseMark(item.getUseMark());
                     weighingTankAddVo.setPointPrimaryKey(item.getPointPrimaryKey());
+
+                    //查询测点信息
+                    GrassPointInfo grassPointInfo = iGrassPointService.getById(item.getPointPrimaryKey());
+                    weighingTankAddVo.setPointId(grassPointInfo.getPointId());
+                    weighingTankAddVo.setPointName(grassPointInfo.getPointName());
                     return weighingTankAddVo;
                 }
         ).collect(Collectors.toList());
@@ -187,7 +197,7 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
     @Override
     public List<PointInfo> getPointInfo(Long pumpId) {
         // 获取所有的测点并根据测点获取测点信息
-        List<PointInfo>  pointInfos = baseMapper.getPointInfo();
+        List<PointInfo> pointInfos = baseMapper.getPointInfo();
         return pointInfos;
     }
 

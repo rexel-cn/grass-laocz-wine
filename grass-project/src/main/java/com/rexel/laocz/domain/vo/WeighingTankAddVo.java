@@ -20,4 +20,9 @@ public class WeighingTankAddVo {
      * 测点的主键id
      */
     private Long pointPrimaryKey;
+
+    private String pointName;
+
+    private String pointId;
+
 }

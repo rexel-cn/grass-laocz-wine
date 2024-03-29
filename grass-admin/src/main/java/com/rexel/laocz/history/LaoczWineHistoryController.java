@@ -39,13 +39,14 @@ public class LaoczWineHistoryController extends BaseController {
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param operationType  操作类型
+     * @param detailType  操作类型
+     * @param workOrderId    工单Id
      * @return
      */
     @GetMapping("/list")
-    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String operationType, String potteryAltarNumber) {
+    public TableDataInfo getList(Long potteryAltarId, String fromTime, String endTime, String detailType, String workOrderId) {
         startPage();
-        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, operationType, potteryAltarNumber), "historyInfo");
+        return getDataTable(laoczWineHistoryService.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, detailType, workOrderId), "historyInfo");
     }
 
     /**

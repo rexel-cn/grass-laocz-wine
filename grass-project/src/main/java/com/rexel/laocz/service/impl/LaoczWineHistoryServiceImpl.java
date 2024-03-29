@@ -55,13 +55,13 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      * @param fromTime           开始时间
      * @param endTime            结束时间
      * @param detailType         操作类型
-     * @param potteryAltarNumber 陶坛编号
+     * @param workOrderId        工单Id
      * @return
      */
 
     @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String potteryAltarNumber) {
-        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, detailType, potteryAltarNumber);
+    public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String workOrderId) {
+        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, detailType, workOrderId);
     }
 
     /**

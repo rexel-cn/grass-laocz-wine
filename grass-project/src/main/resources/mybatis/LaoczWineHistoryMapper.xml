@@ -236,8 +236,8 @@
             <if test="detailType != null and detailType != ''">
                 and lwh.detail_type = #{detailType}
             </if>
-            <if test="potteryAltarNumber != null  and potteryAltarNumber != ''">
-                and lwh.pottery_altar_number like concat('%', #{potteryAltarNumber}, '%')
+            <if test="workOrderId != null  and workOrderId != ''">
+                and lwh.work_order_id like concat('%', #{workOrderId}, '%')
             </if>
         </where>
         order by lwh.operation_time desc

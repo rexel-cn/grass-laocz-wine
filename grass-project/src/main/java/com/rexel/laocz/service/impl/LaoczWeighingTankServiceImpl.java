@@ -16,6 +16,8 @@ import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.mapper.LaoczWeighingTankMapper;
 import com.rexel.laocz.service.*;
+import com.rexel.system.domain.GrassPointInfo;
+import com.rexel.system.service.IGrassPointService;
 import com.rexel.system.service.ISysDictDataService;
 import com.rexel.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,8 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Autowired
     private ILaoczWineDetailsService iLaoczWineDetailsService;
 
+    @Autowired
+    private IGrassPointService iGrassPointService;
     /**
      * 查询称重罐管理列表
      *
@@ -102,6 +106,12 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             weighingTankAddVo.setEquipmentPointId(item.getEquipmentPointId());
             weighingTankAddVo.setUseMark(item.getUseMark());
             weighingTankAddVo.setPointPrimaryKey(item.getPointPrimaryKey());
+
+            //查询测点信息
+            GrassPointInfo grassPointInfo = iGrassPointService.getById(item.getPointPrimaryKey());
+            weighingTankAddVo.setPointId(grassPointInfo.getPointId());
+            weighingTankAddVo.setPointName(grassPointInfo.getPointName());
+
             return weighingTankAddVo;
         }).collect(Collectors.toList());
 

@@ -31,10 +31,11 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param operationType  操作类型
+     * @param detailType  操作类型
+     * @param workOrderId    工单Id
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String operationType, String potteryAltarNumber);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String workOrderId);
 
     /**
      * 数据报表-淘坛操作记录查询1

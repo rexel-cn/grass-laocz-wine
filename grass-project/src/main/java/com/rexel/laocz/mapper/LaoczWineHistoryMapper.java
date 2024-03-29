@@ -40,10 +40,10 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param fromTime           开始时间
      * @param endTime            结束时间
      * @param detailType         操作类型
-     * @param potteryAltarNumber 陶坛编号
+     * @param workOrderId        工单Id
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("potteryAltarNumber") String potteryAltarNumber);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("workOrderId") String workOrderId);
 
     /**
      * 数据报表-淘坛操作记录
