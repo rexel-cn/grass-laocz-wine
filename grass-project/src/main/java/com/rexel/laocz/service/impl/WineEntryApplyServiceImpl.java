@@ -405,12 +405,12 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
         //判断是否已经有了称重罐重量以及是否已经完成
         finishCheck(laoczWineDetails);
+        //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
+        super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "+", laoczWineDetails.getWeighingTankWeight());
         //新增数据到历史表
-        super.saveHistory(wineDetailsId, OperationTypeEnum.WINE_ENTRY);
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_ENTRY);
         //备份酒操作业务表
         super.backupWineDetails(laoczWineDetails);
-        //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
-        super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "+", laoczWineDetails.getWeighingTankWeight(), RealStatusEnum.STORAGE);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
     }

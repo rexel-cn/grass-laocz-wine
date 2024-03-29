@@ -3,22 +3,18 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.DateUtils;
-import com.rexel.laocz.domain.LaoczAreaInfo;
-import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
-import com.rexel.laocz.domain.LaoczFireZoneInfo;
-import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
-import com.rexel.laocz.service.ILaoczAreaInfoService;
-import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
-import com.rexel.laocz.service.ILaoczFireZoneInfoService;
-import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
+import com.rexel.laocz.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +22,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 陶坛管理Service业务层处理
@@ -44,6 +43,10 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
     @Autowired
     private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
+
+    @Autowired
+    private ILaoczLiquorManagementService iLaoczLiquorManagementService;
+
 
     /**
      * 查询陶坛管理列表
@@ -198,23 +201,6 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     }
 
     /**
-     * 入酒时，陶坛列表过滤查询
-     *
-     * @param wineEntryPotteryAltarDTO 入酒，陶坛筛选DTO
-     * @return 陶坛列表
-     */
-    @Override
-    public List<PotteryAltarVo> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
-        //条件查询，1有酒（取样，出酒，倒坛（出酒）），2没酒（入酒）   3倒坛（入酒）：空罐子，或者倒坛入酒同一批次的有酒的坛子
-        if (StrUtil.isEmpty(wineEntryPotteryAltarDTO.getConditionQuery())
-                || (wineEntryPotteryAltarDTO.getConditionQuery().equals("3")
-                && StrUtil.isEmpty(wineEntryPotteryAltarDTO.getLiquorBatchId()))) {
-            throw new ServiceException("条件错误");
-        }
-        return baseMapper.selectWineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
-    }
-
-    /**
      * 删除陶坛管理
      *
      * @param potteryAltarId 陶坛Id
@@ -229,5 +215,148 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         } else {
             return this.removeById(potteryAltarId);
         }
+    }
+
+    /**
+     * 入酒时，陶坛列表：
+     * 1：查询条件如下：
+     * 1：防火区id 可选
+     * 2：陶坛编号 可选
+     * 3：已选陶坛 可选  过滤用
+     * 4: 陶坛状态 必须是使用状态
+     * 5：陶坛没有酒
+     * 2:返回参数如下：
+     * 1：陶坛管理主键id （用来入酒时带入，选择的那个陶坛）
+     * 2：陶坛管理编号 用来显示
+     * 3：区域名称
+     * 4：防火区名称
+     * 5: 满坛重量
+     *
+     * @param wineEntryPotteryAltarDTO 入酒，陶坛筛选DTO
+     */
+    @Override
+    public List<WineOperaPotteryAltarVO> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
+        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
+        if (CollectionUtil.isNotEmpty(wineEntryPotteryAltarDTO.getPotteryAltarIds())) {
+            List<Long> potteryAltarIds = wineEntryPotteryAltarDTO.getPotteryAltarIds();
+            wineOperaPotteryAltarVOS = wineOperaPotteryAltarVOS.stream()
+                    .filter(wineOperaPotteryAltarVO ->
+                            !potteryAltarIds.contains(wineOperaPotteryAltarVO.getPotteryAltarId()))
+                    .collect(Collectors.toList());
+        }
+        return wineOperaPotteryAltarVOS;
+    }
+
+    /**
+     * 出酒时，陶坛列表
+     * 1：查询条件如下：
+     * 1：酒液批次id（可以根据酒液批次查询在酒的信息）  必须是有酒并且存储   可选
+     * 2：防火区id 可选
+     * 3：陶坛编号 可选 过滤用
+     * 4：已选陶坛 可选
+     * 5：陶坛状态 必须是使用状态
+     * 6：陶坛有酒
+     * 7：陶坛目前没有进行其他任务，目前是存储状态
+     * 2:返回参数如下：
+     * 1：陶坛管理主键id （用来出酒时带入，选择的那个陶坛）
+     * 2：陶坛管理编号 用来显示
+     * 3：区域名称
+     * 4：防火区名称
+     * 5: 酒液重量
+     * 6: 存储时长
+     * 7: 酒品相关信息
+     */
+    @Override
+    public List<WineOperaPotteryAltarVO> wineOutPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
+        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+
+        //存储时长
+        for (WineOperaPotteryAltarVO potteryAltarVo : wineOperaPotteryAltarVOS) {
+            if (potteryAltarVo.getStoringTime() != null) {
+                potteryAltarVo.setStorageTime(DateUtils.daysBetween(potteryAltarVo.getStoringTime(), new Date()));
+            }
+        }
+
+
+        //酒品相关
+        List<Long> liquorManagementIds = wineOperaPotteryAltarVOS.stream().map(WineOperaPotteryAltarVO::getLiquorManagementId).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(liquorManagementIds)) {
+            List<LaoczLiquorManagement> managements = iLaoczLiquorManagementService.lambdaQuery().in(LaoczLiquorManagement::getLiquorManagementId, liquorManagementIds).list();
+            Map<Long, LaoczLiquorManagement> managementMap = managements.stream().collect(Collectors.toMap(LaoczLiquorManagement::getLiquorManagementId, Function.identity()));
+            for (WineOperaPotteryAltarVO potteryAltarVo : wineOperaPotteryAltarVOS) {
+                LaoczLiquorManagement laoczLiquorManagement = managementMap.get(potteryAltarVo.getLiquorManagementId());
+                if (laoczLiquorManagement != null) {
+                    potteryAltarVo.setLaoczLiquorManagement(laoczLiquorManagement);
+                }
+            }
+        }
+        return wineOperaPotteryAltarVOS;
+    }
+
+    /**
+     * 取样时，陶坛列表
+     * 1：查询条件如下：
+     * 1：防火区id
+     * 2：陶坛编号
+     * 3：陶坛状态 必须是使用状态
+     * 4：陶坛有酒
+     * 5：陶坛目前没有进行其他任务，目前是存储状态
+     * <p>
+     * 2:返回参数如下：
+     * 1:  陶坛管理主键id （用来取样时带入，选择的那个陶坛）
+     * 2:  陶坛管理编号 用来显示
+     * 3:  区域名称
+     * 4:  防火区名称
+     * 5:  酒液重量
+     * 6: 满坛重量
+     * 7:  酒品相关信息 id就行，点击才会查询
+     *
+     * @param WineSamplePotteryAltarDTO 取样，陶坛筛选DTO
+     */
+    @Override
+    public List<WineOperaPotteryAltarVO> wineSamplePotteryAltarList(WineSamplePotteryAltarDTO WineSamplePotteryAltarDTO) {
+        return baseMapper.wineSamplePotteryAltarList(WineSamplePotteryAltarDTO);
+    }
+
+    /**
+     * 倒坛时，陶坛列表
+     * 1：倒坛出，陶坛列表查询条件如下：
+     * 1：防火区id
+     * 2：陶坛编号
+     * 3：陶坛状态 必须是使用状态
+     * 4：陶坛有酒
+     * 5：陶坛目前没有进行其他任务，目前是存储状态
+     * 2：返回参数如下：
+     * 1：酒批次id
+     * 2：陶坛管理主键id （用来倒坛时带入，选择的那个陶坛）
+     * 3：陶坛管理编号 用来显示
+     * 4：区域名称
+     * 5：防火区名称
+     * 6：酒液重量
+     * 7: 满坛重量
+     * 8：存储时长
+     * 9：酒品相关信息
+     * 3：倒坛入，陶坛列表查询条件如下： 空陶坛或者同一批次的有酒的陶坛
+     * 1：酒批次id(以倒坛出的酒返回的查询)
+     * 2：防火区id
+     * 3：陶坛编号
+     * 4：陶坛状态 必须是使用状态
+     * 5：陶坛没有酒或者同一个批次有酒的陶坛
+     * 6：陶坛如果有酒，那么酒液重量必须小于等于倒坛出的酒液重量
+     * 7：陶坛如果有酒目前没有进行其他任务，目前是存储状态
+     * <p>
+     * 4:返回参数如下：
+     * 1:  陶坛管理主键id （用来倒坛时带入，选择的那个陶坛）
+     * 2:  陶坛管理编号 用来显示
+     * 3:  区域名称
+     * 4:  防火区名称
+     * 5:  满坛重量
+     * 6:  酒液重量
+     *
+     * @param winePourPotteryAltarDTO
+     */
+    @Override
+    public List<WineOperaPotteryAltarVO> winePourPotteryAltarList(WinePourPotteryAltarDTO winePourPotteryAltarDTO) {
+        return null;
     }
 }

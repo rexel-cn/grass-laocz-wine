@@ -159,6 +159,7 @@
         lwd.liquor_batch_id,
         lwd.pottery_altar_id,
         lwo.operation_type,
+        lwd.detail_type,
         lwd.pottery_altar_apply_weight,
         NULL AS `remaining_weight`,-- 剩余重量，需要根据实际情况提供
         NULL AS `loss_weight`,-- 损失重量，需要根据实际情况提供

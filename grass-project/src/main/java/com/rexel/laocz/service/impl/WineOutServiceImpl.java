@@ -95,6 +95,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
      * @return 称重量
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String wineOutStart(Long wineDetailsId) {
         LaoczWineDetails wineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
         //查询称重罐测点
@@ -106,6 +107,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
             wineDetails.setWeighingTankWeight(Double.parseDouble(pointValue));
             wineDetails.setBusyStatus(WineBusyStatusEnum.COMPLETED.getValue());
             iLaoczWineDetailsService.updateById(wineDetails);
+            super.updatePotteryMappingState(wineDetails.getPotteryAltarId(), RealStatusEnum.WINE_OUT);
             return pointValue;
         } catch (IOException e) {
             eventStatus = WineConstants.FAIL;
@@ -137,13 +139,14 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
         //判断是否已经有了称重罐重量以及是否已经完成
         winOutfinishCheck(laoczWineDetails);
-        //新增数据到历史表
-        super.saveHistory(wineDetailsId, OperationTypeEnum.WINE_OUT);
-        //备份酒操作业务表
-        super.backupWineDetails(laoczWineDetails);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
-                laoczWineDetails.getPotteryAltarApplyWeight(), RealStatusEnum.STORAGE);
+                laoczWineDetails.getPotteryAltarApplyWeight());
+        //新增数据到历史表
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.WINE_OUT);
+        //备份酒操作业务表
+        super.backupWineDetails(laoczWineDetails);
+
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
     }

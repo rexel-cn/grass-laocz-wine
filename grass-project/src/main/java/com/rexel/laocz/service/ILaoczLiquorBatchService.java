@@ -21,4 +21,12 @@ public interface ILaoczLiquorBatchService extends IService<LaoczLiquorBatch> {
      */
     List<LaoczLiquorBatch> selectLaoczLiquorBatchList(LaoczLiquorBatch laoczLiquorBatch);
 
+
+    /**
+     * 出酒时，酒液批次下拉框，只显示有酒并且是存储的批次
+     *
+     * @return
+     */
+    List<LaoczLiquorBatch> wineOutLaoczLiquorBatchList();
+
 }

@@ -30,4 +30,5 @@ public interface LaoczLiquorBatchMapper extends BaseMapper<LaoczLiquorBatch> {
      */
     int batchLaoczLiquorBatch(List<LaoczLiquorBatch> laoczLiquorBatchList);
 
+    List<LaoczLiquorBatch> wineOutLaoczLiquorBatchList();
 }

@@ -33,6 +33,10 @@ public class WineHistoryDTO {
      */
     private Long operationType;
     /**
+     *操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样
+     */
+    private Long detailType;
+    /**
      * 申请重量
      */
     private Double potteryAltarApplyWeight;
@@ -56,6 +60,10 @@ public class WineHistoryDTO {
      * 称重罐重量
      */
     private Double weighingTankWeight;
+    /**
+     * 酒液 入酒时间
+     */
+    private Date storingTime;
     /**
      * 业务时间（出酒、入酒、取样时间）
      */

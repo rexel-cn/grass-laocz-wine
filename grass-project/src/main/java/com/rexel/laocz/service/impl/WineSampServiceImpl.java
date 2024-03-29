@@ -90,13 +90,13 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Transactional(rollbackFor = Exception.class)
     public void wineSampFinish(Long wineDetailsId) {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-        //新增数据到历史表
-        super.saveHistory(wineDetailsId, OperationTypeEnum.SAMPLING);
-        //备份酒操作业务表
-        super.backupWineDetails(laoczWineDetails);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
-                laoczWineDetails.getPotteryAltarApplyWeight(), RealStatusEnum.STORAGE);
+                laoczWineDetails.getPotteryAltarApplyWeight());
+        //新增数据到历史表
+        super.saveHistory(laoczWineDetails, OperationTypeEnum.SAMPLING);
+        //备份酒操作业务表
+        super.backupWineDetails(laoczWineDetails);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
     }

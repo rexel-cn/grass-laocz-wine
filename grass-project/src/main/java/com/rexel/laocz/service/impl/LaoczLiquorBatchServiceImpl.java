@@ -29,4 +29,14 @@ public class LaoczLiquorBatchServiceImpl extends ServiceImpl<LaoczLiquorBatchMap
         return baseMapper.selectLaoczLiquorBatchList(laoczLiquorBatch);
     }
 
+    /**
+     * 出酒时，酒液批次下拉框，只显示有酒并且是存储的批次
+     *
+     * @return 酒液批次相关信息
+     */
+    @Override
+    public List<LaoczLiquorBatch> wineOutLaoczLiquorBatchList() {
+        return baseMapper.wineOutLaoczLiquorBatchList();
+    }
+
 }

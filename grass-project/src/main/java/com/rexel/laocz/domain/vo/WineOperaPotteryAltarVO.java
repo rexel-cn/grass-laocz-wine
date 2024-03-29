@@ -5,8 +5,14 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @ClassName WineOperaPotteryAltarVO
+ * @Description 酒操作（出酒、入酒、取样、倒坛）查询陶坛列表
+ * @Author 孟开通
+ * @Date 2024/3/28 17:45
+ **/
 @Data
-public class PotteryAltarVo {
+public class WineOperaPotteryAltarVO {
     /**
      * 陶坛管理主键ID
      */
@@ -16,21 +22,9 @@ public class PotteryAltarVo {
      */
     private String potteryAltarNumber;
     /**
-     * 陶坛状态，1：使用，2封存
-     */
-    private String potteryAltarState;
-    /**
-     * 区域id
-     */
-    private Long areaId;
-    /**
      * 区域名称
      */
     private String areaName;
-    /**
-     * 防火区主键ID，外键关联laocz_fire_zone_info
-     */
-    private Long fireZoneId;
     /**
      * 防火区名称
      */
@@ -39,10 +33,6 @@ public class PotteryAltarVo {
      * 满坛重量
      */
     private Long potteryAltarFullAltarWeight;
-    /**
-     * 陶坛二维码地址
-     */
-    private String potteryAltarQrCodeAddress;
     /**
      * 陶坛实际重量
      */
@@ -68,5 +58,4 @@ public class PotteryAltarVo {
      * 酒品
      */
     private LaoczLiquorManagement laoczLiquorManagement;
-
 }

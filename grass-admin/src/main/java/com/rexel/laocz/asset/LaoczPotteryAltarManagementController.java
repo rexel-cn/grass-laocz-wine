@@ -5,7 +5,8 @@ import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
-import com.rexel.laocz.domain.vo.OverviewVo;
+import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,11 +129,34 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     /**
      * 入酒申请，查询筛选陶坛罐
      *
-     * @param wineEntryPotteryAltarDTO 入酒申请参数：  防火区主键ID，陶坛管理编号，陶坛管理主键ID（过滤去除用）
+     * @param wineEntryPotteryAltarDTO 入酒申请参数： 入酒，陶坛筛选DTO
      * @return 筛选陶坛罐列表
      */
     @PostMapping("/wineEntryPotteryAltarList")
     public AjaxResult wineEntryPotteryAltarList(@RequestBody WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
         return AjaxResult.success(iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO));
     }
+
+    /**
+     * 出酒申请，查询筛选陶坛罐
+     *
+     * @param wineOutPotteryAltarDTO 出酒，陶坛筛选DTO
+     * @return 筛选陶坛罐列表
+     */
+    @PostMapping("/wineOutPotteryAltarList")
+    public AjaxResult wineOutPotteryAltarList(@RequestBody WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO));
+    }
+
+    /**
+     * 取样申请，查询筛选陶坛罐
+     *
+     * @param WineSamplePotteryAltarDTO 取样，陶坛筛选DTO
+     * @return 筛选陶坛罐列表
+     */
+    @PostMapping("/wineSamplePotteryAltarList")
+    public AjaxResult wineSamplePotteryAltarList(@RequestBody WineSamplePotteryAltarDTO WineSamplePotteryAltarDTO) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineSamplePotteryAltarList(WineSamplePotteryAltarDTO));
+    }
+
 }

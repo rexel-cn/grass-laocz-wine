@@ -130,7 +130,7 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
         LaoczPump one = iLaoczPumpService.lambdaQuery().eq(LaoczPump::getFireZoneId, weighingTank.getFireZoneId()).one();
         if (one == null) {
             LaoczFireZoneInfo byId = iLaoczFireZoneInfoService.getById(weighingTank.getFireZoneId());
-            throw new CustomException("请联系管理员在防火区:{}，设置泵信息" + byId.getFireZoneName());
+            throw new CustomException("请联系管理员在防火区:{}，设置泵信息", byId.getFireZoneName());
         }
         return iLaoczWineDetailsService.lambdaUpdate().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId())
                 .set(LaoczWineDetails::getWeighingTank, weighingTank.getWeighingTank())
