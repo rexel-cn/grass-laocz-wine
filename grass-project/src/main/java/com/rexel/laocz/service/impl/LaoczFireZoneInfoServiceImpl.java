@@ -41,23 +41,9 @@ public class LaoczFireZoneInfoServiceImpl extends ServiceImpl<LaoczFireZoneInfoM
     @Override
     public List<FireZoneInfoVo> selectLaoczFireZoneInfoList(LaoczFireZoneInfo laoczFireZoneInfo) {
 
-        List<LaoczFireZoneInfo> laoczFireZoneInfos = baseMapper.selectLaoczFireZoneInfoList(laoczFireZoneInfo);
+        List<FireZoneInfoVo> fireZoneInfoVos = baseMapper.selectLaoczFireZoneInfoListWithArea(laoczFireZoneInfo);
 
-        List<FireZoneInfoVo> list = laoczFireZoneInfos.stream().map((item) -> {
-            FireZoneInfoVo fireZoneInfoVo = new FireZoneInfoVo();
-
-            BeanUtil.copyProperties(item, fireZoneInfoVo);
-
-            LaoczAreaInfo laoczAreaInfo = laoczAreaInfoService.getById(item.getAreaId());
-
-            if (laoczAreaInfo != null) {
-                String areaName = laoczAreaInfo.getAreaName();
-                fireZoneInfoVo.setAreaName(areaName);
-            }
-            return fireZoneInfoVo;
-        }).collect(Collectors.toList());
-
-        return list;
+        return fireZoneInfoVos;
     }
 
     /**

@@ -46,6 +46,9 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
     @Autowired
     private IGrassPointService iGrassPointService;
 
+    @Autowired
+    private ILaoczWeighingTankService ILaoczWeighingTankService;
+
     /**
      * 查询泵管理列表
      *
@@ -63,6 +66,8 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
      */
     @Override
     public PumpAddDto getPumpDetail(Long pumpId) {
+        //查询使用标识的名字
+        List<WeighingTankAddVo> pumpMark = ILaoczWeighingTankService.getAddVo("pump_mark");
         //获取泵管理数据
         LaoczPump laoczPump = this.getById(pumpId);
         //通过泵管理对象信息获取防火区id
@@ -96,6 +101,12 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
                     GrassPointInfo grassPointInfo = iGrassPointService.getById(item.getPointPrimaryKey());
                     weighingTankAddVo.setPointId(grassPointInfo.getPointId());
                     weighingTankAddVo.setPointName(grassPointInfo.getPointName());
+
+                    for (WeighingTankAddVo tankAddVo : pumpMark) {
+                        if (tankAddVo.getUseMark().equals(item.getUseMark())) {
+                            weighingTankAddVo.setName(tankAddVo.getName());
+                        }
+                    }
                     return weighingTankAddVo;
                 }
         ).collect(Collectors.toList());

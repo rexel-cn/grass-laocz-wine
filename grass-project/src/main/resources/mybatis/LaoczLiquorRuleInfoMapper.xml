@@ -81,6 +81,56 @@
         select distinct liquor_batch_id
         from laocz_wine_details
     </select>
+    <select id="selectLaoczLiquorRuleInfoListVo" resultType="com.rexel.laocz.domain.vo.LiquorRuleInfoVo">
+        select liquor_rule_id,
+        liquor_batch_id,
+        tenant_id,
+        liquor_rule_name,
+        liquor_rule_enable,
+        liquor_rule_judge,
+        liquor_rule_threshold,
+        liquor_rule_notify_user,
+        liquor_rule_notify_template,
+        delete_flag,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        remark
+        from laocz_liquor_rule_info
+        <where>
+            <if test="liquorRuleId != null ">
+                and liquor_rule_id = #{liquorRuleId}
+            </if>
+            <if test="liquorBatchId != null ">
+                and liquor_batch_id = #{liquorBatchId}
+            </if>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="liquorRuleName != null  and liquorRuleName != ''">
+                and liquor_rule_name like concat('%', #{liquorRuleName}, '%')
+            </if>
+            <if test="liquorRuleEnable != null ">
+                and liquor_rule_enable = #{liquorRuleEnable}
+            </if>
+            <if test="liquorRuleJudge != null  and liquorRuleJudge != ''">
+                and liquor_rule_judge = #{liquorRuleJudge}
+            </if>
+            <if test="liquorRuleThreshold != null  and liquorRuleThreshold != ''">
+                and liquor_rule_threshold = #{liquorRuleThreshold}
+            </if>
+            <if test="liquorRuleNotifyUser != null  and liquorRuleNotifyUser != ''">
+                and liquor_rule_notify_user = #{liquorRuleNotifyUser}
+            </if>
+            <if test="liquorRuleNotifyTemplate != null  and liquorRuleNotifyTemplate != ''">
+                and liquor_rule_notify_template = #{liquorRuleNotifyTemplate}
+            </if>
+            <if test="deleteFlag != null ">
+                and delete_flag = #{deleteFlag}
+            </if>
+        </where>
+    </select>
 
     <insert id="batchLaoczLiquorRuleInfo" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="liquorRuleId">
