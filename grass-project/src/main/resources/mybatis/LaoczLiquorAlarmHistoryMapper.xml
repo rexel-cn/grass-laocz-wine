@@ -93,7 +93,7 @@
         from laocz_liquor_alarm_history
         <where>
             <if test="liquorRuleId != null and liquorRuleId != ''">
-                and liquor_rule_id = like concat('%', #{liquorRuleId}, '%')
+                and liquor_rule_id like concat('%', #{liquorRuleId}, '%')
             </if>
             <if test="potteryAltarId != null and potteryAltarId != ''">
                 and pottery_altar_id = #{potteryAltarId}
