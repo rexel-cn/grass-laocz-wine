@@ -136,7 +136,7 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     @Override
     public ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId) {
         LaoczSamplingHistority laoczSamplingHistority = this.lambdaQuery().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).one();
-        if (laoczSamplingHistority.getSamplingFile().isEmpty()) {
+        if (laoczSamplingHistority.getSamplingFile() == null) {
             throw  new ServiceException("文件链接为空，下载失败！");
         }
         String samplingFile = laoczSamplingHistority.getSamplingFile();
