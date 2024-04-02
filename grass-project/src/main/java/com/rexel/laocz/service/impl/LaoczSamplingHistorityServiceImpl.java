@@ -3,6 +3,7 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.*;
@@ -135,6 +136,9 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     @Override
     public ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId) {
         LaoczSamplingHistority laoczSamplingHistority = this.lambdaQuery().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).one();
+        if (laoczSamplingHistority.getSamplingFile().isEmpty()) {
+            throw  new ServiceException("文件链接为空，下载失败！");
+        }
         String samplingFile = laoczSamplingHistority.getSamplingFile();
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet httpGet = new HttpGet(samplingFile);
