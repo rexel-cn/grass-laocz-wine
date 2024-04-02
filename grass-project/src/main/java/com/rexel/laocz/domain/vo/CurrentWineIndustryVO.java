@@ -1,6 +1,7 @@
 package com.rexel.laocz.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rexel.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -68,4 +69,9 @@ public class CurrentWineIndustryVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date storingTime;
+
+    /**
+     * 运行状态（0：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中）
+     */
+    private Long realStatus;
 }

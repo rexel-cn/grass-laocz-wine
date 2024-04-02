@@ -103,20 +103,20 @@
     <select id="selectBoardData" resultType="com.rexel.laocz.domain.vo.BoardDataVO">
         SELECT
         pam.pottery_altar_number AS potteryAltarNumber,
-        lm.liquor_name AS liquorName,
-        lb.liquor_batch_id AS liquorBatchId,
-        bpm.actual_weight AS actualWeight,
+        COALESCE(lm.liquor_name, '--') AS liquorName,
+        COALESCE(lb.liquor_batch_id, '--') AS liquorBatchId, -- 假设liquor_batch_id为整数类型，用0替换NULL
+        COALESCE(bpm.actual_weight, 0.0) AS actualWeight, -- 假设actual_weight为浮点数类型，用0.0替换NULL
         DATEDIFF(CURRENT_DATE, bpm.storing_time) AS retentionDays,
-        lm.liquor_level AS liquorLevel,
-        lm.liquor_round AS liquorRound,
-        lm.liquor_flavor_name AS liquorFlavorName,
-        lm.liquor_source AS liquorSource,
-        lm.liquor_year AS liquorYear,
-        lm.liquor_brewing_time AS liquorBrewingTime,
-        lm.liquor_content AS liquorContent
+        COALESCE(lm.liquor_level, '--') AS liquorLevel,
+        COALESCE(lm.liquor_round, '--') AS liquorRound,
+        COALESCE(lm.liquor_flavor_name, '--') AS liquorFlavorName,
+        COALESCE(lm.liquor_source, '--') AS liquorSource,
+        COALESCE(lm.liquor_year, '--') AS liquorYear,
+        COALESCE(lm.liquor_brewing_time, '0000-00-00') AS liquorBrewingTime,
+        COALESCE(lm.liquor_content, '--') AS liquorContent
         FROM
         laocz_pottery_altar_management pam
-        LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id
+        LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id AND bpm.real_status != 0
         LEFT JOIN laocz_liquor_batch lb ON bpm.liquor_batch_id = lb.liquor_batch_id
         LEFT JOIN laocz_liquor_management lm ON lb.liquor_management_id = lm.liquor_management_id
         LEFT JOIN laocz_fire_zone_info fzi ON pam.fire_zone_id = fzi.fire_zone_id
@@ -129,6 +129,7 @@
             <if test="areaId != null and areaId != ''">
                 AND ai.area_id = #{areaId}
             </if>
+            AND pam.pottery_altar_state = 1
         </where>
     </select>
     <select id="selectOverviewVo" resultType="com.rexel.laocz.domain.vo.OverviewVo">

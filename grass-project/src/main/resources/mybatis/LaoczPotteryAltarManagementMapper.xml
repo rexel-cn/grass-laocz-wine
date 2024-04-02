@@ -42,6 +42,7 @@
         lbpm.actual_weight,
         lbpm.storing_time,
         lbpm.storing_time as StorageDuration,
+        lbpm.real_status,
         llm.liquor_level,
         llm.liquor_round,
         llm.liquor_flavor_name,

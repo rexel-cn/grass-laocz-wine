@@ -95,7 +95,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         // 定义一个与字符串日期格式相匹配的SimpleDateFormat对象
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         CurrentWineIndustryVO currentWineIndustryVO = baseMapper.setCurrentWineIndustry(potteryAltarId);
-        if (ObjectUtil.isEmpty(currentWineIndustryVO)) {
+        if (ObjectUtil.isEmpty(currentWineIndustryVO) || currentWineIndustryVO.getRealStatus() == 0) {
             CurrentWineIndustryVO currentWineIndustryVO1 = new CurrentWineIndustryVO();
             currentWineIndustryVO1.setLiquorName("--");
             currentWineIndustryVO1.setLiquorBatchId("--");
