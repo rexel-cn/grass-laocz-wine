@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.laocz.domain.LaoczSamplingHistority;
 import com.rexel.laocz.domain.LaoczSamplingHistorityVO;
 import com.rexel.laocz.domain.vo.*;
@@ -62,7 +63,13 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
      */
     @Override
     public List<LaoczSamplingHistorityVO> selectLaoczSamplingHist(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId) {
-        return baseMapper.selectLaoczSamplingHist(potteryAltarId, fromTime, endTime, liquorBatchId);
+        return baseMapper.selectLaoczSamplingHist(potteryAltarId, fromTime, endTime, liquorBatchId).stream()
+                .peek(aaa -> {
+                    if (aaa != null) {
+                        aaa.setState(aaa.getSamplingFile() == null || aaa.getSamplingFile().isEmpty() ? 0 : 1);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -99,6 +106,7 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     public Boolean updateLaoczSampling(Long samplingHistorityId, String url) {
         LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
         laoczSamplingHistority.setSamplingFile(url);
+        laoczSamplingHistority.setSamplingFileDate(DateUtils.getNowDate());
         return this.lambdaUpdate().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).update(laoczSamplingHistority);
     }
 
@@ -137,7 +145,7 @@ public class LaoczSamplingHistorityServiceImpl extends ServiceImpl<LaoczSampling
     public ResponseEntity<ByteArrayResource> downloadFile(Long samplingHistorityId) {
         LaoczSamplingHistority laoczSamplingHistority = this.lambdaQuery().eq(LaoczSamplingHistority::getSamplingHistorityId, samplingHistorityId).one();
         if (laoczSamplingHistority.getSamplingFile() == null) {
-            throw  new ServiceException("文件链接为空，下载失败！");
+            throw new ServiceException("文件链接为空，下载失败！");
         }
         String samplingFile = laoczSamplingHistority.getSamplingFile();
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {

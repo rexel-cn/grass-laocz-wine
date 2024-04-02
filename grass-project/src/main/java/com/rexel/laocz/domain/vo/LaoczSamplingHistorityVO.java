@@ -88,7 +88,10 @@ public class LaoczSamplingHistorityVO extends BaseEntity {
      * 陶坛管理编号
      */
     private String potteryAltarNumber;
-
+    /**
+     * 显示上传还是下载 0：上传 1：下载
+     */
+    private Integer state;
 
     @Override
     public String toString() {
