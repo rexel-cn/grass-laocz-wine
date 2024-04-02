@@ -38,20 +38,20 @@ public interface LaoczLiquorAlarmHistoryMapper extends BaseMapper<LaoczLiquorAla
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
-    List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorRuleId") Long liquorRuleId, @Param("liquorRuleName") String liquorRuleName);
+    List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorBatchId") String liquorBatchId, @Param("liquorRuleName") String liquorRuleName);
 
     /**
      * 报警查询
      *
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
-    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryVOList(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorRuleId") Long liquorRuleId, @Param("liquorRuleName") String liquorRuleName);
+    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryVOList(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorBatchId") String liquorBatchId, @Param("liquorRuleName") String liquorRuleName);
 }

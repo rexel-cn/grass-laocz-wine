@@ -37,13 +37,13 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
     @Override
-    public List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
-        return baseMapper.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorRuleId, liquorRuleName);
+    public List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, String liquorRuleName) {
+        return baseMapper.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorBatchId, liquorRuleName);
     }
 
     /**
@@ -51,14 +51,14 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
      *
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
     @Override
-    public List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
+    public List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, String liquorBatchId, String liquorRuleName) {
         try {
-            return baseMapper.selectLaoczLiquorAlarmHistoryVOList(fromTime, endTime, liquorRuleId, liquorRuleName);
+            return baseMapper.selectLaoczLiquorAlarmHistoryVOList(fromTime, endTime, liquorBatchId, liquorRuleName);
         } catch (Exception e) {
             log.error("查询失败", e);
             throw new ServiceException("查询失败");

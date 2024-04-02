@@ -10,6 +10,7 @@
         <result property="liquorRuleId" column="liquor_rule_id"/>
         <result property="potteryAltarId" column="pottery_altar_id"/>
         <result property="liquorRuleName" column="liquor_rule_name"/>
+        <result property="liquorBatchId" column="liquor_batch_id"/>
         <result property="liquorRuleJudge" column="liquor_rule_judge"/>
         <result property="liquorRuleThreshold" column="liquor_rule_threshold"/>
         <result property="alarmValue" column="alarm_value"/>
@@ -28,6 +29,7 @@
                liquor_rule_id,
                pottery_altar_id,
                liquor_rule_name,
+               liquor_batch_id,
                liquor_rule_judge,
                liquor_rule_threshold,
                alarm_value,
@@ -57,6 +59,9 @@
             <if test="liquorRuleName != null  and liquorRuleName != ''">
                 and liquor_rule_name like concat('%', #{liquorRuleName}, '%')
             </if>
+            <if test="liquorBatchId != null  and liquorBatchId != ''">
+                and liquor_batch_id like concat('%', #{liquorBatchId}, '%')
+            </if>
             <if test="liquorRuleJudge != null  and liquorRuleJudge != ''">
                 and liquor_rule_judge = #{liquorRuleJudge}
             </if>
@@ -80,6 +85,7 @@
         liquor_rule_id,
         pottery_altar_id,
         liquor_rule_name,
+        liquor_batch_id,
         liquor_rule_judge,
         liquor_rule_threshold,
         alarm_value,
@@ -92,8 +98,8 @@
         remark
         from laocz_liquor_alarm_history
         <where>
-            <if test="liquorRuleId != null and liquorRuleId != ''">
-                and liquor_rule_id like concat('%', #{liquorRuleId}, '%')
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
             <if test="potteryAltarId != null and potteryAltarId != ''">
                 and pottery_altar_id = #{potteryAltarId}
@@ -111,7 +117,7 @@
         SELECT
         llah.create_time,
         llah.liquor_rule_name,
-        llah.liquor_rule_id,
+        llah.liquor_batch_id,
         llm.liquor_name,
         lai.area_name,
         lfzi.fire_zone_name,
@@ -121,14 +127,14 @@
         llah.alarm_value
         FROM
         laocz_liquor_alarm_history llah
-        LEFT JOIN laocz_liquor_batch llb ON llah.liquor_rule_id = llb.liquor_batch_id
+        LEFT JOIN laocz_liquor_batch llb ON llah.liquor_batch_id = llb.liquor_batch_id
         LEFT JOIN laocz_liquor_management llm ON llb.liquor_management_id = llm.liquor_management_id
         LEFT JOIN laocz_pottery_altar_management lpam ON llah.pottery_altar_id = lpam.pottery_altar_id
         LEFT JOIN laocz_fire_zone_info lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
         LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
         <where>
-            <if test="liquorRuleId != null and liquorRuleId != ''">
-                and llah.liquor_rule_id like concat('%', #{liquorRuleId}, '%')
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                and llah.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
             <if test="liquorRuleName != null and liquorRuleName != ''">
                 and llah.liquor_rule_name like concat('%', #{liquorRuleName}, '%')
@@ -142,12 +148,12 @@
     <insert id="batchLaoczLiquorAlarmHistory" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="liquorAlarmHistoryId">
         insert into laocz_liquor_alarm_history
-        ( liquor_alarm_history_id , tenant_id , liquor_rule_id , pottery_altar_id , liquor_rule_name , liquor_rule_judge
+        ( liquor_alarm_history_id , tenant_id , liquor_rule_id , pottery_altar_id , liquor_rule_name ,liquor_batch_id, liquor_rule_judge
         , liquor_rule_threshold , alarm_value , liquor_rule_notify_user , liquor_rule_notify_template , create_by ,
         create_time , update_by , update_time , remark) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.liquorAlarmHistoryId}, #{item.tenantId}, #{item.liquorRuleId}, #{item.potteryAltarId},
-            #{item.liquorRuleName}, #{item.liquorRuleJudge}, #{item.liquorRuleThreshold}, #{item.alarmValue},
+            #{item.liquorRuleName}, #{item.liquorBatchId}, #{item.liquorRuleJudge}, #{item.liquorRuleThreshold}, #{item.alarmValue},
             #{item.liquorRuleNotifyUser}, #{item.liquorRuleNotifyTemplate}, #{item.createBy}, #{item.createTime},
             #{item.updateBy}, #{item.updateTime}, #{item.remark})
         </foreach>

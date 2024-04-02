@@ -28,20 +28,20 @@ public interface ILaoczLiquorAlarmHistoryService extends IService<LaoczLiquorAla
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
-    List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName);
+    List<LaoczLiquorAlarmHistory> selectLaoczLiquorAlarmHistory(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, String liquorRuleName);
 
     /**
      * 报警查询
      *
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
-    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName);
+    List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, String liquorBatchId, String liquorRuleName);
 }

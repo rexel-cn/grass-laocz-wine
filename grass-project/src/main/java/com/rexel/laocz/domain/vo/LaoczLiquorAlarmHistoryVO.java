@@ -34,7 +34,7 @@ public class LaoczLiquorAlarmHistoryVO {
      * 酒液批次报警ID
      */
     @Excel(name = "酒液批次")
-    private String liquorRuleId;
+    private String liquorBatchId;
     /**
      * 酒品名称
      */

@@ -41,7 +41,7 @@ public class LaoczLiquorAlarmHistory extends BaseEntity {
     /**
      * 酒液批次报警ID
      */
-    @Excel(name = "酒液批次报警ID")
+    @Excel(name = "规则ID")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long liquorRuleId;
     /**
@@ -56,6 +56,12 @@ public class LaoczLiquorAlarmHistory extends BaseEntity {
     @Excel(name = "规则名称")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String liquorRuleName;
+    /**
+     * 酒批次ID，外键关联laocz_liquor_batch
+     */
+    @Excel(name = "酒批次ID，外键关联laocz_liquor_batch")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private String liquorBatchId;
     /**
      * 规则判断条件
      */

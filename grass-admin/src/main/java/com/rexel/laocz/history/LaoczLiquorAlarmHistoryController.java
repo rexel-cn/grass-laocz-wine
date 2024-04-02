@@ -27,14 +27,14 @@ public class LaoczLiquorAlarmHistoryController extends BaseController {
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
     @GetMapping("/list")
-    public TableDataInfo getTableDataList(Long potteryAltarId, String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
+    public TableDataInfo getTableDataList(Long potteryAltarId, String fromTime, String endTime, String liquorBatchId, String liquorRuleName) {
         startPage();
-        return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorRuleId, liquorRuleName), "alarmRecord");
+        return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistory(potteryAltarId, fromTime, endTime, liquorBatchId, liquorRuleName), "alarmRecord");
     }
 
     /**
@@ -42,13 +42,13 @@ public class LaoczLiquorAlarmHistoryController extends BaseController {
      *
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorRuleId   批次ID
+     * @param liquorBatchId   批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
     @GetMapping("/alarmHistoryList")
-    public TableDataInfo getAlarmHistoryList(String fromTime, String endTime, Long liquorRuleId, String liquorRuleName) {
+    public TableDataInfo getAlarmHistoryList(String fromTime, String endTime, String liquorBatchId, String liquorRuleName) {
         startPage();
-        return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistoryList(fromTime, endTime, liquorRuleId, liquorRuleName), "alarmHistoryList");
+        return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistoryList(fromTime, endTime, liquorBatchId, liquorRuleName), "alarmHistoryList");
     }
 }
