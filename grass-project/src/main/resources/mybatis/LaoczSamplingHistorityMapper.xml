@@ -88,18 +88,16 @@
         SELECT
         lsh.sampling_histority_id,
         lsh.work_order_id,
-        lsh.tenant_id,
         lsh.liquor_batch_id,
-        llm.liquor_name,
-        lsh.pottery_altar_id,
+        lwh.liquor_name,
         lsh.sampling_purpose,
         lsh.sampling_weight,
         lsh.sampling_date,
-        lsh.sampling_file_date,
         lsh.sampling_file,
+        lsh.sampling_file_date,
         lsh.sampling_file_name,
-        lai.area_name,
-        lfzi.fire_zone_name,
+        lwh.area_name,
+        lwh.fire_zone_name,
         lsh.pottery_altar_number,
         lsh.create_by,
         lsh.create_time,
@@ -108,11 +106,7 @@
         lsh.remark
         FROM
         laocz_sampling_histority lsh
-        LEFT JOIN laocz_liquor_batch llb ON llb.liquor_batch_id = lsh.liquor_batch_id
-        LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
-        LEFT JOIN laocz_pottery_altar_management lpam ON lpam.pottery_altar_id = lsh.pottery_altar_id
-        LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id
-        LEFT JOIN laocz_area_info lai ON lai.area_id = lfzi.area_id
+        LEFT JOIN laocz_wine_history lwh ON lsh.busy_id = lwh.busy_id
         <where>
             <if test="potteryAltarId != null and potteryAltarId != ''">
                 and lsh.pottery_altar_id = #{potteryAltarId}
@@ -124,6 +118,7 @@
                 and lsh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
         </where>
+        ORDER BY lsh.create_time DESC
     </select>
     <select id="selectLaoczSamplingList" resultType="com.rexel.laocz.domain.vo.LaoczSamplingVO">
         SELECT
@@ -165,6 +160,7 @@
                 and lwh.fire_zone_id = #{fireZoneId}
             </if>
         </where>
+        ORDER BY lsh.create_time DESC
     </select>
     <select id="getLaoczSamplingHistoryInfo" resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">
         SELECT
