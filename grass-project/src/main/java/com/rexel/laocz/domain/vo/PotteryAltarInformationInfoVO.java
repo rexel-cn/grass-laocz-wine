@@ -29,7 +29,7 @@ public class PotteryAltarInformationInfoVO {
     /**
      * 称重罐编号
      */
-    private Long weighingTankNumber;
+    private String weighingTankNumber;
     /**
      * 剩余重量
      */
