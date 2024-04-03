@@ -1,9 +1,13 @@
 package com.rexel.laocz.asset;
 
+import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.enums.BusinessType;
+import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
@@ -12,8 +16,12 @@ import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -171,4 +179,30 @@ public class LaoczPotteryAltarManagementController extends BaseController {
         return AjaxResult.success(iLaoczPotteryAltarManagementService.winePourPotteryAltarList(winePourPotteryAltarDTO));
     }
 
+    /**
+     * 获取陶坛PDF文件
+     */
+    @PostMapping("/qrCodePdf")
+    public AjaxResult getQrCodePdf() {
+        return iLaoczPotteryAltarManagementService.getPotteryAltarManagementQrCodePdf();
+    }
+
+    /**
+     * 导出陶坛管理列表
+     */
+    @PostMapping("/export")
+    public void export(HttpServletResponse response) throws IOException {
+        ExcelUtil<PotteryAltarVo> util = new ExcelUtil<>(PotteryAltarVo.class);
+        List<PotteryAltarVo> potteryAltarVos = iLaoczPotteryAltarManagementService.selectLaoczPotteryAltarManagementListDetail(null);
+        util.exportExcel(response, potteryAltarVos, "陶坛管理");
+    }
+    /**
+     * 导入陶坛管理列表
+     */
+    @PostMapping("/import")
+    public AjaxResult importPotteryAltar(@RequestParam("file") MultipartFile file) throws Exception {
+        ExcelUtil<PotteryAltarVo> util = new ExcelUtil<>(PotteryAltarVo.class);
+        List<PotteryAltarVo> potteryAltarVos = util.importExcel(file.getInputStream());
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.importPotteryAltar(potteryAltarVos));
+    }
 }

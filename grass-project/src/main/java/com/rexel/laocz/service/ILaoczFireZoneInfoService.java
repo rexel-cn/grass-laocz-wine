@@ -29,4 +29,6 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
      * @return
      */
     List<TreePullDownVO> selectTreePullDown();
+
+    Long findFireZoneId(String areaName, String fireZoneName);
 }

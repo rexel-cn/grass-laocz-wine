@@ -64,7 +64,7 @@ public class LaoczAreaInfoController extends BaseController {
     @Log(title = "场区信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody LaoczAreaInfo laoczAreaInfo) {
-        return toAjax(laoczAreaInfoService.save(laoczAreaInfo));
+        return toAjax(laoczAreaInfoService.addLaoczAreaInfo(laoczAreaInfo));
     }
 
     /**

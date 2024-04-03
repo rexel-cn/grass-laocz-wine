@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.AreaVo;
@@ -65,6 +66,24 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
         queryWrapper.orderByAsc(LaoczFireZoneInfo::getDispalyOrder);
         List<LaoczFireZoneInfo> list = iLaoczFireZoneInfoService.list(queryWrapper);
         return list;
+    }
+
+    /**
+     * 新增场区
+     * @param laoczAreaInfo 场区信息
+     * @return
+     */
+    @Override
+    public boolean addLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo) {
+        //判断场区编号是否已存在
+        QueryWrapper<LaoczAreaInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("area_name",laoczAreaInfo.getAreaName());
+
+        int count = this.count(wrapper);
+        if (count > 0){
+            throw new ServiceException("场区编号已存在");
+        }
+        return this.save(laoczAreaInfo);
     }
 
 }

@@ -394,6 +394,30 @@
             </if>
         </where>
     </select>
+    <select id="selectOperation" resultType="com.rexel.laocz.domain.vo.LaoczWineHistoryVO">
+        select
+        lwh.win_his_id,
+        lwh.work_order_id,
+        sdd.dict_label AS detail_type,
+        case when lwo.create_time is null then lwoh.create_time else lwo.create_time end as create_time
+        from laocz_wine_history lwh
+        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
+        LEFT JOIN laocz_wine_operations lwo on lwo.work_order_id = lwh.work_order_id
+        LEFT JOIN laocz_wine_operations_his lwoh on lwoh.work_order_id = lwh.work_order_id
+        <where>
+            <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
+                and lwh.operation_time between #{fromTime} and #{endTime}
+            </if>
+            <if test="detailType != null and detailType != ''">
+                and lwh.detail_type = #{detailType}
+            </if>
+            <if test="workOrderId != null  and workOrderId != ''">
+                and lwh.work_order_id like concat('%', #{workOrderId}, '%')
+            </if>
+        </where>
+        GROUP BY lwh.work_order_id
+        order by lwh.operation_time desc
+    </select>
 
     <insert id="batchLaoczWineHistory" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="winHisId">

@@ -147,7 +147,9 @@
         lm.liquor_brewing_time AS liquorBrewingTime,
         lm.liquor_content AS liquorContent,
         fzi.fire_zone_name AS fireZoneName,
-        ai.area_name AS areaName
+        ai.area_name AS areaName,
+        bpm.create_by,
+        bpm.create_time
         FROM
         laocz_pottery_altar_management pam
         LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id

@@ -1,5 +1,6 @@
 package com.rexel.laocz.domain.vo;
 
+import com.rexel.common.annotation.Excel;
 import com.rexel.laocz.domain.LaoczLiquorManagement;
 import lombok.Data;
 
@@ -14,10 +15,12 @@ public class PotteryAltarVo {
     /**
      * 陶坛管理编号
      */
+    @Excel(name = "陶坛编号")
     private String potteryAltarNumber;
     /**
      * 陶坛状态，1：使用，2封存
      */
+    @Excel(name = "陶坛状态1：使用，2封存")
     private String potteryAltarState;
     /**
      * 区域id
@@ -26,6 +29,7 @@ public class PotteryAltarVo {
     /**
      * 区域名称
      */
+    @Excel(name = "归属区域")
     private String areaName;
     /**
      * 防火区主键ID，外键关联laocz_fire_zone_info
@@ -34,11 +38,13 @@ public class PotteryAltarVo {
     /**
      * 防火区名称
      */
+    @Excel(name = "归属防火区")
     private String fireZoneName;
     /**
      * 满坛重量
      */
-    private Long potteryAltarFullAltarWeight;
+    @Excel(name = "满坛重量")
+    private Double potteryAltarFullAltarWeight;
     /**
      * 陶坛二维码地址
      */

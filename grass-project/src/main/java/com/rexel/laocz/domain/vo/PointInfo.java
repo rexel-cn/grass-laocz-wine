@@ -15,5 +15,5 @@ public class PointInfo {
     /**
      * 测点名称
      */
-    private String point_name;
+    private String pointName;
 }

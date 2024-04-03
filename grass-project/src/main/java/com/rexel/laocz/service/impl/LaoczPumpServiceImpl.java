@@ -12,6 +12,8 @@ import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.mapper.LaoczPumpMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.system.domain.GrassPointInfo;
+import com.rexel.system.domain.vo.PointQueryVO;
+import com.rexel.system.mapper.GrassPointInfoMapper;
 import com.rexel.system.service.IGrassPointService;
 import com.rexel.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,9 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
 
     @Autowired
     private ILaoczWeighingTankService ILaoczWeighingTankService;
+
+    @Autowired
+    private GrassPointInfoMapper pointInfoMapper;
 
     /**
      * 查询泵管理列表
@@ -147,6 +152,18 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
                 LaoczPumpPoint laoczPumpPoint = new LaoczPumpPoint();
                 laoczPumpPoint.setUseMark(weighingTankAddVo.getUseMark());
                 laoczPumpPoint.setPumpId(pumpId);
+
+                //判断测点Id是否以及被占用，如果被占用，新增失败
+                Integer countId = iLaoczPumpPointService.lambdaQuery().eq(LaoczPumpPoint::getPointPrimaryKey, weighingTankAddVo.getPointPrimaryKey()).count();
+                if (countId > 0) {
+                    //查询使用标识的名字
+                    List<WeighingTankAddVo> weightMark = ILaoczWeighingTankService.getAddVo("pump_mark");
+                    for (WeighingTankAddVo tankAddVo : weightMark) {
+                        if (tankAddVo.getUseMark().equals(weighingTankAddVo.getUseMark())) {
+                            throw new ServiceException(tankAddVo.getName() + "的绑定测点已经被使用，请重新选择正确测点进行新增");
+                        }
+                    }
+                }
                 laoczPumpPoint.setPointPrimaryKey(weighingTankAddVo.getPointPrimaryKey());
 
                 laoczPumpPoints.add(laoczPumpPoint);

@@ -2,8 +2,11 @@ package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
@@ -11,10 +14,13 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
+import com.rexel.laocz.domain.LaoczLiquorManagement;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.*;
+import com.rexel.laocz.mapper.LaoczLiquorManagementMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
+import com.rexel.laocz.service.ILaoczLiquorManagementService;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +41,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     private ISysHeaderMetadataService headerMetadataService;
     @Autowired
     private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
+    @Autowired
+    private LaoczLiquorManagementMapper laoczLiquorManagementMapper;
 
 
     /**
@@ -236,6 +244,27 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     @Override
     public List<LaoczWineHistoryVO> batchLossReportExport(String liquorBatchId) {
         return baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+    }
+
+    @Override
+    public List<LaoczWineHistoryVO> selectOperation(String fromTime, String endTime, String detailType, String workOrderId) {
+        List<LaoczWineHistoryVO> list = baseMapper.selectOperation(fromTime, endTime, detailType, workOrderId);
+        return list;
+    }
+
+    @Override
+    public List<LaoczWineHistory> selectDetailByWorkId(LaoczWineHistory laoczWineHistory) {
+        List<LaoczWineHistory> list = baseMapper.selectLaoczWineHistoryList(laoczWineHistory);
+
+        //赋值
+        if (!CollectionUtil.isEmpty(list)){
+            //查询酒品Id
+            LambdaQueryWrapper<LaoczLiquorManagement> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(LaoczLiquorManagement::getLiquorName, list.get(0).getLiquorName());
+            LaoczLiquorManagement laoczLiquorManagement = laoczLiquorManagementMapper.selectOne(queryWrapper);
+            list.get(0).setLiquorManagementId(laoczLiquorManagement.getLiquorManagementId());
+        }
+        return list;
     }
 
 

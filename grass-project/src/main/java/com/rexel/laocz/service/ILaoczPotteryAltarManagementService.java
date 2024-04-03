@@ -1,6 +1,7 @@
 package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
@@ -185,4 +186,7 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
 
     List<WineOperaPotteryAltarVO> winePourPotteryAltarList(WinePourPotteryAltarDTO winePourPotteryAltarDTO);
 
+    AjaxResult getPotteryAltarManagementQrCodePdf();
+
+    boolean importPotteryAltar(List<PotteryAltarVo> potteryAltarVos);
 }

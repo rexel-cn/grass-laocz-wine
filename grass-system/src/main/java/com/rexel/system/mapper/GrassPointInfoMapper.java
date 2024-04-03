@@ -113,4 +113,9 @@ public interface GrassPointInfoMapper extends BaseMapper<GrassPointInfo> {
 
     @InterceptorIgnore(tenantLine = "on")
     Boolean deleteByTenantId(String tenantId);
+
+    List<PointQueryVO> getFilterList(@Param("deviceId") String deviceId,
+                                     @Param("pointId") String pointId,
+                                     @Param("pointName") String pointName,
+                                     @Param("pointPrimaryKey") String pointPrimaryKey);
 }

@@ -1,9 +1,11 @@
 package com.rexel.laocz.history;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.utils.CollectionUtils;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
@@ -39,7 +41,7 @@ public class LaoczWineHistoryController extends BaseController {
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param detailType  操作类型
+     * @param detailType     操作类型
      * @param workOrderId    工单Id
      * @return
      */
@@ -150,5 +152,44 @@ public class LaoczWineHistoryController extends BaseController {
     public AjaxResult getOperationdetails(Long winHisId) {
         LaoczWineHistory laoczWineHistory = laoczWineHistoryService.getById(winHisId);
         return AjaxResult.success(laoczWineHistory);
+    }
+
+    /**
+     * 操作记录
+     * @param fromTime 开始时间
+     * @param endTime 结束时间
+     * @param detailType 操作类型
+     * @param workOrderId 工单Id
+     * @return 分页数据
+     */
+    @GetMapping("/listOperation")
+    public TableDataInfo selectOperation(String fromTime, String endTime, String detailType, String workOrderId) {
+        startPage();
+        List<LaoczWineHistoryVO> list = laoczWineHistoryService.selectOperation(fromTime, endTime, detailType, workOrderId);
+        return getDataTable(list,"historyInfo");
+    }
+
+    /**
+     * 根据工单Id查询所有陶坛信息
+     * @param laoczWineHistory
+     * @return
+     */
+    @GetMapping("getDetailByWorkId")
+    public AjaxResult getDetailByWorkId(LaoczWineHistory laoczWineHistory){
+        List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectDetailByWorkId(laoczWineHistory);
+        return AjaxResult.success(laoczWineHistories);
+    }
+    /**
+     * 根据工单Id,陶坛Id,操作类型查询陶坛信息
+     * @param laoczWineHistory
+     * @return
+     */
+    @GetMapping("getOneByWorkId")
+    public AjaxResult getOneByWorkId(LaoczWineHistory laoczWineHistory){
+        List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectDetailByWorkId(laoczWineHistory);
+        if (!CollectionUtil.isEmpty(laoczWineHistories)){
+            return AjaxResult.success(laoczWineHistories.get(0));
+        }
+        return AjaxResult.success();
     }
 }

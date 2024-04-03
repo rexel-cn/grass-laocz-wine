@@ -534,7 +534,7 @@
         grass_point_tag_info gpti
         LEFT JOIN grass_point_tag_point gptp on gpti.id = gptp.point_tag_info_id
         LEFT JOIN grass_point_info gpi on gptp.point_id = gpi.point_id
-            and gptp.device_id = gpi.device_id and gptp.point_type = gpi.point_type
+        and gptp.device_id = gpi.device_id and gptp.point_type = gpi.point_type
         <where>
             <if test="tagKey != null and tagKey != ''">and gpti.tag_key = #{tagKey}</if>
             <if test="tagValue != null and tagValue != ''">and gpti.tag_value = #{tagValue}</if>
@@ -542,6 +542,71 @@
             and gpi.is_delete = '0'
         </where>
         ORDER BY gpti.create_time desc
+    </select>
+    <select id="getFilterList" resultType="com.rexel.system.domain.vo.PointQueryVO">
+        SELECT
+        gpi.id,
+        gpi.device_id,
+        gdi.device_name,
+        pli.link_device_type,
+        gpi.point_id,
+        gpi.point_type,
+        gpi.point_name,
+        gpi.point_unit,
+        gpi.in_min,
+        gpi.in_max,
+        gpi.out_min,
+        gpi.out_max,
+        gpi.remark,
+        gpi.create_by,
+        gpi.create_time,
+        gpi.update_by,
+        gpi.update_time,
+        sdd_pt.dict_label AS point_type_desc,
+        sdd_pu.dict_label AS point_unit_desc,
+        ( SELECT count( 1 ) FROM grass_asset_point gap WHERE gap.point_primary_key = gpi.id ) AS associateDeviceCount,
+        ( SELECT count( 1 ) FROM grass_point_tag_point gpt WHERE gpt.point_id = gpi.point_id and gpt.device_id =
+        gpi.device_id ) AS pointTagCount
+        FROM
+        grass_point_info gpi
+        LEFT JOIN grass_device_info gdi ON gpi.device_id = gdi.device_id
+        LEFT JOIN pulse_link_info pli ON gdi.link_id = pli.link_id
+        LEFT JOIN sys_dict_data sdd_pt ON gpi.point_type = sdd_pt.dict_value
+        AND sdd_pt.dict_type = 'point_type'
+        LEFT JOIN sys_dict_data sdd_pu ON gpi.point_unit = sdd_pu.dict_value
+        AND sdd_pu.dict_type = 'point_unit'
+        <where>
+            <if test="deviceId != null  and deviceId != ''">
+                and gpi.device_id =#{deviceId}
+            </if>
+            <if test="pointId != null  and pointId != ''">
+                and gpi.point_id like concat('%', #{pointId}, '%')
+            </if>
+            <if test="pointName != null  and pointName != ''">
+                and gpi.point_name like concat('%', #{pointName}, '%')
+            </if>
+            and gpi.is_delete = '0'
+            AND gpi.point_id not in (
+            SELECT
+            DISTINCT gpi.point_id
+            FROM
+            laocz_weighing_tank_point wtp
+            JOIN grass_point_info gpi ON gpi.id = wtp.point_primary_key
+            <if test="pointPrimaryKey!=null and pointPrimaryKey!='' ">
+                and  wtp.point_primary_key != #{pointPrimaryKey}
+            </if>
+            UNION
+            SELECT
+            DISTINCT gpi.point_id
+            FROM
+            laocz_pump_point lpp
+            JOIN grass_point_info gpi ON gpi.id = lpp.point_primary_key
+            <if test="pointPrimaryKey!=null and pointPrimaryKey!='' ">
+            and  lpp.point_primary_key != #{pointPrimaryKey}
+        </if>
+            )
+        </where>
+        order by gpi.device_id, gpi.point_id
     </select>
 
 </mapper>

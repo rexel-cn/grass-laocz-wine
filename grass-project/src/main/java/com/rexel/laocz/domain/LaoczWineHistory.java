@@ -116,12 +116,14 @@ public class LaoczWineHistory extends BaseEntity {
     /**
      * 业务时间（出酒、入酒、取样时间）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "业务时间", readConverterExp = "出=酒、入酒、取样时间")
     private Date operationTime;
     /**
      * 酒液 入酒时间
      */
     @Excel(name = "酒液", readConverterExp = "酒液 入酒时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date storingTime;
     /**
      * 取样用途
@@ -226,6 +228,11 @@ public class LaoczWineHistory extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String liquorContent;
 
+    /**
+     * 酒品管理Id
+     */
+    @TableField(exist = false)
+    private Long liquorManagementId;
 
     @Override
     public String toString() {

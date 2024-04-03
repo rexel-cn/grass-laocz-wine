@@ -7,6 +7,8 @@ import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
+import com.rexel.system.domain.dto.PulsePointQueryDTO;
+import com.rexel.system.domain.vo.PointQueryVO;
 
 import java.util.List;
 
@@ -51,4 +53,11 @@ public interface ILaoczWeighingTankService extends IService<LaoczWeighingTank> {
     List<PointInfo> getPointInfo(Long weighingTankId);
 
     boolean removeByIdWithPoint(Long weighingTankId);
+
+    /**
+     * 分页查询过滤已被选择测点
+     * @param
+     * @return
+     */
+    List<PointQueryVO> getListPageNoChoice(String deviceId, String pointId,String pointName,String pointPrimaryKey);
 }

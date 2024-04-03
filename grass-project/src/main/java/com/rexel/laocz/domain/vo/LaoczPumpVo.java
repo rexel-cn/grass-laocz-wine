@@ -19,7 +19,7 @@ public class LaoczPumpVo {
     /**
      * 泵编号
      */
-    private Long pumpNumber;
+    private String pumpNumber;
 
     /**
      * 区域名称

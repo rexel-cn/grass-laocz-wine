@@ -15,6 +15,8 @@ import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.service.ILaoczWeighingTankService;
+import com.rexel.system.domain.dto.PulsePointQueryDTO;
+import com.rexel.system.service.IGrassPointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.rexel.common.annotation.Log;
@@ -116,5 +118,16 @@ public class LaoczWeighingTankController extends BaseController {
     public AjaxResult getPointInfo(Long weighingTankId){
         List<PointInfo> pointInfos = laoczWeighingTankService.getPointInfo(weighingTankId);
         return AjaxResult.success(pointInfos);
+    }
+    /**
+     * 称重罐分页查询过滤已被选择测点
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/getListPageNoChoice")
+    public TableDataInfo getListPageNoChoice(String deviceId, String pointId,String pointName,String pointPrimaryKey) {
+        startPage();
+        return getDataTable(laoczWeighingTankService.getListPageNoChoice(deviceId,pointId,pointName,pointPrimaryKey), "pointList_table");
     }
 }

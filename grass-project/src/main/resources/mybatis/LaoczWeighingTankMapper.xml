@@ -55,7 +55,7 @@
         gpi.point_name
         FROM
         laocz_weighing_tank lwt
-        LEFT JOIN laocz_weighing_tank_point lwtp ON lwt.weighing_tank_id = lwtp.weighing_tank_id
+        JOIN laocz_weighing_tank_point lwtp ON lwt.weighing_tank_id = lwtp.weighing_tank_id
         LEFT JOIN grass_point_info gpi ON gpi.id = lwtp.point_primary_key
         <where>
             <if test="weighingTankId != null">

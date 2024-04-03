@@ -17,15 +17,22 @@ import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.mapper.LaoczWeighingTankMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.system.domain.GrassPointInfo;
+import com.rexel.system.domain.dto.PulsePointQueryDTO;
+import com.rexel.system.domain.vo.PointQueryVO;
+import com.rexel.system.mapper.GrassPointInfoMapper;
 import com.rexel.system.service.IGrassPointService;
 import com.rexel.system.service.ISysDictDataService;
 import com.rexel.system.service.ISysDictTypeService;
+import com.rexel.system.service.impl.IGrassPointServiceImpl;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,6 +62,10 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
     @Autowired
     private IGrassPointService iGrassPointService;
+
+    @Autowired
+    private GrassPointInfoMapper pointInfoMapper;
+
     /**
      * 查询称重罐管理列表
      *
@@ -116,7 +127,7 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             weighingTankAddVo.setPointName(grassPointInfo.getPointName());
 
             for (WeighingTankAddVo tankAddVo : weightMark) {
-                if (tankAddVo.getUseMark().equals(item.getUseMark())){
+                if (tankAddVo.getUseMark().equals(item.getUseMark())) {
                     weighingTankAddVo.setName(tankAddVo.getName());
                 }
             }
@@ -199,6 +210,17 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
                 LaoczWeighingTankPoint laoczWeighingTankPoint = new LaoczWeighingTankPoint();
                 laoczWeighingTankPoint.setUseMark(weighingTankAddVo.getUseMark());
                 laoczWeighingTankPoint.setWeighingTankId(weighingTankId);
+                //判断测点Id是否以及被占用，如果被占用，新增失败
+                Integer countId = iLaoczWeighingTankPointService.lambdaQuery().eq(LaoczWeighingTankPoint::getPointPrimaryKey, weighingTankAddVo.getPointPrimaryKey()).count();
+                if (countId > 0) {
+                    //查询使用标识的名字
+                    List<WeighingTankAddVo> weightMark = this.getAddVo("weight_mark");
+                    for (WeighingTankAddVo tankAddVo : weightMark) {
+                        if (tankAddVo.getUseMark().equals(weighingTankAddVo.getUseMark())) {
+                            throw new ServiceException(tankAddVo.getName() + "的绑定测点已经被使用，请重新选择正确测点进行新增");
+                        }
+                    }
+                }
                 laoczWeighingTankPoint.setPointPrimaryKey(weighingTankAddVo.getPointPrimaryKey());
 
                 laoczWeighingTankPoints.add(laoczWeighingTankPoint);
@@ -294,12 +316,19 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
         return remove;
     }
 
+    /**
+     * 分页查询过滤已被选择测点
+     * @param
+     * @return
+     */
+    @Override
+    public List<PointQueryVO> getListPageNoChoice(String deviceId, String pointId,String pointName,String pointPrimaryKey) {
+        //获取全部分页数据已经选择的测点过滤，自己不过滤
+        List<PointQueryVO> list = pointInfoMapper.getFilterList(deviceId,pointId,pointName,pointPrimaryKey);
+        return list;
+    }
+
     private void check(List<WeighingTankDto> weighingTankDtos) {
-        /**
-         * 校验数据
-         *
-         * @param liquorVos
-         */
         List<String> errList = new ArrayList<>();
         // 校验数据
         for (int i = 0; i < weighingTankDtos.size(); i++) {

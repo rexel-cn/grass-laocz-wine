@@ -3,20 +3,24 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.DateUtils;
+import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.*;
-import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
-import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
-import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
-import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
+import com.rexel.laocz.domain.dto.*;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.*;
+import com.rexel.laocz.utils.TinciPdfUtils;
+import com.rexel.laocz.utils.TinciQrCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,6 +48,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
     @Autowired
     private ILaoczLiquorManagementService iLaoczLiquorManagementService;
+
+    @Autowired
+    private TinciQrCodeUtils qrCodeUtils;
+
+    @Autowired
+    private TinciPdfUtils pdfUtils;
 
 
     /**
@@ -171,6 +181,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         if (count > 0) {
             throw new ServiceException("陶坛编号已存在");
         } else {
+            //生成陶坛二维码
+            String content = qrCodeUtils.makeQrCodeContent(
+                    laoczPotteryAltarManagement.getPotteryAltarNumber());
+            String url = qrCodeUtils.generateQrcode(
+                    "taotan", laoczPotteryAltarManagement.getPotteryAltarNumber(), content);
+            laoczPotteryAltarManagement.setPotteryAltarQrCodeAddress(url);
             return this.save(laoczPotteryAltarManagement);
         }
     }
@@ -205,13 +221,21 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      * @return 返回标识
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean removeWithReal(Long potteryAltarId) {
         // 陶坛不在实时使用中才可以删除
         Integer count = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).count();
         if (count > 0) {
             throw new ServiceException("陶坛在使用中，禁止删除");
         } else {
-            return this.removeById(potteryAltarId);
+            LaoczPotteryAltarManagement laoczPotteryAltarManagement = this.getById(potteryAltarId);
+            //删除陶坛管理数据
+            boolean flag = this.removeById(potteryAltarId);
+            //删除二维码图片
+            if (StringUtils.isNotEmpty(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress())) {
+                qrCodeUtils.deleteQrcode(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress());
+            }
+            return flag;
         }
     }
 
@@ -395,5 +419,93 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         }
         wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(new ArrayList<>(Collections.singletonList(winePourPotteryAltarDTO.getPotteryAltarId())), wineOperaPotteryAltarVOS);
         return wineOperaPotteryAltarVOS;
+    }
+
+    @Override
+    public AjaxResult getPotteryAltarManagementQrCodePdf() {
+        // 查询陶坛列表
+        List<LaoczPotteryAltarManagement> list = baseMapper.selectLaoczPotteryAltarManagementList(null);
+
+        // 生成图片集合
+        LinkedHashMap<String, String> idMap = new LinkedHashMap<>();
+        list.forEach(m -> {
+            if (StringUtils.isNotEmpty(m.getPotteryAltarQrCodeAddress())) {
+                idMap.put(m.getPotteryAltarNumber(), m.getPotteryAltarQrCodeAddress());
+            }
+        });
+
+        // 转换为PDF
+        String pdfUrl = pdfUtils.convertToPdf(idMap, "陶坛二维码");
+        if (StringUtils.isEmpty(pdfUrl)) {
+            return AjaxResult.success();
+        }
+
+        return AjaxResult.success(pdfUrl);
+    }
+
+    @Override
+    public boolean importPotteryAltar(List<PotteryAltarVo> potteryAltarVos) {
+        //检查excel是否为空
+        List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = new ArrayList<>();
+        if (CollectionUtil.isEmpty(potteryAltarVos)) {
+            throw new ServiceException("导入数据为空");
+        }
+        //数据校验
+        check(potteryAltarVos);
+
+
+        for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
+            //验证称重罐编号是否已存在
+            QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
+
+            queryWrapper.eq("pottery_altar_number", potteryAltarVo.getPotteryAltarNumber());
+
+            int count = this.count(queryWrapper);
+
+            if (count > 0) {
+                throw new ServiceException("陶坛编号已存在");
+            }
+            // 获取归属区域Id 获取防火区Id
+            Long fireZoneId = iLaoczFireZoneInfoService.findFireZoneId(potteryAltarVo.getAreaName(), potteryAltarVo.getFireZoneName());
+            potteryAltarVo.setFireZoneId(fireZoneId);
+
+            LaoczPotteryAltarManagement laoczPotteryAltarManagement = new LaoczPotteryAltarManagement();
+            // 数据拷贝
+            BeanUtil.copyProperties(potteryAltarVo, laoczPotteryAltarManagement);
+            //生成二维码
+            String content = qrCodeUtils.makeQrCodeContent(
+                    laoczPotteryAltarManagement.getPotteryAltarNumber());
+            String url = qrCodeUtils.generateQrcode(
+                    "taotan", laoczPotteryAltarManagement.getPotteryAltarNumber(), content);
+            laoczPotteryAltarManagement.setPotteryAltarQrCodeAddress(url);
+            laoczPotteryAltarManagements.add(laoczPotteryAltarManagement);
+        }
+        return saveBatch(laoczPotteryAltarManagements);
+    }
+
+    private void check(List<PotteryAltarVo> potteryAltarVos) {
+        List<String> errList = new ArrayList<>();
+        // 校验数据
+        for (int i = 0; i < potteryAltarVos.size(); i++) {
+            PotteryAltarVo potteryAltarVo = potteryAltarVos.get(i);
+            if (StrUtil.isEmpty(potteryAltarVo.getPotteryAltarNumber())) {
+                errList.add("第" + (i + 2) + "行陶坛编号为空");
+            }
+            if (ObjectUtil.isNull(potteryAltarVo.getAreaName())) {
+                errList.add("第" + (i + 2) + "行归属区域为空");
+            }
+            if (StrUtil.isEmpty(potteryAltarVo.getFireZoneName())) {
+                errList.add("第" + (i + 2) + "行防火区为空");
+            }
+            if (StrUtil.isEmpty(potteryAltarVo.getPotteryAltarState())) {
+                errList.add("第" + (i + 2) + "行陶坛状态为空");
+            }
+            if (StrUtil.isEmpty(potteryAltarVo.getPotteryAltarFullAltarWeight().toString())) {
+                errList.add("第" + (i + 2) + "行满坛重量为空");
+            }
+        }
+        if (CollectionUtil.isNotEmpty(errList)) {
+            throw new ServiceException(StrUtil.join("\n", errList));
+        }
     }
 }

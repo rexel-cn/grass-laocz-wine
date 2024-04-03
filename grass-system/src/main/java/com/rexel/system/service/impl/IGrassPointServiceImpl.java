@@ -315,7 +315,7 @@ public class IGrassPointServiceImpl extends ServiceImpl<GrassPointInfoMapper, Gr
      *
      * @param pointInfos
      */
-    private void pointDisplayNameConvert(List<PointQueryVO> pointInfos) {
+    public void pointDisplayNameConvert(List<PointQueryVO> pointInfos) {
         pointInfos.forEach(pointInfo -> {
             //如果测点名称为空，拼接结果为测点id
             //如果测点名称不为空，拼接结果为测点id+测点名称

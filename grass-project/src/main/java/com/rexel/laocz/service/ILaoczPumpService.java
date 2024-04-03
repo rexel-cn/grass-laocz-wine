@@ -5,6 +5,7 @@ import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
+import com.rexel.system.domain.vo.PointQueryVO;
 
 import java.util.List;
 

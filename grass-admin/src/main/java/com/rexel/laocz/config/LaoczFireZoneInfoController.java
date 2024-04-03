@@ -83,4 +83,11 @@ public class LaoczFireZoneInfoController extends BaseController {
         return AjaxResult.success(laoczFireZoneInfoService.selectTreePullDown());
     }
 
+    /**
+     * 根据场区名字和防火区名字获取防火区Id
+     */
+    @GetMapping("/getFireZoneId")
+    public AjaxResult getFireZoneId(String areaName,String fireZoneName){
+        return AjaxResult.success(laoczFireZoneInfoService.findFireZoneId(areaName,fireZoneName));
+    }
 }

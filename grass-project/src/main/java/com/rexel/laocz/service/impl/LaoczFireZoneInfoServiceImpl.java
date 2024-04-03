@@ -1,7 +1,9 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.FireZoneInfoVo;
@@ -61,6 +63,23 @@ public class LaoczFireZoneInfoServiceImpl extends ServiceImpl<LaoczFireZoneInfoM
 
             return new TreePullDownVO(area.getAreaId(), area.getAreaName(), children);
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long findFireZoneId(String areaName, String fireZoneName) {
+        // 获取归属区域Id
+        QueryWrapper<LaoczAreaInfo> areaWrapper = new QueryWrapper<>();
+        areaWrapper.eq("area_name", areaName);
+        LaoczAreaInfo laoczAreaInfo = iLaoczAreaInfoService.getOne(areaWrapper);
+        // 获取防火区Id
+        if (laoczAreaInfo != null) {
+            QueryWrapper<LaoczFireZoneInfo> zoneInfoQueryWrapper = new QueryWrapper<>();
+            zoneInfoQueryWrapper.eq("area_id", laoczAreaInfo.getAreaId())
+                    .eq("fire_zone_name", fireZoneName);
+            LaoczFireZoneInfo fireZoneInfo = this.getOne(zoneInfoQueryWrapper);
+             return fireZoneInfo.getFireZoneId();
+        }
+        throw new ServiceException("防火区Id不存在");
     }
 
 }

@@ -109,4 +109,8 @@ public interface ILaoczWineHistoryService extends IService<LaoczWineHistory> {
      * @return
      */
     List<LaoczWineHistoryVO> batchLossReportExport(String liquorBatchId);
+
+    List<LaoczWineHistoryVO> selectOperation(String fromTime, String endTime, String detailType, String workOrderId);
+
+    List<LaoczWineHistory> selectDetailByWorkId(LaoczWineHistory laoczWineHistory);
 }

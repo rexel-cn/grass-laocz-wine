@@ -26,4 +26,11 @@ public interface ILaoczAreaInfoService extends IService<LaoczAreaInfo> {
     List<AreaVo> dropDown();
 
     List<LaoczFireZoneInfo> getByIdWithfireZoneName(Long id);
+
+    /**
+     * 新增场区
+     * @param laoczAreaInfo 场区信息
+     * @return 返回
+     */
+    boolean addLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo);
 }
