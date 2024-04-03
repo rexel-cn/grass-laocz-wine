@@ -151,7 +151,7 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      * 倒坛时，陶坛列表
      * 1：倒坛出，陶坛列表查询条件如下：
      * 1：防火区id
-     * 2：陶坛编号
+     * 2：陶坛编号 可选 过滤用
      * 3：陶坛状态 必须是使用状态
      * 4：陶坛有酒
      * 5：陶坛目前没有进行其他任务，目前是存储状态

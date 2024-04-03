@@ -84,7 +84,11 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     public List<MatterDetailVO> getMatterDetailVOList(Long wineOperationsId) {
         LaoczWineOperations operations = getById(wineOperationsId);
         String busyId = operations.getBusyId();
-        return laoczWineDetailsMapper.selectMatterDetailVOList(busyId);
+        List<MatterDetailVO> matterDetailVOS = laoczWineDetailsMapper.selectMatterDetailVOList(busyId);
+        for (MatterDetailVO matterDetailVO : matterDetailVOS) {
+            matterDetailVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, matterDetailVO.getDetailType()));
+        }
+        return matterDetailVOS;
     }
 
     /**

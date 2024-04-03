@@ -1,6 +1,7 @@
 package com.rexel.laocz.service;
 
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
+import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 
 /**
  * @ClassName WineSampService
@@ -23,4 +24,12 @@ public interface WineSampService {
      * @param wineDetailsId 酒操作业务详情id
      */
     void wineSampFinish(Long wineDetailsId);
+
+    /**
+     * 二维码扫描获取入酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    WineOperaPotteryAltarVO qrCodeScan(String potteryAltarNumber);
 }

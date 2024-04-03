@@ -158,10 +158,14 @@
             <if test="potteryAltarNumber!=null and potteryAltarNumber!=''">
                 AND lpam.pottery_altar_number LIKE CONCAT('%', #{potteryAltarNumber}, '%')
             </if>
+            <if test="eqPotteryAltarNumber!=null and eqPotteryAltarNumber!=''">
+                AND lpam.pottery_altar_number = #{eqPotteryAltarNumber}
+            </if>
             <if test="potteryAltarState!=null">
                 AND lpam.pottery_altar_state = #{potteryAltarState}
             </if>
         </where>
+        ORDER BY lai.create_time,lfzi.create_time
     </select>
     <select id="wineOutPotteryAltarList" resultType="com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO">
         SELECT
@@ -171,6 +175,7 @@
         lpam.pottery_altar_number,
         lpam.pottery_altar_full_altar_weight,
         llb.liquor_management_id,
+        lbpm.liquor_batch_id,
         lbpm.actual_weight,
         lbpm.storing_time
         FROM
@@ -186,6 +191,9 @@
             </if>
             <if test="potteryAltarNumber!=null and potteryAltarNumber!=''">
                 AND lpam.pottery_altar_number LIKE CONCAT('%', #{potteryAltarNumber}, '%')
+            </if>
+            <if test="eqPotteryAltarNumber!=null and eqPotteryAltarNumber!=''">
+                AND lpam.pottery_altar_number = #{eqPotteryAltarNumber}
             </if>
             <if test="potteryAltarState!=null">
                 AND lpam.pottery_altar_state = #{potteryAltarState}
@@ -217,6 +225,9 @@
             </if>
             <if test="potteryAltarNumber!=null and potteryAltarNumber!=''">
                 AND lpam.pottery_altar_number LIKE CONCAT('%', #{potteryAltarNumber}, '%')
+            </if>
+            <if test="eqPotteryAltarNumber!=null and eqPotteryAltarNumber!=''">
+                AND lpam.pottery_altar_number = #{eqPotteryAltarNumber}
             </if>
             <if test="potteryAltarState!=null">
                 AND lpam.pottery_altar_state = #{potteryAltarState}

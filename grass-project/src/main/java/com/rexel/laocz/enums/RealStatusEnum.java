@@ -17,7 +17,8 @@ public enum RealStatusEnum {
     STORAGE(1L, "存储"),
     WINE_IN(2L, "入酒中"),
     WINE_OUT(3L, "出酒中"),
-    POUR(4L, "倒坛中");
+    POUR(4L, "倒坛中"),
+    NULL_ENUM(0L, "未知");
 
     private final Long code;
 
@@ -28,5 +29,12 @@ public enum RealStatusEnum {
         this.desc = desc;
     }
 
-
+    public static RealStatusEnum getEnumByCode(Long status) {
+        for (RealStatusEnum realStatusEnum : RealStatusEnum.values()) {
+            if (realStatusEnum.getCode().equals(status)) {
+                return realStatusEnum;
+            }
+        }
+        return NULL_ENUM;
+    }
 }

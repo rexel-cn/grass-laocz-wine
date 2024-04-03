@@ -74,13 +74,25 @@ public class WineEntryController extends BaseController {
     /**
      * 入酒结束
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param winBaseDTO 酒操作业务详情id
      * @return 结束结果
      */
     @PostMapping("/wineEntryFinish")
     public AjaxResult wineEntryFinish(@RequestBody WinBaseDTO winBaseDTO) {
         wineEntryApplyService.wineEntryFinish(winBaseDTO.getWineDetailsId());
         return AjaxResult.success();
+    }
+
+
+    /**
+     * 二维码扫描获取入酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    @GetMapping("/qrCodeScan/{potteryAltarNumber}")
+    public AjaxResult qrCodeScan(@PathVariable("potteryAltarNumber") String potteryAltarNumber) {
+        return AjaxResult.success(wineEntryApplyService.qrCodeScan(potteryAltarNumber));
     }
 
 }

@@ -111,4 +111,5 @@ public interface LaoczPotteryAltarManagementMapper extends BaseMapper<LaoczPotte
      * @param wineSamplePotteryAltarDTO 取样，陶坛筛选DTO
      */
     List<WineOperaPotteryAltarVO> wineSamplePotteryAltarList(WineSamplePotteryAltarDTO wineSamplePotteryAltarDTO);
+
 }

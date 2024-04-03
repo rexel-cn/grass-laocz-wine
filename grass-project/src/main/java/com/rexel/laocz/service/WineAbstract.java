@@ -7,6 +7,7 @@ import com.rexel.common.utils.DictUtils;
 import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineHistoryDTO;
+import com.rexel.laocz.domain.dto.WineOutApplyDTO;
 import com.rexel.laocz.enums.*;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName WineAbstract
@@ -28,28 +33,31 @@ import java.util.concurrent.ScheduledExecutorService;
 @Service
 @Slf4j
 public abstract class WineAbstract {
+    protected static final String APPLY_LOCK = "apply_lock";
 
     @Autowired
     @Qualifier("laoczTtlScheduledExecutorService")
     protected ScheduledExecutorService threadPoolTaskScheduler;
     @Autowired
-    private ILaoczWineDetailsService iLaoczWineDetailsService;
+    protected ILaoczWineDetailsService iLaoczWineDetailsService;
     @Autowired
-    private ILaoczSamplingHistorityService iLaoczSamplingHistorityService;
+    protected ILaoczSamplingHistorityService iLaoczSamplingHistorityService;
     @Autowired
-    private LaoczWineDetailsMapper laoczWineDetailsMapper;
+    protected LaoczWineDetailsMapper laoczWineDetailsMapper;
     @Autowired
-    private ILaoczWineOperationsService iLaoczWineOperationsService;
+    protected ILaoczWineOperationsService iLaoczWineOperationsService;
     @Autowired
-    private ILaoczWineOperationsHisService iLaoczWineOperationsHisService;
+    protected ILaoczWineOperationsHisService iLaoczWineOperationsHisService;
     @Autowired
-    private ILaoczWineEventService iLaoczWineEventService;
+    protected ILaoczWineEventService iLaoczWineEventService;
     @Autowired
-    private ILaoczWineDetailsHisService iLaoczWineDetailsHisService;
+    protected ILaoczWineDetailsHisService iLaoczWineDetailsHisService;
     @Autowired
-    private ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
+    protected ILaoczBatchPotteryMappingService iLaoczBatchPotteryMappingService;
     @Autowired
-    private ILaoczWineHistoryService iLaoczWineHistoryService;
+    protected ILaoczWineHistoryService iLaoczWineHistoryService;
+    @Autowired
+    protected ILaoczPotteryAltarManagementService iLaoczPotteryAltarManagementService;
 
 
     protected void saveWineEvent(LaoczWineDetails wineDetails, String Status, List<String> points, String eventStatus) {
@@ -131,13 +139,15 @@ public abstract class WineAbstract {
     }
 
 
-    protected void saveHistory(LaoczWineDetails wineDetailsId, OperationTypeEnum operationTypeEnum) {
-        List<WineHistoryDTO> wineHistoryDTOS = laoczWineDetailsMapper.selectWineHistoryDTOList(wineDetailsId.getWineDetailsId());
-        //获取第一条数据 出酒，入酒，取样肯定是一条数据 ,倒坛会是两条
-        LaoczWineHistory laoczWineHistory = BeanUtil.copyProperties(wineHistoryDTOS.get(0), LaoczWineHistory.class);
+    protected void saveHistory(LaoczWineDetails wineDetailsId) {
+        Long detailType = wineDetailsId.getDetailType();
+        WineDetailTypeEnum wineDetailTypeEnum = WineDetailTypeEnum.getEnumByCode(detailType);
+
+        WineHistoryDTO wineHistoryDTO = laoczWineDetailsMapper.selectWineHistoryDTOList(wineDetailsId.getWineDetailsId());
+        LaoczWineHistory laoczWineHistory = BeanUtil.copyProperties(wineHistoryDTO, LaoczWineHistory.class);
         LaoczBatchPotteryMapping batchPotteryMapping;
-        switch (operationTypeEnum) {
-            case WINE_ENTRY:
+        switch (wineDetailTypeEnum) {
+            case IN_WINE:
                 //剩余重量，因为是入酒所以剩余重量就是称重罐重量
                 laoczWineHistory.setRemainingWeight(laoczWineHistory.getWeighingTankWeight());
                 //因为是入酒所以，操作时间就是入酒时间
@@ -147,7 +157,8 @@ public abstract class WineAbstract {
                 //入酒
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 break;
-            case WINE_OUT:
+            case OUT_WINE:
+            case POUR_OUT:
                 //出酒
                 batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
                         .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
@@ -163,7 +174,27 @@ public abstract class WineAbstract {
                 //出酒历史保存
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 break;
-            case POUR_POT:
+            case POUR_IN:
+                //去历史表找到busyId一样并且是倒坛入酒的数据，查询入酒时间，对比俩个入酒时间以时间短的为基准
+                LaoczWineHistory history = iLaoczWineHistoryService.lambdaQuery()
+                        .eq(LaoczWineHistory::getBusyId, wineDetailsId.getBusyId())
+                        .eq(LaoczWineHistory::getDetailType, WineDetailTypeEnum.POUR_OUT.getCode())
+                        .one();
+
+                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
+                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
+                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
+                        .one();
+                //剩余重量
+                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                //因为是倒坛入，所以入酒时间=俩个入酒时间的最短值（出酒的入酒时间，或者本身的入酒时间（如果有））
+                Date outTime = history.getStoringTime();
+                Date inTime = batchPotteryMapping.getStoringTime();
+                laoczWineHistory.setStoringTime(outTime.before(inTime) ? outTime : inTime);
+                //亏损重量=申请重量-称重罐重量
+                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                //入酒
+                iLaoczWineHistoryService.save(laoczWineHistory);
                 //倒坛
                 break;
             case SAMPLING:
@@ -181,10 +212,16 @@ public abstract class WineAbstract {
                 saveSamplingHistory(wineDetailsId, laoczWineHistory);
                 break;
             default:
-                throw new IllegalArgumentException("Unexpected value: " + operationTypeEnum);
+                throw new IllegalArgumentException("Unexpected value: " + wineDetailTypeEnum);
         }
     }
 
+    /**
+     * 保存取样历史
+     *
+     * @param laoczWineDetails 酒品详情
+     * @param laoczWineHistory 酒品历史
+     */
     private void saveSamplingHistory(LaoczWineDetails laoczWineDetails, LaoczWineHistory laoczWineHistory) {
         //新增数据到laocz_sampling_histority
         LaoczSamplingHistority laoczSamplingHistority = new LaoczSamplingHistority();
@@ -279,6 +316,130 @@ public abstract class WineAbstract {
      * @param operatingStatusEnum 操作状态
      */
     protected void updatePotteryMappingState(Long potteryAltarId, RealStatusEnum operatingStatusEnum) {
-        iLaoczBatchPotteryMappingService.lambdaUpdate().set(LaoczBatchPotteryMapping::getRealStatus, operatingStatusEnum.getCode()).eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).update();
+        iLaoczBatchPotteryMappingService.lambdaUpdate().set(LaoczBatchPotteryMapping::getRealStatus,
+                operatingStatusEnum.getCode()).eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).update();
+    }
+
+    /**
+     * 批量更新陶坛罐
+     *
+     * @param batchPotteryMappings 陶坛罐列表
+     */
+    protected void updatePotteryMappingState(List<LaoczBatchPotteryMapping> batchPotteryMappings) {
+        iLaoczBatchPotteryMappingService.updateBatchById(batchPotteryMappings);
+    }
+
+    /**
+     * 更新陶坛罐
+     *
+     * @param batchPotteryMappings 陶坛罐
+     */
+    protected void updatePotteryMappingState(LaoczBatchPotteryMapping batchPotteryMappings) {
+        iLaoczBatchPotteryMappingService.updateById(batchPotteryMappings);
+    }
+
+
+    /**
+     * 批量检查
+     *
+     * @param potteryAltars 陶坛罐列表
+     */
+    protected void checkLaoczPotteryAltarManagement(List<WineOutApplyDTO> potteryAltars) {
+        //先验证选择的陶坛是否存在
+        //验证陶坛是否可以使用，有没有被封存
+        //验证陶坛是否已经被申请
+        //验证陶坛的重量上限是否满足
+
+
+        //检查陶坛是否都可以使用
+        List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, potteryAltars).list();
+        if (potteryAltars.size() != laoczPotteryAltarManagements.size()) {
+            throw new CustomException("陶坛罐不存在，请刷新重新选择");
+        }
+        for (LaoczPotteryAltarManagement laoczPotteryAltarManagement : laoczPotteryAltarManagements) {
+            if (Objects.equals(laoczPotteryAltarManagement.getPotteryAltarState(), PotteryAltarStateEnum.SEAL.getCode())) {
+                throw new CustomException("陶坛罐编号:" + laoczPotteryAltarManagement.getPotteryAltarNumber() + "已经封存");
+            }
+        }
+        //检查入酒陶坛罐是否已经申请
+        List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery().in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltars).list();
+        if (!list.isEmpty()) {
+            throw new CustomException("陶坛罐已经申请,请刷新重新选择");
+        }
+        Map<Long, WineOutApplyDTO> map = potteryAltars.stream().collect(Collectors.toMap(WineOutApplyDTO::getPotteryAltarId, Function.identity()));
+        //检查陶坛的重量上限是否满足
+        for (LaoczPotteryAltarManagement laoczPotteryAltarManagement : laoczPotteryAltarManagements) {
+            WineOutApplyDTO wineOutApplyDTO = map.get(laoczPotteryAltarManagement.getPotteryAltarId());
+            if (wineOutApplyDTO.getApplyWeight() > laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight()) {
+                throw new CustomException("陶坛罐编号:" + laoczPotteryAltarManagement.getPotteryAltarNumber() + "容量不足");
+            }
+        }
+    }
+
+
+    /**
+     * 陶坛罐编号检查
+     *
+     * @param potteryAltarNumber 陶坛罐编号
+     * @param isUse              是否使用（有没有酒）
+     */
+    protected void potteryAltarNumberCheck(String potteryAltarNumber, boolean isUse) {
+        LaoczPotteryAltarManagement laoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery()
+                .eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
+        if (laoczPotteryAltarManagement == null) {
+            throw new CustomException("陶坛罐不存在");
+        }
+
+        if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
+            throw new CustomException("陶坛罐已被封存");
+        }
+
+        LaoczBatchPotteryMapping batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
+                .eq(LaoczBatchPotteryMapping::getPotteryAltarId, laoczPotteryAltarManagement.getPotteryAltarId()).one();
+
+        RealStatusEnum realStatus = batchPotteryMapping != null ? RealStatusEnum.getEnumByCode(batchPotteryMapping.getRealStatus()) : null;
+        if (isUse) {
+            if (batchPotteryMapping == null) {
+                throw new CustomException("陶坛罐未存储酒液");
+            }
+        } else {
+            if (batchPotteryMapping != null) {
+                if (Objects.equals(RealStatusEnum.STORAGE.getCode(), realStatus.getCode())) {
+                    throw new CustomException("陶坛罐已存储酒液");
+                }
+            }
+        }
+        if (realStatus != null) {
+            checkRealStatus(realStatus);
+        }
+    }
+
+    /**
+     * 检查陶坛罐状态
+     *
+     * @param realStatus 陶坛罐状态
+     */
+    public void checkRealStatus(RealStatusEnum realStatus) {
+        switch (realStatus) {
+            case OCCUPY:
+                throw new CustomException("陶坛罐已被申请");
+            case WINE_IN:
+                throw new CustomException("陶坛罐入酒中");
+            case WINE_OUT:
+                throw new CustomException("陶坛出酒中");
+            case POUR:
+                throw new CustomException("陶坛罐倒坛中");
+        }
+    }
+
+
+    protected void checkDetailType(Long detailType, WineDetailTypeEnum wineDetailTypeEnum) {
+        if (!wineDetailTypeEnum.getCode().equals(detailType)) {
+            throw new CustomException("酒操作业务详情不是" + wineDetailTypeEnum.getDesc());
+        }
+    }
+
+    protected LaoczWineDetails getWineDetailsById(Long wineDetailsId) {
+        return iLaoczWineDetailsService.getById(wineDetailsId);
     }
 }

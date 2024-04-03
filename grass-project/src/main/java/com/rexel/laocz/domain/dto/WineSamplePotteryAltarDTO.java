@@ -12,5 +12,5 @@ public class WineSamplePotteryAltarDTO extends WinePotteryAltarBaseDTO {
     /**
      * 存储中
      */
-    private Long realStatus = RealStatusEnum.STORAGE.getCode();
+    private final Long realStatus = RealStatusEnum.STORAGE.getCode();
 }

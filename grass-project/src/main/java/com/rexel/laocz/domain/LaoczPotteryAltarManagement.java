@@ -61,7 +61,7 @@ public class LaoczPotteryAltarManagement extends BaseEntity {
      */
     @Excel(name = "满坛重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private Long potteryAltarFullAltarWeight;
+    private Double potteryAltarFullAltarWeight;
     /**
      * 陶坛二维码地址
      */

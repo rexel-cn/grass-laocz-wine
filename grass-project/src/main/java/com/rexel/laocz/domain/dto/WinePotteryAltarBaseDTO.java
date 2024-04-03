@@ -1,5 +1,6 @@
 package com.rexel.laocz.domain.dto;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.laocz.enums.PotteryAltarStateEnum;
 import lombok.Data;
 
@@ -19,9 +20,13 @@ public class WinePotteryAltarBaseDTO {
      */
     private Long fireZoneId;
     /**
-     * 陶坛管理编号
+     * 陶坛管理编号 like
      */
     private String potteryAltarNumber;
+    /**
+     * 陶坛管理编号 eq
+     */
+    private String eqPotteryAltarNumber;
     /**
      * 陶坛管理主键ID
      */
@@ -32,8 +37,10 @@ public class WinePotteryAltarBaseDTO {
     private Long potteryAltarState = PotteryAltarStateEnum.USE.getCode();
 
     public void setPotteryAltarIds(List<Long> potteryAltarIds) {
-        //如果Long为null就移除
-        potteryAltarIds.removeIf(Objects::isNull);
+        if (CollectionUtil.isNotEmpty(potteryAltarIds)) {
+            //如果Long为null就移除
+            potteryAltarIds.removeIf(Objects::isNull);
+        }
         this.potteryAltarIds = potteryAltarIds;
     }
 }

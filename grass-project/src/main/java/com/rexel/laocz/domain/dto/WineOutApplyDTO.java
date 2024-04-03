@@ -1,6 +1,8 @@
 package com.rexel.laocz.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @ClassName WineOutApplyDTO
@@ -9,6 +11,8 @@ import lombok.Data;
  * @Date 2024/3/11 14:06
  **/
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class WineOutApplyDTO {
     /**
      * 陶坛罐主键id

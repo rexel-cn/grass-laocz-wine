@@ -19,4 +19,8 @@ public class MatterDetailVO {
      * 陶坛管理编号
      */
     private String potteryAltarNumber;
+    /**
+     * 操作类型
+     */
+    private String detailType;
 }

@@ -32,7 +32,7 @@ public class WineOperaPotteryAltarVO {
     /**
      * 满坛重量
      */
-    private Long potteryAltarFullAltarWeight;
+    private Double potteryAltarFullAltarWeight;
     /**
      * 陶坛实际重量
      */
@@ -44,7 +44,7 @@ public class WineOperaPotteryAltarVO {
     /**
      * 酒批次id
      */
-    private Long liquorBatchId;
+    private String liquorBatchId;
     /**
      * 入酒时间
      */

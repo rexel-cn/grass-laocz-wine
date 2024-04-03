@@ -63,12 +63,14 @@ public class LaoczBatchPotteryMapping extends BaseEntity {
      * 运行状态（0：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中）
      */
     @Excel(name = "运行状态", readConverterExp = "0=：占用，1：存储，2：入酒中，3：出酒中，4：倒坛中")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long realStatus;
     /**
      * 入酒时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "入酒时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Date storingTime;
 
 

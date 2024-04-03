@@ -90,7 +90,8 @@
     </select>
     <select id="selectMatterDetailVOList" resultType="com.rexel.laocz.domain.vo.MatterDetailVO">
         SELECT lwd.wine_details_id,
-               lpam.pottery_altar_number
+               lpam.pottery_altar_number,
+               lwd.detail_type
         FROM laocz_wine_details lwd
                  LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
         WHERE lwd.busy_id = #{busyId}

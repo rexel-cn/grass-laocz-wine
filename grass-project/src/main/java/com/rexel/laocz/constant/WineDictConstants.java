@@ -14,4 +14,9 @@ public class WineDictConstants {
      * 取样用途 sampling_purpose
      */
     public static final String SAMPLING_PURPOSE = "sampling_purpose";
+
+    /**
+     * 操作类型详情
+     */
+    public static final String DETAIL_TYPE = "detail_type";
 }

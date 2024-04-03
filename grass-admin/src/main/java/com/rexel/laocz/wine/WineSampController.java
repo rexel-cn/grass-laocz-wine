@@ -5,10 +5,7 @@ import com.rexel.laocz.domain.dto.WinBaseDTO;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
 import com.rexel.laocz.service.WineSampService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName WineSampController
@@ -42,6 +39,18 @@ public class WineSampController {
     public AjaxResult wineSampFinish(@RequestBody WinBaseDTO winBaseDTO) {
         wineSampService.wineSampFinish(winBaseDTO.getWineDetailsId());
         return AjaxResult.success();
+    }
+
+
+    /**
+     * 二维码扫描获取入酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    @GetMapping("/qrCodeScan/{potteryAltarNumber}")
+    public AjaxResult qrCodeScan(@PathVariable("potteryAltarNumber") String potteryAltarNumber) {
+        return AjaxResult.success(wineSampService.qrCodeScan(potteryAltarNumber));
     }
 
 }

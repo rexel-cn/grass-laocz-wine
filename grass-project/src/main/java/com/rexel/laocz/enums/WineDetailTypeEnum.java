@@ -17,11 +17,12 @@ public enum WineDetailTypeEnum {
     OUT_WINE(2L, "出酒"),
     POUR_IN(3L, "倒坛入"),
     POUR_OUT(4L, "倒坛出"),
-    SAMPLING(5L, "取样");
+    SAMPLING(5L, "取样"),
+    NULL_ENUM(0L, "未知");
 
-    private Long code;
+    private final Long code;
 
-    private String desc;
+    private final String desc;
 
     WineDetailTypeEnum(Long code, String desc) {
         this.code = code;
@@ -29,4 +30,12 @@ public enum WineDetailTypeEnum {
     }
 
 
+    public static WineDetailTypeEnum getEnumByCode(Long detailType) {
+        for (WineDetailTypeEnum wineDetailTypeEnum : WineDetailTypeEnum.values()) {
+            if (wineDetailTypeEnum.getCode().equals(detailType)) {
+                return wineDetailTypeEnum;
+            }
+        }
+        return NULL_ENUM;
+    }
 }

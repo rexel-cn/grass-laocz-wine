@@ -69,5 +69,5 @@ public interface LaoczWineDetailsMapper extends BaseMapper<LaoczWineDetails> {
     List<WineDetailPointVO> selectWineDetailPumpPointVOList(Long wineDetailsId);
 
 
-    List<WineHistoryDTO> selectWineHistoryDTOList(Long wineDetailsId);
+    WineHistoryDTO selectWineHistoryDTOList(Long wineDetailsId);
 }

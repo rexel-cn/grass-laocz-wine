@@ -6,6 +6,7 @@ import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
@@ -157,6 +158,17 @@ public class LaoczPotteryAltarManagementController extends BaseController {
     @PostMapping("/wineSamplePotteryAltarList")
     public AjaxResult wineSamplePotteryAltarList(@RequestBody WineSamplePotteryAltarDTO WineSamplePotteryAltarDTO) {
         return AjaxResult.success(iLaoczPotteryAltarManagementService.wineSamplePotteryAltarList(WineSamplePotteryAltarDTO));
+    }
+
+    /**
+     * 倒坛入酒，查询筛选陶坛罐
+     *
+     * @param winePourPotteryAltarDTO 倒坛入酒，陶坛筛选DTO
+     * @return 筛选陶坛罐列表
+     */
+    @PostMapping("/winePourPotteryAltarList")
+    public AjaxResult winePourPotteryAltarList(@RequestBody WinePourPotteryAltarDTO winePourPotteryAltarDTO) {
+        return AjaxResult.success(iLaoczPotteryAltarManagementService.winePourPotteryAltarList(winePourPotteryAltarDTO));
     }
 
 }
