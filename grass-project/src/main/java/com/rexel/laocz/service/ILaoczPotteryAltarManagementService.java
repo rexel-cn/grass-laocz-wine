@@ -189,4 +189,6 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
     AjaxResult getPotteryAltarManagementQrCodePdf();
 
     boolean importPotteryAltar(List<PotteryAltarVo> potteryAltarVos);
+
+
 }

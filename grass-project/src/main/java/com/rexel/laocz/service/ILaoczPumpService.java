@@ -3,6 +3,7 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.dto.PumpAddDto;
+import com.rexel.laocz.domain.dto.PumpImportDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.system.domain.vo.PointQueryVO;
@@ -36,4 +37,11 @@ public interface ILaoczPumpService extends IService<LaoczPump> {
     boolean removeByIdWithPoint(Long pumpId);
 
     List<PointInfo> getPointInfo(Long pumpId);
+
+    /**
+     * 导入泵管理数据
+     * @param pumpImportDtos 泵管理数据
+     * @return 布尔
+     */
+    boolean importPump(List<PumpImportDto> pumpImportDtos);
 }

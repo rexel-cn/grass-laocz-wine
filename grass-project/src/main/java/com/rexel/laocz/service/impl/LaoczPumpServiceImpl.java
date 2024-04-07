@@ -1,11 +1,16 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.PumpAddDto;
+import com.rexel.laocz.domain.dto.PumpImportDto;
+import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
@@ -16,11 +21,13 @@ import com.rexel.system.domain.vo.PointQueryVO;
 import com.rexel.system.mapper.GrassPointInfoMapper;
 import com.rexel.system.service.IGrassPointService;
 import com.rexel.system.service.ISysDictTypeService;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +59,7 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
     private ILaoczWeighingTankService ILaoczWeighingTankService;
 
     @Autowired
-    private GrassPointInfoMapper pointInfoMapper;
+    private ILaoczWeighingTankPointService iLaoczWeighingTankPointService;
 
     /**
      * 查询泵管理列表
@@ -227,6 +234,97 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
         // 获取所有的测点并根据测点获取测点信息
         List<PointInfo> pointInfos = baseMapper.getPointInfo();
         return pointInfos;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean importPump(List<PumpImportDto> pumpImportDtos) {
+
+        List<LaoczPumpPoint> pumpPoints = new ArrayList<>();
+        if (CollectionUtil.isEmpty(pumpImportDtos)) {
+            throw new ServiceException("导入数据为空");
+        }
+
+        // 数据验证
+        check(pumpImportDtos);
+        HashMap<String, String> pumpImportDtoMap = new HashMap<>(pumpImportDtos.size());
+
+        //验证泵编号是否已存在
+        for (PumpImportDto pumpImportDto : pumpImportDtos) {
+
+            if (!pumpImportDtoMap.containsKey(pumpImportDto.getPumpNumber())) {
+                QueryWrapper<LaoczPump> queryWrapper = new QueryWrapper<>();
+
+                queryWrapper.eq("pump_number", pumpImportDto.getPumpNumber());
+
+                int count = this.count(queryWrapper);
+
+                if (count > 0) {
+                    throw new ServiceException("泵编号已存在");
+                }
+                //获取防火区Id
+                Long fireZoneId = iLaoczFireZoneInfoService.findFireZoneId(pumpImportDto.getAreaName(), pumpImportDto.getFireZoneName());
+                pumpImportDto.setFireZoneId(fireZoneId);
+
+                LaoczPump laoczPump = new LaoczPump();
+                //数据拷贝
+                BeanUtil.copyProperties(pumpImportDto, laoczPump);
+                this.save(laoczPump);
+                pumpImportDtoMap.put(pumpImportDto.getPumpNumber(), laoczPump.getPumpId().toString());
+            }
+            // 封装泵相关测点维护数据
+            LaoczPumpPoint laoczPumpPoint = new LaoczPumpPoint();
+
+            //根据测点pointId获取主键Id
+            QueryWrapper<GrassPointInfo> wrapper = new QueryWrapper<>();
+            wrapper.eq("point_id", pumpImportDto.getPointId());
+            GrassPointInfo one = iGrassPointService.getOne(wrapper);
+            if (one == null){
+                throw new ServiceException(pumpImportDto.getPointId() + "不存在");
+            }
+            //判断pointId是否已经被占用
+            Integer countId1 = iLaoczPumpPointService.lambdaQuery().eq(LaoczPumpPoint::getPointPrimaryKey, one.getId()).count();
+            if (countId1 > 0) {
+                throw new ServiceException(one.getPointId() + "测点已经被使用，请重新选择正确测点进行新增");
+            }
+            //判断pointId是否已经被占用
+            Integer countId2 = iLaoczWeighingTankPointService.lambdaQuery().eq(LaoczWeighingTankPoint::getPointPrimaryKey, one.getId()).count();
+            if (countId2 > 0) {
+                throw new ServiceException(one.getPointId() + "测点已经被使用，请重新选择正确测点进行新增");
+            }
+            laoczPumpPoint.setUseMark(pumpImportDto.getUseMark());
+            laoczPumpPoint.setPointPrimaryKey(one.getId());
+            laoczPumpPoint.setPumpId(Long.parseLong(pumpImportDtoMap.get(pumpImportDto.getPumpNumber())));
+            pumpPoints.add(laoczPumpPoint);
+        }
+
+        return iLaoczPumpPointService.saveBatch(pumpPoints);
+    }
+
+    private void check(List<PumpImportDto> pumpImportDtos) {
+        List<String> errList = new ArrayList<>();
+        // 校验数据
+        for (int i = 0; i < pumpImportDtos.size(); i++) {
+            PumpImportDto pumpImportDto = pumpImportDtos.get(i);
+            if (StrUtil.isEmpty(pumpImportDto.getPumpNumber())) {
+                errList.add("第" + (i + 2) + "行泵编号为空");
+            }
+            if (ObjectUtil.isNull(pumpImportDto.getAreaName())) {
+                errList.add("第" + (i + 2) + "行归属区域为空");
+            }
+            if (StrUtil.isEmpty(pumpImportDto.getFireZoneName())) {
+                errList.add("第" + (i + 2) + "行防火区为空");
+            }
+            if (StrUtil.isEmpty(pumpImportDto.getUseMark())) {
+                errList.add("第" + (i + 2) + "行使用标识为空");
+            }
+            if (StrUtil.isEmpty(pumpImportDto.getPointId())) {
+                errList.add("第" + (i + 2) + "行测点为空");
+            }
+        }
+        if (CollectionUtil.isNotEmpty(errList)) {
+            throw new ServiceException(StrUtil.join("\n", errList));
+        }
     }
 
 }

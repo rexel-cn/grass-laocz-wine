@@ -66,6 +66,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Autowired
     private GrassPointInfoMapper pointInfoMapper;
 
+    @Autowired
+    private ILaoczPumpPointService iLaoczPumpPointService;
+
     /**
      * 查询称重罐管理列表
      *
@@ -236,44 +239,59 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Transactional(rollbackFor = Exception.class)
     public boolean importWeighingTank(List<WeighingTankDto> weighingTankDtos) {
 
-        List<LaoczWeighingTank> laoczWeighingTanks = new ArrayList<>();
+        List<LaoczWeighingTankPoint> laoczWeighingTankPoints = new ArrayList<>();
         if (CollectionUtil.isEmpty(weighingTankDtos)) {
             throw new ServiceException("导入数据为空");
         }
 
         // 数据验证
         check(weighingTankDtos);
+        Map<String, String> weighingTankDtoMap = new HashMap<>(weighingTankDtos.size());
         // 验证称重罐编号是否已存在
         for (WeighingTankDto weighingTankVo : weighingTankDtos) {
 
-            QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
+            if (!weighingTankDtoMap.containsKey(weighingTankVo.getWeighingTankNumber())){
+                QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
 
-            queryWrapper.eq("weighing_tank_number", weighingTankVo.getWeighingTankNumber());
+                queryWrapper.eq("weighing_tank_number", weighingTankVo.getWeighingTankNumber());
 
-            int count = this.count(queryWrapper);
+                int count = this.count(queryWrapper);
 
-            if (count > 0) {
-                throw new ServiceException("称重罐编号已存在");
+                if (count > 0) {
+                    throw new ServiceException("称重罐编号已存在");
+                }
+                //获取防火区Id
+                Long fireZoneId = iLaoczFireZoneInfoService.findFireZoneId(weighingTankVo.getAreaName(), weighingTankVo.getFireZoneName());
+                weighingTankVo.setFireZoneId(fireZoneId);
+
+                LaoczWeighingTank laoczWeighingTank = new LaoczWeighingTank();
+                // 数据拷贝
+                BeanUtil.copyProperties(weighingTankVo, laoczWeighingTank);
+                this.save(laoczWeighingTank);
+                weighingTankDtoMap.put(weighingTankVo.getWeighingTankNumber(),laoczWeighingTank.getWeighingTankId().toString());
             }
-            // 获取归属区域Id
-            QueryWrapper<LaoczAreaInfo> areaWrapper = new QueryWrapper<>();
-            areaWrapper.eq("area_name", weighingTankVo.getAreaName());
-            LaoczAreaInfo laoczAreaInfo = iLaoczAreaInfoService.getOne(areaWrapper);
-            // 获取防火区Id
-            if (laoczAreaInfo != null) {
-                QueryWrapper<LaoczFireZoneInfo> zoneInfoQueryWrapper = new QueryWrapper<>();
-                zoneInfoQueryWrapper.eq("area_id", laoczAreaInfo.getAreaId())
-                        .eq("fire_zone_name", weighingTankVo.getFireZoneName());
-                LaoczFireZoneInfo fireZoneInfo = iLaoczFireZoneInfoService.getOne(zoneInfoQueryWrapper);
-                weighingTankVo.setFireZoneId(fireZoneInfo.getFireZoneId());
-            }
+            //封装称重罐相关测点维护数据
+            LaoczWeighingTankPoint laoczWeighingTankPoint = new LaoczWeighingTankPoint();
 
-            LaoczWeighingTank laoczWeighingTank = new LaoczWeighingTank();
-            // 数据拷贝
-            BeanUtil.copyProperties(weighingTankVo, laoczWeighingTank);
-            laoczWeighingTanks.add(laoczWeighingTank);
+            //根据测点pointId获取主键Id
+            QueryWrapper<GrassPointInfo> wrapper = new QueryWrapper<>();
+            wrapper.eq("point_id", weighingTankVo.getPointId());
+            GrassPointInfo one = iGrassPointService.getOne(wrapper);
+            //判断pointId是否已经被占用
+            Integer countId1 = iLaoczPumpPointService.lambdaQuery().eq(LaoczPumpPoint::getPointPrimaryKey, one.getId()).count();
+            if (countId1 > 0) {
+                throw new ServiceException(one.getPointId() + "测点已经被使用，请重新选择正确测点进行新增");
+            }
+            Integer countId2 = iLaoczWeighingTankPointService.lambdaQuery().eq(LaoczWeighingTankPoint::getPointPrimaryKey, one.getId()).count();
+            if (countId2 > 0) {
+                throw new ServiceException(one.getPointId() + "测点已经被使用，请重新选择正确测点进行新增");
+            }
+            laoczWeighingTankPoint.setUseMark(weighingTankVo.getUseMark());
+            laoczWeighingTankPoint.setPointPrimaryKey(one.getId());
+            laoczWeighingTankPoint.setWeighingTankId(Long.parseLong(weighingTankDtoMap.get(weighingTankVo.getWeighingTankNumber())));
+            laoczWeighingTankPoints.add(laoczWeighingTankPoint);
         }
-        return saveBatch(laoczWeighingTanks);
+        return iLaoczWeighingTankPointService.saveBatch(laoczWeighingTankPoints);
     }
 
     @Override
@@ -318,13 +336,14 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
     /**
      * 分页查询过滤已被选择测点
+     *
      * @param
      * @return
      */
     @Override
-    public List<PointQueryVO> getListPageNoChoice(String deviceId, String pointId,String pointName,String pointPrimaryKey) {
+    public List<PointQueryVO> getListPageNoChoice(String deviceId, String pointId, String pointName, String pointPrimaryKey) {
         //获取全部分页数据已经选择的测点过滤，自己不过滤
-        List<PointQueryVO> list = pointInfoMapper.getFilterList(deviceId,pointId,pointName,pointPrimaryKey);
+        List<PointQueryVO> list = pointInfoMapper.getFilterList(deviceId, pointId, pointName, pointPrimaryKey);
         return list;
     }
 
@@ -344,6 +363,12 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             }
             if (StrUtil.isEmpty(weighingTankVo.getFullTankUpperLimit())) {
                 errList.add("第" + (i + 2) + "行满罐上限为空");
+            }
+            if (StrUtil.isEmpty(weighingTankVo.getUseMark())) {
+                errList.add("第" + (i + 2) + "行使用标识为空");
+            }
+            if (StrUtil.isEmpty(weighingTankVo.getPointId())) {
+                errList.add("第" + (i + 2) + "行测点为空");
             }
         }
         if (CollectionUtil.isNotEmpty(errList)) {
