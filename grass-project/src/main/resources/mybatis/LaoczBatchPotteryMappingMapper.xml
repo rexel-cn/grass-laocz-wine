@@ -149,7 +149,9 @@
         fzi.fire_zone_name AS fireZoneName,
         ai.area_name AS areaName,
         bpm.create_by,
-        bpm.create_time
+        bpm.create_time,
+        pam.pottery_altar_full_altar_weight,
+        lm.liquor_management_id
         FROM
         laocz_pottery_altar_management pam
         LEFT JOIN laocz_batch_pottery_mapping bpm ON bpm.pottery_altar_id = pam.pottery_altar_id

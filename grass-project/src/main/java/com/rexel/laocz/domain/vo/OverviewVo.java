@@ -25,4 +25,12 @@ public class OverviewVo extends BoardDataVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
+    /**
+     * 满坛重量
+     */
+    private String potteryAltarFullAltarWeight;
+    /**
+     * 酒品管理ID
+     */
+    private Long liquorManagementId;
 }
