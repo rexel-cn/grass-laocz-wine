@@ -306,27 +306,29 @@
     <select id="selectPotteryAltarFullAltarWeight"
             resultType="com.rexel.laocz.domain.vo.PotteryAltarInfomationDInfoVO">
         SELECT
-        lwh.work_order_id,
-        lwh.pottery_altar_apply_weight as ApplyWeight,
-        lwh.liquor_name,
-        lwh.operation_type,
-        lwh.liquor_batch_id,
-        lwh.liquor_level,
-        lwh.liquor_source,
-        lwh.liquor_round,
+        IFNULL(lwh.work_order_id, '--') AS workOrderId,
+        IFNULL(lwh.weighing_tank_weight, -1) AS liquorWeight,
+        IFNULL(lwh.sampling_weight, -1) AS samplingWeight,
+        IFNULL(lwh.pottery_altar_apply_weight, -1) AS ApplyWeight,
+        IFNULL(lwh.liquor_name, '--') AS liquorName,
+        IFNULL(lwh.operation_type, -1) AS operationType,
+        IFNULL(lwh.liquor_batch_id, '--') AS liquorBatchId,
+        IFNULL(lwh.liquor_level, '--') AS liquorLevel,
+        IFNULL(lwh.liquor_round, '--') AS liquorRound,
+        IFNULL(lwh.liquor_source, '--') AS liquorSource,
+        IFNULL(lwh.liquor_year, '--') AS liquorYear,
         lwh.liquor_brewing_time,
-        lwh.liquor_flavor_name,
-        lwh.liquor_year,
-        lwh.liquor_content,
-        lwh.pottery_altar_apply_weight,
-        lwt.weighing_tank_number,
-        lwh.remaining_weight,
-        lpam.pottery_altar_number,
-        lwh.area_name,
-        lwh.fire_zone_name,
-        lwh.create_by,
+        IFNULL(lwh.liquor_flavor_name, '--') AS liquorFlavorName,
+        IFNULL(lwh.liquor_content, '--') AS liquorContent,
+        IFNULL(lwh.pottery_altar_apply_weight, -1) AS potteryAltarApplyWeight,
+        IFNULL(lwt.weighing_tank_number, '--') AS weighingTankNumber,
+        IFNULL(lwh.remaining_weight, -1) AS remainingWeight,
+        IFNULL(lpam.pottery_altar_number, '--') AS potteryAltarNumber,
+        IFNULL(lwh.area_name, '--') AS areaName,
+        IFNULL(lwh.fire_zone_name, '--') AS fireZoneName,
+        IFNULL(lwh.create_by, '--') AS createBy,
         lwh.operation_time,
-        lpam.pottery_altar_full_altar_weight
+        IFNULL(lpam.pottery_altar_full_altar_weight, -1) AS potteryAltarFullAltarWeight
         FROM
         laocz_wine_history lwh
         LEFT JOIN

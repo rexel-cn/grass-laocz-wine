@@ -29,6 +29,10 @@ public class PotteryAltarInfomationDInfoVO {
      */
     private Double liquorWeight;
     /**
+     * 取样重量
+     */
+    private Double samplingWeight;
+    /**
      * 酒品名称
      */
     private String liquorName;
