@@ -84,13 +84,15 @@ public class LaoczWineHistoryController extends BaseController {
         }
         // 将字符串转换为LocalDate对象
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // 假设日期格式是"yyyy-MM-dd"
-        LocalDate startDate = LocalDate.parse(fromTime, formatter);
-        LocalDate endDate = LocalDate.parse(endTime, formatter);
 
-        // 判断时间跨度是否超过三个月
-        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-        if (daysBetween > 90) { // 如果天数大于90天（即超过三个月）
-            throw new IllegalArgumentException("所选时间范围超过三个月，请重新选择！");
+        if (StringUtils.isNotEmpty(fromTime)&&StringUtils.isNotEmpty(endTime)){
+            LocalDate startDate = LocalDate.parse(fromTime, formatter);
+            LocalDate endDate = LocalDate.parse(endTime, formatter);
+            // 判断时间跨度是否超过三个月
+            long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+            if (daysBetween > 90) { // 如果天数大于90天（即超过三个月）
+                throw new IllegalArgumentException("所选时间范围超过三个月，请重新选择！");
+            }
         }
         ExcelUtil<LaoczPotteryAltarOperationRecordExportVO> util = new ExcelUtil<>(LaoczPotteryAltarOperationRecordExportVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.getLaoczWineHistoryTable(fromTime, endTime, liquorBatchId);
