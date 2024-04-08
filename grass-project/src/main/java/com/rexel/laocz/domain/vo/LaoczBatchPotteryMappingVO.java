@@ -65,7 +65,7 @@ public class LaoczBatchPotteryMappingVO {
     /**
      * 存储时长
      */
-    @Excel(name = "存储时长")
+    @Excel(name = "存储时长（天）")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String StorageDuration;
 }

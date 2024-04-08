@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.utils.StringUtils;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.vo.BatchInfoVo;
 import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 陶坛与批次实时关系对象
@@ -59,6 +61,10 @@ public class LaoczBatchPotteryMappingController extends BaseController {
      */
     @PostMapping("/liquorStorageReportExport")
     public void liquorStorageReportExport(HttpServletResponse response, Long areaId, Long fireZoneId, String liquorBatchId) throws IOException {
+        // 检查三个参数是否同时为空
+        if (Objects.isNull(areaId) && Objects.isNull(fireZoneId) && StringUtils.isEmpty(liquorBatchId)) {
+            throw new IllegalArgumentException("场区编号、防火区编号和批次编号不能同时为空，请至少选择一项！");
+        }
         ExcelUtil<LaoczBatchPotteryMappingVO> util = new ExcelUtil<>(LaoczBatchPotteryMappingVO.class);
         List<LaoczBatchPotteryMappingVO> laoczWineHistories = laoczBatchPotteryMappingService.selectTableDataInfoReportActualList(fireZoneId, liquorBatchId, areaId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchPotteryMappingVO.class), "酒液存储报表");

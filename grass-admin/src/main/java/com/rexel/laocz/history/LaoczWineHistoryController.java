@@ -5,11 +5,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.utils.StringUtils;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczWineHistory;
-import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
-import com.rexel.laocz.domain.vo.TableDataInfoDataReportLossVO;
-import com.rexel.laocz.domain.vo.TableDataInfoDataReportVO;
+import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -66,18 +68,34 @@ public class LaoczWineHistoryController extends BaseController {
         return laoczWineHistoryService.selectTableDataInfo(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
     }
 
-
     /**
      * 陶坛操作记录表导出
      *
      * @param response
+     * @param fromTime      开始时间
+     * @param endTime       结束时间
+     * @param liquorBatchId 批次编号
      * @throws IOException
      */
     @PostMapping("/exportThePotteryJarOperation")
     public void exportThePotteryJarOperation(HttpServletResponse response, String fromTime, String endTime, String liquorBatchId) throws IOException {
-        ExcelUtil<LaoczWineHistoryVO> util = new ExcelUtil<>(LaoczWineHistoryVO.class);
+        // 检查所有参数是否均为空
+        if (StringUtils.isEmpty(fromTime) && StringUtils.isEmpty(endTime) && StringUtils.isEmpty(liquorBatchId)) {
+            throw new IllegalArgumentException("开始时间、结束时间和批次编号都不能为空，请至少选择一项！");
+        }
+        // 将字符串转换为LocalDate对象
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 假设日期格式是"yyyy-MM-dd"
+        LocalDate startDate = LocalDate.parse(fromTime, formatter);
+        LocalDate endDate = LocalDate.parse(endTime, formatter);
+
+        // 判断时间跨度是否超过三个月
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        if (daysBetween > 90) { // 如果天数大于90天（即超过三个月）
+            throw new IllegalArgumentException("所选时间范围超过三个月，请重新选择！");
+        }
+        ExcelUtil<LaoczPotteryAltarOperationRecordExportVO> util = new ExcelUtil<>(LaoczPotteryAltarOperationRecordExportVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.getLaoczWineHistoryTable(fromTime, endTime, liquorBatchId);
-        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczWineHistoryVO.class), "陶坛操作报表");
+        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczPotteryAltarOperationRecordExportVO.class), "陶坛操作报表");
     }
 
     /**
@@ -106,7 +124,7 @@ public class LaoczWineHistoryController extends BaseController {
     }
 
     /**
-     * 陶坛操作记录表导出
+     * 批次亏损报表导出
      *
      * @param response
      * @param liquorBatchId 批次编号
@@ -114,9 +132,13 @@ public class LaoczWineHistoryController extends BaseController {
      */
     @PostMapping("/batchLossReportExport")
     public void batchLossReportExport(HttpServletResponse response, String liquorBatchId) throws IOException {
-        ExcelUtil<LaoczWineHistoryVO> util = new ExcelUtil<>(LaoczWineHistoryVO.class);
+        // 检查所有参数是否均为空
+        if (StringUtils.isEmpty(liquorBatchId)) {
+            throw new IllegalArgumentException("批次编号都不能为空，请至少选择一项！");
+        }
+        ExcelUtil<LaoczBatchLossReportExportVO> util = new ExcelUtil<>(LaoczBatchLossReportExportVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.batchLossReportExport(liquorBatchId);
-        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczWineHistoryVO.class), "批次亏损报表");
+        util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchLossReportExportVO.class), "批次亏损报表");
     }
 
     /**
