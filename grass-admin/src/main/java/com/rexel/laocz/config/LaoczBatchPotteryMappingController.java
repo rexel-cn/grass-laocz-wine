@@ -101,6 +101,7 @@ public class LaoczBatchPotteryMappingController extends BaseController {
      */
     @GetMapping("/getBatchInfo")
     public TableDataInfo getBatchInfo(String liquorBatchId) {
+        startPage();
         List<BatchInfoVo> batchInfoVos = laoczBatchPotteryMappingService.getBatchInfo(liquorBatchId);
         return getDataTable(batchInfoVos, "batchInfo");
     }
