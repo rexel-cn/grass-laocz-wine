@@ -56,17 +56,18 @@ public class LaoczBatchPotteryMappingController extends BaseController {
      * @throws IOException
      */
     @PostMapping("/liquorStorageReportExport")
-    public void liquorStorageReportExport(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
+    public AjaxResult liquorStorageReportExport(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
         Long areaId = requestParams.getLong("areaId");
         Long fireZoneId = requestParams.getLong("fireZoneId");
         String liquorBatchId = requestParams.getString("liquorBatchId");
         // 检查三个参数是否同时为空
         if (Objects.isNull(areaId) && Objects.isNull(fireZoneId) && StringUtils.isEmpty(liquorBatchId)) {
-            throw new IllegalArgumentException("场区编号、防火区编号和批次编号不能同时为空，请至少选择一项！");
+            return AjaxResult.error("场区编号、防火区编号和批次编号不能同时为空，请至少选择一项！");
         }
         ExcelUtil<LaoczBatchPotteryMappingVO> util = new ExcelUtil<>(LaoczBatchPotteryMappingVO.class);
         List<LaoczBatchPotteryMappingVO> laoczWineHistories = laoczBatchPotteryMappingService.selectTableDataInfoReportActualList(fireZoneId, liquorBatchId, areaId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchPotteryMappingVO.class), "酒液存储报表");
+        return AjaxResult.success("酒液存储报表导出成功！");
     }
 
     /**

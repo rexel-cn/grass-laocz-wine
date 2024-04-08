@@ -74,29 +74,30 @@ public class LaoczWineHistoryController extends BaseController {
      * @throws IOException
      */
     @PostMapping("/exportThePotteryJarOperation")
-    public void exportThePotteryJarOperation(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
+    public AjaxResult exportThePotteryJarOperation(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
         String liquorBatchId = requestParams.getString("liquorBatchId");
         String endTime = requestParams.getString("endTime");
         String fromTime = requestParams.getString("fromTime");
         // 检查所有参数是否均为空
         if (StringUtils.isEmpty(fromTime) && StringUtils.isEmpty(endTime) && StringUtils.isEmpty(liquorBatchId)) {
-            throw new IllegalArgumentException("开始时间、结束时间和批次编号都不能为空，请至少选择一项！");
+            return AjaxResult.error("开始时间、结束时间和批次编号都不能为空，请至少选择一项！");
         }
         // 将字符串转换为LocalDate对象
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // 假设日期格式是"yyyy-MM-dd"
 
-        if (StringUtils.isNotEmpty(fromTime)&&StringUtils.isNotEmpty(endTime)){
+        if (StringUtils.isNotEmpty(fromTime) && StringUtils.isNotEmpty(endTime)) {
             LocalDate startDate = LocalDate.parse(fromTime, formatter);
             LocalDate endDate = LocalDate.parse(endTime, formatter);
             // 判断时间跨度是否超过三个月
             long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
             if (daysBetween > 90) { // 如果天数大于90天（即超过三个月）
-                throw new IllegalArgumentException("所选时间范围超过三个月，请重新选择！");
+                return AjaxResult.error("所选时间范围超过三个月，请重新选择！");
             }
         }
         ExcelUtil<LaoczPotteryAltarOperationRecordExportVO> util = new ExcelUtil<>(LaoczPotteryAltarOperationRecordExportVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.getLaoczWineHistoryTable(fromTime, endTime, liquorBatchId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczPotteryAltarOperationRecordExportVO.class), "陶坛操作报表");
+        return AjaxResult.success("陶坛操作报表导出成功！");
     }
 
     /**
@@ -132,15 +133,16 @@ public class LaoczWineHistoryController extends BaseController {
      * @throws IOException
      */
     @PostMapping("/batchLossReportExport")
-    public void batchLossReportExport(HttpServletResponse response,@RequestBody JSONObject requestParams) throws IOException {
+    public AjaxResult batchLossReportExport(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
         String liquorBatchId = requestParams.getString("liquorBatchId");
         // 检查所有参数是否均为空
         if (StringUtils.isEmpty(liquorBatchId)) {
-            throw new IllegalArgumentException("批次编号都不能为空，请至少选择一项！");
+            return AjaxResult.error("批次编号都不能为空，请至少选择一项！");
         }
         ExcelUtil<LaoczBatchLossReportExportVO> util = new ExcelUtil<>(LaoczBatchLossReportExportVO.class);
         List<LaoczWineHistoryVO> laoczWineHistories = laoczWineHistoryService.batchLossReportExport(liquorBatchId);
         util.exportExcel(response, BeanUtil.copyToList(laoczWineHistories, LaoczBatchLossReportExportVO.class), "批次亏损报表");
+        return AjaxResult.success("批次亏损报表导出成功！");
     }
 
     /**
