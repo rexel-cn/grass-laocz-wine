@@ -41,26 +41,6 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
         return baseMapper.selectLaoczBatchPotteryMappingList(laoczBatchPotteryMapping);
     }
 
-    /**
-     * 酒液存储报表查询
-     *
-     * @param fireZoneId     防火区编号
-     * @param liquorBatchId  批次ID
-     * @param potteryAltarId 陶坛ID
-     * @param liquorName     酒品名称
-     * @param areaId         区域编号
-     * @return
-     */
-    @Override
-    public List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(Long fireZoneId, String liquorBatchId, String potteryAltarId, String liquorName, Long areaId) {
-        try {
-            return baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, potteryAltarId, liquorName, areaId);
-        } catch (Exception e) {
-            log.error("查询失败", e);
-            throw new ServiceException("查询失败");
-        }
-    }
-
     @Override
     public List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActualList(Long fireZoneId, String liquorBatchId, Long areaId) {
         return baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, null, null, areaId);
@@ -69,22 +49,24 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
     /**
      * 酒液存储报表查询所有
      *
-     * @param areaId        区域编号
-     * @param fireZoneId    防火区编号
-     * @param liquorBatchId 批次ID
+     * @param areaId             区域编号
+     * @param fireZoneId         防火区编号
+     * @param liquorBatchId      批次ID
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorName         酒品名称
      * @return
      */
     @Override
-    public TableDataInfoDataReportActualVO selectTableDataInfoDataReportActualVO(Long areaId, Long fireZoneId, String liquorBatchId) {
+    public TableDataInfoDataReportActualVO selectTableDataInfoDataReportActualVO(Long areaId, Long fireZoneId, String liquorBatchId, String potteryAltarNumber, String liquorName) {
         try {
             List<LaoczBatchPotteryMappingVO> laoczBatchPotteryMappingVOS;
             try {
                 PageUtils.startPage();
-                laoczBatchPotteryMappingVOS = baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, null, null, areaId);
+                laoczBatchPotteryMappingVOS = baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, potteryAltarNumber, liquorName, areaId);
             } finally {
                 PageUtils.clearPage();
             }
-            List<LaoczBatchPotteryMappingVO> laoczBatchPotteryMappingVOS1 = baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, null, null, areaId);
+            List<LaoczBatchPotteryMappingVO> laoczBatchPotteryMappingVOS1 = baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, potteryAltarNumber, liquorName, areaId);
             double totalActualWeight = laoczBatchPotteryMappingVOS.stream()
                     .filter(Objects::nonNull) // 排除VO对象为null的情况
                     .filter(mappingVO -> mappingVO.getActualWeight() != null) // 排除实际重量为null的记录
@@ -118,6 +100,7 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
         boardDataListVO.setTableTotal(baseMapper.selectBoardData(areaId, fireZoneId).size());
         return boardDataListVO;
     }
+
     /**
      * 移动端场区概览
      *

@@ -23,18 +23,6 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
     List<LaoczBatchPotteryMapping> selectLaoczBatchPotteryMappingList(LaoczBatchPotteryMapping laoczBatchPotteryMapping);
 
     /**
-     * 酒液存储报表查询下方
-     *
-     * @param fireZoneId     防火区编号
-     * @param liquorBatchId  批次ID
-     * @param potteryAltarId 陶坛ID
-     * @param liquorName     酒品名称
-     * @param areaId         区域编号
-     * @return
-     */
-    List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(Long fireZoneId, String liquorBatchId, String potteryAltarId, String liquorName, Long areaId);
-
-    /**
      * 酒液存储报表查询
      *
      * @param fireZoneId    防火区编号
@@ -45,14 +33,16 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
     List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActualList(Long fireZoneId, String liquorBatchId, Long areaId);
 
     /**
-     * 酒液存储报表查询所有上方
+     * 酒液存储报表查询所有
      *
-     * @param areaId        区域编号
-     * @param fireZoneId    防火区编号
-     * @param liquorBatchId 批次ID
+     * @param areaId             区域编号
+     * @param fireZoneId         防火区编号
+     * @param liquorBatchId      批次ID
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorName         酒品名称
      * @return
      */
-    TableDataInfoDataReportActualVO selectTableDataInfoDataReportActualVO(Long areaId, Long fireZoneId, String liquorBatchId);
+    TableDataInfoDataReportActualVO selectTableDataInfoDataReportActualVO(Long areaId, Long fireZoneId, String liquorBatchId, String potteryAltarNumber, String liquorName);
 
     /**
      * 看板场区概览
@@ -62,13 +52,14 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
      * @return
      */
     BoardDataListVO selectBoardData(Long areaId, Long fireZoneId);
+
     /**
      * 移动端场区概览
      *
      * @param potteryAltarNumber 陶坛编号
      * @return 详情数据
      */
-    OverviewVo  getOverview(String potteryAltarNumber);
+    OverviewVo getOverview(String potteryAltarNumber);
 
     List<BatchInfoVo> getBatchInfo(String liquorBatchId);
 }

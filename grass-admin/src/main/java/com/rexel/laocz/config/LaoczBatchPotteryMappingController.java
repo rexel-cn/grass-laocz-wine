@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,39 +32,29 @@ public class LaoczBatchPotteryMappingController extends BaseController {
     @Autowired
     private ILaoczBatchPotteryMappingService laoczBatchPotteryMappingService;
 
-    /**
-     * 酒液存储报表查询
-     *
-     * @param fireZoneId         防火区编号
-     * @param liquorBatchId      批次ID
-     * @param potteryAltarNumber 陶坛ID
-     * @param liquorName         酒品名称
-     * @param areaId             区域编号
-     * @return
-     */
-    @GetMapping("/list")
-    private TableDataInfo getListTableDataInfo(Long fireZoneId, String liquorBatchId, String potteryAltarNumber, String liquorName, Long areaId) {
-        startPage();
-        return getDataTable(laoczBatchPotteryMappingService.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, potteryAltarNumber, liquorName, areaId), "LiquorStorage");
-    }
 
     /**
      * 酒液存储报表查询所有
      *
-     * @param areaId        区域编号
-     * @param fireZoneId    防火区编号
-     * @param liquorBatchId 批次ID
+     * @param areaId             区域编号
+     * @param fireZoneId         防火区编号
+     * @param liquorBatchId      批次ID
+     * @param potteryAltarNumber 陶坛编号
+     * @param liquorName         酒品名称
      * @return
      */
     @GetMapping("/listAndNumber")
-    private TableDataInfoDataReportActualVO getActual(Long areaId, Long fireZoneId, String liquorBatchId) {
-        return laoczBatchPotteryMappingService.selectTableDataInfoDataReportActualVO(areaId, fireZoneId, liquorBatchId);
+    private TableDataInfoDataReportActualVO getActual(Long areaId, Long fireZoneId, String liquorBatchId, String potteryAltarNumber, String liquorName) {
+        return laoczBatchPotteryMappingService.selectTableDataInfoDataReportActualVO(areaId, fireZoneId, liquorBatchId, potteryAltarNumber, liquorName);
     }
 
     /**
      * 酒液存储报表导出
      *
      * @param response
+     * @param areaId        场区编号
+     * @param fireZoneId    防火区编号
+     * @param liquorBatchId 批次编号
      * @throws IOException
      */
     @PostMapping("/liquorStorageReportExport")
@@ -100,13 +89,14 @@ public class LaoczBatchPotteryMappingController extends BaseController {
 
     /**
      * 批次查询
+     *
      * @param liquorBatchId 酒批次Id
      * @return 分页数据
      */
     @GetMapping("/getBatchInfo")
-    public TableDataInfo getBatchInfo(String liquorBatchId){
+    public TableDataInfo getBatchInfo(String liquorBatchId) {
         List<BatchInfoVo> batchInfoVos = laoczBatchPotteryMappingService.getBatchInfo(liquorBatchId);
-        return getDataTable(batchInfoVos,"batchInfo");
+        return getDataTable(batchInfoVos, "batchInfo");
     }
 
 }

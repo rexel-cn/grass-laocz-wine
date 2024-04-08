@@ -36,11 +36,11 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
     /**
      * 查询历史信息
      *
-     * @param potteryAltarId     陶坛ID
-     * @param fromTime           开始时间
-     * @param endTime            结束时间
-     * @param detailType         操作类型
-     * @param workOrderId        工单Id
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param detailType     操作类型
+     * @param workOrderId    工单Id
      * @return
      */
     List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("workOrderId") String workOrderId);
@@ -72,7 +72,7 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @return 酒历史集合
      */
     List<LaoczWineHistoryVO> selectLaoczWineHistoryLossList(@Param("liquorBatchId") String liquorBatchId,
-                                                            @Param("potteryAltarNumber") Long potteryAltarNumber,
+                                                            @Param("potteryAltarNumber") String potteryAltarNumber,
                                                             @Param("fireZoneId") Long fireZoneId,
                                                             @Param("areaId") Long areaId);
 

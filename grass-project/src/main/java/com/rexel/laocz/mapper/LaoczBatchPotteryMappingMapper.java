@@ -37,16 +37,19 @@ public interface LaoczBatchPotteryMappingMapper extends BaseMapper<LaoczBatchPot
 
     List<LaoczBatchPotteryMappingVO> selectTableDataInfoReportActual(@Param("fireZoneId") Long fireZoneId,
                                                                      @Param("liquorBatchId") String liquorBatchId,
-                                                                     @Param("potteryAltarId") String potteryAltarId,
+                                                                     @Param("potteryAltarNumber") String potteryAltarNumber,
                                                                      @Param("liquorName") String liquorName,
                                                                      @Param("areaId") Long areaId);
+
     /**
      * 看板场区概览
-     * @param areaId 场区编号
+     *
+     * @param areaId     场区编号
      * @param fireZoneId 防火区编号
      * @return
      */
-    List<BoardDataVO> selectBoardData(@Param("areaId") Long areaId,@Param("fireZoneId") Long fireZoneId);
+    List<BoardDataVO> selectBoardData(@Param("areaId") Long areaId, @Param("fireZoneId") Long fireZoneId);
+
     /**
      * 移动端场区概览
      *

@@ -3,10 +3,8 @@ package com.rexel.laocz.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
-import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
@@ -20,7 +18,6 @@ import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczLiquorManagementMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
-import com.rexel.laocz.service.ILaoczLiquorManagementService;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,11 +56,11 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     /**
      * 查询历史信息
      *
-     * @param potteryAltarId     陶坛ID
-     * @param fromTime           开始时间
-     * @param endTime            结束时间
-     * @param detailType         操作类型
-     * @param workOrderId        工单Id
+     * @param potteryAltarId 陶坛ID
+     * @param fromTime       开始时间
+     * @param endTime        结束时间
+     * @param detailType     操作类型
+     * @param workOrderId    工单Id
      * @return
      */
 
@@ -86,7 +83,16 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     @Override
     public TableDataInfoDataReportVO selectTableDataInfo(String potteryAltarNumber, String fromTime, String endTime, String liquorBatchId, Long fireZoneId, Long areaId) {
         try {
-            List<LaoczWineHistoryVO> laoczWineHistoryVOS;
+            List<LaoczWineHistoryVO> laoczWineHistoryVOS = null;
+            if (StringUtils.isEmpty(potteryAltarNumber)
+                    && StringUtils.isEmpty(fromTime)
+                    && StringUtils.isEmpty(endTime)
+                    && StringUtils.isEmpty(liquorBatchId)
+                    && (fireZoneId == null || fireZoneId == 0L)
+                    && (areaId == null || areaId == 0L)) {
+                return getDataTable(-1L, -1L, -1L, -1L, -1L, -1L, laoczWineHistoryVOS, "PotteryReport");
+            }
+
             try {
                 PageUtils.startPage();
                 laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
@@ -96,19 +102,19 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
             List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
             Long totalOperand = (long) laoczWineHistoryVOSList.size();
             long entryOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "1".equals(history.getDetailType()))
+                    .filter(history -> "入酒".equals(history.getDetailType()))
                     .count();
             long distillingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "2".equals(history.getDetailType()))
+                    .filter(history -> "出酒".equals(history.getDetailType()))
                     .count();
             long invertedJarOperationIn = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "3".equals(history.getDetailType()))
+                    .filter(history -> "倒坛入".equals(history.getDetailType()))
                     .count();
             long invertedJarOperationOut = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "4".equals(history.getDetailType()))
+                    .filter(history -> "倒坛出".equals(history.getDetailType()))
                     .count();
             long samplingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "5".equals(history.getDetailType()))
+                    .filter(history -> "取样".equals(history.getDetailType()))
                     .count();
 
             return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperationIn, invertedJarOperationOut, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
@@ -116,19 +122,6 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
             log.error("查询失败", e);
             throw new ServiceException("查询失败");
         }
-    }
-
-    /**
-     * 数据报表-淘坛操作记录查询2
-     *
-     * @param potteryAltarNumber 陶坛ID
-     * @param fireZoneId         防火区ID
-     * @param areaId             场区ID
-     * @return
-     */
-    @Override
-    public List<LaoczWineHistoryVO> getLaoczWineHistoryTableList(String potteryAltarNumber, Long fireZoneId, Long areaId) {
-        return baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, null, null, null, fireZoneId, areaId);
     }
 
     @Override
@@ -159,24 +152,34 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     }
 
     /**
-     * 批次亏损查询一
+     * 批次亏损查询
      *
-     * @param liquorBatchId 批次ID
+     * @param liquorBatchId      批次ID
+     * @param potteryAltarNumber 陶坛编号
+     * @param fireZoneId         防火区编号
+     * @param areaId             区域编号
      * @return
      */
     @Override
-    public TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId) {
-        List<LaoczWineHistoryVO> laoczWineHistoryListVO;
+    public TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId, String potteryAltarNumber, Long fireZoneId, Long areaId) {
+
         try {
+            List<LaoczWineHistoryVO> laoczWineHistoryListVO = null;
+            if (StringUtils.isEmpty(liquorBatchId)
+                    && (fireZoneId == null || fireZoneId == 0L)
+                    && (areaId == null || areaId == 0L)
+                    && StringUtils.isEmpty(potteryAltarNumber)) {
+                return getDataTableLoss(-1.0, -1.0, -1.0, -1.0, -1.0, laoczWineHistoryListVO, "lossStatement");
+            }
             Double totalApplications;
             Double inventoryQuantity;
             Double totalLiquorOutput;
             Double totalSampling;
             Double totalLoss;
-            List<LaoczWineHistoryVO> laoczWineHistoryList = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+            List<LaoczWineHistoryVO> laoczWineHistoryList = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
             try {
                 PageUtils.startPage();
-                laoczWineHistoryListVO = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+                laoczWineHistoryListVO = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
             } finally {
                 PageUtils.clearPage();
             }
@@ -222,18 +225,6 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
         }
     }
 
-    /**
-     * 批次亏损查询二
-     *
-     * @param potteryAltarNumber 陶坛编号
-     * @param fireZoneId         防火区编号
-     * @param areaId             区域编号
-     * @return
-     */
-    @Override
-    public List<LaoczWineHistoryVO> selectLaoczWineHistoryInfoTwo(Long potteryAltarNumber, Long fireZoneId, Long areaId) {
-        return baseMapper.selectLaoczWineHistoryLossList(null, potteryAltarNumber, fireZoneId, areaId);
-    }
 
     /**
      * 批次报表导出
@@ -257,7 +248,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
         List<LaoczWineHistory> list = baseMapper.selectLaoczWineHistoryList(laoczWineHistory);
 
         //赋值
-        if (!CollectionUtil.isEmpty(list)){
+        if (!CollectionUtil.isEmpty(list)) {
             //查询酒品Id
             LambdaQueryWrapper<LaoczLiquorManagement> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(LaoczLiquorManagement::getLiquorName, list.get(0).getLiquorName());

@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
-import com.rexel.common.utils.CollectionUtils;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.LaoczWineHistoryVO;
@@ -67,18 +66,6 @@ public class LaoczWineHistoryController extends BaseController {
         return laoczWineHistoryService.selectTableDataInfo(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
     }
 
-    /**
-     * 数据报表-淘坛操作记录查询2
-     *
-     * @param potteryAltarNumber 陶坛编号
-     * @param fireZoneId         防火区ID
-     * @param areaId             场区ID
-     * @return
-     */
-    @GetMapping("/getPotteryJarOperationTableList")
-    public TableDataInfo getPotteryJarOperationTableList(String potteryAltarNumber, Long fireZoneId, Long areaId) {
-        return getDataTable(laoczWineHistoryService.getLaoczWineHistoryTableList(potteryAltarNumber, fireZoneId, areaId), "PotteryReport");
-    }
 
     /**
      * 陶坛操作记录表导出
@@ -105,34 +92,24 @@ public class LaoczWineHistoryController extends BaseController {
     }
 
     /**
-     * 批次亏损查询一
+     * 批次亏损查询
      *
-     * @param liquorBatchId 批次ID
-     * @return
-     */
-    @GetMapping("/selectLaoczWineHistoryInfoOne")
-    public TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId) {
-        return laoczWineHistoryService.selectLaoczWineHistoryInfoOne(liquorBatchId);
-    }
-
-    /**
-     * 批次亏损查询二
-     *
+     * @param liquorBatchId      批次ID
      * @param potteryAltarNumber 陶坛编号
      * @param fireZoneId         防火区编号
      * @param areaId             区域编号
      * @return
      */
-    @GetMapping("/selectLaoczWineHistoryInfoTwo")
-    public TableDataInfo selectLaoczWineHistoryInfoTwo(Long potteryAltarNumber, Long fireZoneId, Long areaId) {
-        startPage();
-        return getDataTable(laoczWineHistoryService.selectLaoczWineHistoryInfoTwo(potteryAltarNumber, fireZoneId, areaId), "lossStatement");
+    @GetMapping("/selectLaoczWineHistoryInfoOne")
+    public TableDataInfoDataReportLossVO selectLaoczWineHistoryInfoOne(String liquorBatchId, String potteryAltarNumber, Long fireZoneId, Long areaId) {
+        return laoczWineHistoryService.selectLaoczWineHistoryInfoOne(liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
     }
 
     /**
      * 陶坛操作记录表导出
      *
      * @param response
+     * @param liquorBatchId 批次编号
      * @throws IOException
      */
     @PostMapping("/batchLossReportExport")
@@ -156,9 +133,10 @@ public class LaoczWineHistoryController extends BaseController {
 
     /**
      * 操作记录
-     * @param fromTime 开始时间
-     * @param endTime 结束时间
-     * @param detailType 操作类型
+     *
+     * @param fromTime    开始时间
+     * @param endTime     结束时间
+     * @param detailType  操作类型
      * @param workOrderId 工单Id
      * @return 分页数据
      */
@@ -166,28 +144,31 @@ public class LaoczWineHistoryController extends BaseController {
     public TableDataInfo selectOperation(String fromTime, String endTime, String detailType, String workOrderId) {
         startPage();
         List<LaoczWineHistoryVO> list = laoczWineHistoryService.selectOperation(fromTime, endTime, detailType, workOrderId);
-        return getDataTable(list,"historyInfo");
+        return getDataTable(list, "historyInfo");
     }
 
     /**
      * 根据工单Id查询所有陶坛信息
+     *
      * @param laoczWineHistory
      * @return
      */
     @GetMapping("getDetailByWorkId")
-    public AjaxResult getDetailByWorkId(LaoczWineHistory laoczWineHistory){
+    public AjaxResult getDetailByWorkId(LaoczWineHistory laoczWineHistory) {
         List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectDetailByWorkId(laoczWineHistory);
         return AjaxResult.success(laoczWineHistories);
     }
+
     /**
      * 根据工单Id,陶坛Id,操作类型查询陶坛信息
+     *
      * @param laoczWineHistory
      * @return
      */
     @GetMapping("getOneByWorkId")
-    public AjaxResult getOneByWorkId(LaoczWineHistory laoczWineHistory){
+    public AjaxResult getOneByWorkId(LaoczWineHistory laoczWineHistory) {
         List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectDetailByWorkId(laoczWineHistory);
-        if (!CollectionUtil.isEmpty(laoczWineHistories)){
+        if (!CollectionUtil.isEmpty(laoczWineHistories)) {
             return AjaxResult.success(laoczWineHistories.get(0));
         }
         return AjaxResult.success();
