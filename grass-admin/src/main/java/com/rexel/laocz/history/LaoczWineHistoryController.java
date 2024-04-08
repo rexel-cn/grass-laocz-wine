@@ -2,6 +2,7 @@ package com.rexel.laocz.history;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
@@ -11,10 +12,7 @@ import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.service.ILaoczWineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -72,19 +70,20 @@ public class LaoczWineHistoryController extends BaseController {
      * 陶坛操作记录表导出
      *
      * @param response
-     * @param fromTime      开始时间
-     * @param endTime       结束时间
-     * @param liquorBatchId 批次编号
+     * @param requestParams
      * @throws IOException
      */
     @PostMapping("/exportThePotteryJarOperation")
-    public void exportThePotteryJarOperation(HttpServletResponse response, String fromTime, String endTime, String liquorBatchId) throws IOException {
+    public void exportThePotteryJarOperation(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
+        String liquorBatchId = requestParams.getString("liquorBatchId");
+        String endTime = requestParams.getString("endTime");
+        String fromTime = requestParams.getString("fromTime");
         // 检查所有参数是否均为空
         if (StringUtils.isEmpty(fromTime) && StringUtils.isEmpty(endTime) && StringUtils.isEmpty(liquorBatchId)) {
             throw new IllegalArgumentException("开始时间、结束时间和批次编号都不能为空，请至少选择一项！");
         }
         // 将字符串转换为LocalDate对象
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 假设日期格式是"yyyy-MM-dd"
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // 假设日期格式是"yyyy-MM-dd"
         LocalDate startDate = LocalDate.parse(fromTime, formatter);
         LocalDate endDate = LocalDate.parse(endTime, formatter);
 
@@ -127,11 +126,12 @@ public class LaoczWineHistoryController extends BaseController {
      * 批次亏损报表导出
      *
      * @param response
-     * @param liquorBatchId 批次编号
+     * @param requestParams 批次编号
      * @throws IOException
      */
     @PostMapping("/batchLossReportExport")
-    public void batchLossReportExport(HttpServletResponse response, String liquorBatchId) throws IOException {
+    public void batchLossReportExport(HttpServletResponse response,@RequestBody JSONObject requestParams) throws IOException {
+        String liquorBatchId = requestParams.getString("liquorBatchId");
         // 检查所有参数是否均为空
         if (StringUtils.isEmpty(liquorBatchId)) {
             throw new IllegalArgumentException("批次编号都不能为空，请至少选择一项！");

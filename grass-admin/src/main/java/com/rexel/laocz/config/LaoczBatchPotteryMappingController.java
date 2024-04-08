@@ -1,6 +1,7 @@
 package com.rexel.laocz.config;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
@@ -11,10 +12,7 @@ import com.rexel.laocz.domain.vo.LaoczBatchPotteryMappingVO;
 import com.rexel.laocz.domain.vo.TableDataInfoDataReportActualVO;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -54,13 +52,14 @@ public class LaoczBatchPotteryMappingController extends BaseController {
      * 酒液存储报表导出
      *
      * @param response
-     * @param areaId        场区编号
-     * @param fireZoneId    防火区编号
-     * @param liquorBatchId 批次编号
+     * @param requestParams
      * @throws IOException
      */
     @PostMapping("/liquorStorageReportExport")
-    public void liquorStorageReportExport(HttpServletResponse response, Long areaId, Long fireZoneId, String liquorBatchId) throws IOException {
+    public void liquorStorageReportExport(HttpServletResponse response, @RequestBody JSONObject requestParams) throws IOException {
+        Long areaId = requestParams.getLong("areaId");
+        Long fireZoneId = requestParams.getLong("fireZoneId");
+        String liquorBatchId = requestParams.getString("liquorBatchId");
         // 检查三个参数是否同时为空
         if (Objects.isNull(areaId) && Objects.isNull(fireZoneId) && StringUtils.isEmpty(liquorBatchId)) {
             throw new IllegalArgumentException("场区编号、防火区编号和批次编号不能同时为空，请至少选择一项！");
