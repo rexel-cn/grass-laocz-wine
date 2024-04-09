@@ -177,7 +177,7 @@
         left join laocz_batch_pottery_mapping bpm on bpm.liquor_batch_id = lb.liquor_batch_id
         <where>
             <if test="liquorBatchId != null and liquorBatchId != ''">
-                bpm.liquor_batch_id = #{liquorBatchId}
+                bpm.liquor_batch_id LIKE CONCAT('%', #{liquorBatchId}, '%')
             </if>
         </where>
         GROUP BY bpm.liquor_batch_id
