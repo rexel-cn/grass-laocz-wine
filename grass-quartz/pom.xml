@@ -38,6 +38,10 @@
             <groupId>com.rexel</groupId>
             <artifactId>grass-system</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rexel</groupId>
+            <artifactId>grass-project</artifactId>
+        </dependency>
 
 
     </dependencies>

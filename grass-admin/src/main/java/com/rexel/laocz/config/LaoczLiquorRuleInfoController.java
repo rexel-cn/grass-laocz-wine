@@ -9,7 +9,6 @@ import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
 import com.rexel.laocz.domain.vo.UserInfoVo;
 import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
-import com.rexel.laocz.service.ILaoczWineOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -107,5 +106,13 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     @GetMapping("/dropDown")
     public AjaxResult dropDown(){
         return AjaxResult.success(laoczLiquorRuleInfoService.dropDown());
+    }
+
+    /**
+     * 报警推送
+     */
+    @PostMapping("/pushAlarm")
+    public void pushAlarm(){
+        laoczLiquorRuleInfoService.pushAlarm();
     }
 }

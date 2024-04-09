@@ -2,6 +2,7 @@ package com.rexel.quartz.task;
 
 import com.rexel.common.utils.PulseRefreshToken;
 import com.rexel.common.utils.StringUtils;
+import com.rexel.laocz.service.ILaoczLiquorRuleInfoService;
 import com.rexel.quartz.util.ToConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class RyTask {
 
     @Autowired
     private ToConfiguration toConfiguration;
+
+    @Autowired
+    private ILaoczLiquorRuleInfoService laoczLiquorRuleInfoService;
 
 
     public void ryMultipleParams(String s, Boolean b, Long l, Double d, Integer i) {
@@ -54,4 +58,10 @@ public class RyTask {
         toConfiguration.phoneToConfiguration();
     }
 
+    /**
+     * 将所有租户电话号传给组态
+     */
+    public void pushLiquorAlarm() {
+        laoczLiquorRuleInfoService.pushAlarm();
+    }
 }

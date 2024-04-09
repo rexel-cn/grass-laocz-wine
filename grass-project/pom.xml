@@ -31,5 +31,9 @@
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rexel</groupId>
+            <artifactId>grass-component</artifactId>
+        </dependency>
     </dependencies>
 </project>

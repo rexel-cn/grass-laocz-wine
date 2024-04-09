@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorRuleInfo;
 import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
 import com.rexel.laocz.domain.vo.UserInfoVo;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -46,4 +47,8 @@ public interface ILaoczLiquorRuleInfoService extends IService<LaoczLiquorRuleInf
      * @return
      */
     List<String> dropDown();
+    /**
+     * 定时就批次报警
+     */
+    void pushAlarm();
 }
