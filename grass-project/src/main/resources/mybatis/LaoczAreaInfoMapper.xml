@@ -29,7 +29,8 @@
         from laocz_area_info
     </sql>
 
-    <select id="selectLaoczAreaInfoList" parameterType="com.rexel.laocz.domain.LaoczAreaInfo" resultMap="LaoczAreaInfoResult">
+    <select id="selectLaoczAreaInfoList" parameterType="com.rexel.laocz.domain.LaoczAreaInfo"
+            resultMap="LaoczAreaInfoResult">
         <include refid="selectLaoczAreaInfoVo"/>
         <where>
             <if test="tenantId != null  and tenantId != ''">
@@ -43,6 +44,13 @@
             </if>
         </where>
         order by laocz_area_info.dispaly_order
+    </select>
+    <select id="selectAreaFire" resultType="com.rexel.laocz.domain.vo.FireZoneInfoVo">
+        SELECT lai.area_name,
+               fzi.fire_zone_name,
+               fzi.fire_zone_id
+        FROM laocz_area_info lai
+                 left JOIN laocz_fire_zone_info fzi ON fzi.area_id = lai.area_id
     </select>
 
     <insert id="batchLaoczAreaInfo" parameterType="java.util.List"

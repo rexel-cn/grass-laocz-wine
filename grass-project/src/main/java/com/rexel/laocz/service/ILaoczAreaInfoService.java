@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.AreaVo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 
 import java.util.List;
 
@@ -33,4 +34,8 @@ public interface ILaoczAreaInfoService extends IService<LaoczAreaInfo> {
      * @return 返回
      */
     boolean addLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo);
+    /**
+     * 联查全部防火区+场区
+     */
+    List<FireZoneInfoVo> getAreaFire();
 }

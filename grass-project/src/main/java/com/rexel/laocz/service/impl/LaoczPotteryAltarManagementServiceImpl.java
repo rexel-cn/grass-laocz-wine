@@ -452,23 +452,32 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         }
         //数据校验
         check(potteryAltarVos);
-
-
+        //校验陶坛编号是否有重复
+        Set<String> potteryAltarNumberSet = new HashSet<>();
         for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
-            //验证称重罐编号是否已存在
-            QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
-
-            queryWrapper.eq("pottery_altar_number", potteryAltarVo.getPotteryAltarNumber());
-
-            int count = this.count(queryWrapper);
-
-            if (count > 0) {
-                throw new ServiceException("陶坛编号已存在");
+            if (!potteryAltarNumberSet.add(potteryAltarVo.getPotteryAltarNumber())) {
+                throw new ServiceException("Excel中有重复的陶坛编号" + potteryAltarVo.getPotteryAltarNumber());
             }
-            // 获取归属区域Id 获取防火区Id
-            Long fireZoneId = iLaoczFireZoneInfoService.findFireZoneId(potteryAltarVo.getAreaName(), potteryAltarVo.getFireZoneName());
-            potteryAltarVo.setFireZoneId(fireZoneId);
+        }
+        //查询数据库中的所有陶坛数据
+        Integer count1 = this.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumberSet).count();
+        if (count1 > 0) {
+            throw new ServiceException("陶坛编号已存在,请删除后再导入");
+        }
+        //查询所有的场区名称、防火区名称、防火区id
+        List<FireZoneInfoVo> areaFires = iLaoczAreaInfoService.getAreaFire();
 
+
+        //导入
+        for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
+            // 获取防火区Id
+            for (FireZoneInfoVo areaFire : areaFires) {
+                String excelInfo = potteryAltarVo.getAreaName() + potteryAltarVo.getFireZoneName();
+                String dataInfo = areaFire.getAreaName() + areaFire.getFireZoneName();
+                if (excelInfo.equals(dataInfo)) {
+                    potteryAltarVo.setFireZoneId(areaFire.getFireZoneId());
+                }
+            }
             LaoczPotteryAltarManagement laoczPotteryAltarManagement = new LaoczPotteryAltarManagement();
             // 数据拷贝
             BeanUtil.copyProperties(potteryAltarVo, laoczPotteryAltarManagement);

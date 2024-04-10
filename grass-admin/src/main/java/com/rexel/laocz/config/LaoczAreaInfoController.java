@@ -114,4 +114,12 @@ public class LaoczAreaInfoController extends BaseController {
         List<LaoczFireZoneInfo> laoczFireZoneInfos = laoczAreaInfoService.getByIdWithfireZoneName(id);
         return AjaxResult.success(laoczFireZoneInfos);
     }
+    /**
+     * 联查全部防火区+场区
+     */
+    @GetMapping("/getAreaFire")
+    public AjaxResult getAreaFire(){
+        List<FireZoneInfoVo> fireZoneInfoVo = laoczAreaInfoService.getAreaFire();
+        return AjaxResult.success(fireZoneInfoVo);
+    }
 }

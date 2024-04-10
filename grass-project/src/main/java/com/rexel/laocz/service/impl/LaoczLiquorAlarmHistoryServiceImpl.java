@@ -1,11 +1,16 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczLiquorAlarmHistory;
+import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO;
 import com.rexel.laocz.mapper.LaoczLiquorAlarmHistoryMapper;
 import com.rexel.laocz.service.ILaoczLiquorAlarmHistoryService;
+import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +24,8 @@ import java.util.List;
 @Service
 public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorAlarmHistoryMapper, LaoczLiquorAlarmHistory> implements ILaoczLiquorAlarmHistoryService {
 
-
+    @Autowired
+    private ILaoczPotteryAltarManagementService iLaoczPotteryAltarManagementService;
     /**
      * 查询老村长酒存储时间报警历史列表
      *
@@ -37,7 +43,7 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
      * @param potteryAltarId 陶坛ID
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorBatchId   批次ID
+     * @param liquorBatchId  批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
@@ -51,7 +57,7 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
      *
      * @param fromTime       开始时间
      * @param endTime        结束时间
-     * @param liquorBatchId   批次ID
+     * @param liquorBatchId  批次ID
      * @param liquorRuleName 规则名称
      * @return
      */
@@ -63,6 +69,15 @@ public class LaoczLiquorAlarmHistoryServiceImpl extends ServiceImpl<LaoczLiquorA
             log.error("查询失败", e);
             throw new ServiceException("查询失败");
         }
+    }
+    /**
+     * 获取报警详情
+     *
+     * @return
+     */
+    @Override
+    public LaoczLiquorAlarmHistoryVO getByIdWithAlarmInfo(Long liquorAlarmHistoryId) {
+         return   baseMapper.selectAlarmInfo(liquorAlarmHistoryId);
     }
 
 }

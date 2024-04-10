@@ -1,6 +1,7 @@
 package com.rexel.laocz.history;
 
 import com.rexel.common.core.controller.BaseController;
+import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.service.ILaoczLiquorAlarmHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +51,15 @@ public class LaoczLiquorAlarmHistoryController extends BaseController {
     public TableDataInfo getAlarmHistoryList(String fromTime, String endTime, String liquorBatchId, String liquorRuleName) {
         startPage();
         return getDataTable(laoczLiquorAlarmHistoryService.selectLaoczLiquorAlarmHistoryList(fromTime, endTime, liquorBatchId, liquorRuleName), "alarmHistoryList");
+    }
+
+    /**
+     * 获取报警详情
+     *
+     * @return
+     */
+    @GetMapping("/getAlarmDetail")
+    public AjaxResult getAlarmDetail(Long liquorAlarmHistoryId){
+        return AjaxResult.success(laoczLiquorAlarmHistoryService.getByIdWithAlarmInfo(liquorAlarmHistoryId));
     }
 }

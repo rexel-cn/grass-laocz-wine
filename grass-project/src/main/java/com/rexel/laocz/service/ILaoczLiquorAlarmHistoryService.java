@@ -44,4 +44,11 @@ public interface ILaoczLiquorAlarmHistoryService extends IService<LaoczLiquorAla
      * @return
      */
     List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryList(String fromTime, String endTime, String liquorBatchId, String liquorRuleName);
+    /**
+     * 获取报警详情
+     *
+     * @return
+     */
+    LaoczLiquorAlarmHistoryVO getByIdWithAlarmInfo(Long liquorAlarmHistoryId);
+
 }

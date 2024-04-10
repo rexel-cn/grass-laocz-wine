@@ -54,4 +54,10 @@ public interface LaoczLiquorAlarmHistoryMapper extends BaseMapper<LaoczLiquorAla
      * @return
      */
     List<LaoczLiquorAlarmHistoryVO> selectLaoczLiquorAlarmHistoryVOList(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("liquorBatchId") String liquorBatchId, @Param("liquorRuleName") String liquorRuleName);
+    /**
+     * 获取报警详情
+     *
+     * @return
+     */
+    LaoczLiquorAlarmHistoryVO selectAlarmInfo(Long liquorAlarmHistoryId);
 }

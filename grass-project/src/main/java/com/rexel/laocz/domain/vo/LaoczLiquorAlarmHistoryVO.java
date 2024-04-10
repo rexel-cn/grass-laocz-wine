@@ -20,6 +20,10 @@ import java.util.Date;
 @NoArgsConstructor
 public class LaoczLiquorAlarmHistoryVO {
     /**
+     * 报警主键Id
+     */
+    private Long liquorAlarmHistoryId;
+    /**
      * 报警时间
      */
     @Excel(name = "报警时间")

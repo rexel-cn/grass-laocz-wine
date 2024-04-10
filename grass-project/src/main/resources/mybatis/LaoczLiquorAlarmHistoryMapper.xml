@@ -115,6 +115,7 @@
     <select id="selectLaoczLiquorAlarmHistoryVOList"
             resultType="com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO">
         SELECT
+        llah.liquor_alarm_history_id,
         llah.create_time,
         llah.liquor_rule_name,
         llah.liquor_batch_id,
@@ -141,6 +142,32 @@
             </if>
             <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
                 and llah.create_time between #{fromTime} and #{endTime}
+            </if>
+        </where>
+    </select>
+    <select id="selectAlarmInfo" resultType="com.rexel.laocz.domain.vo.LaoczLiquorAlarmHistoryVO">
+        SELECT
+        llah.liquor_alarm_history_id,
+        llah.create_time,
+        llah.liquor_rule_name,
+        llah.liquor_batch_id,
+        llm.liquor_name,
+        lai.area_name,
+        lfzi.fire_zone_name,
+        lpam.pottery_altar_number,
+        llah.liquor_rule_judge,
+        llah.liquor_rule_threshold,
+        llah.alarm_value
+        FROM
+        laocz_liquor_alarm_history llah
+        LEFT JOIN laocz_liquor_batch llb ON llah.liquor_batch_id = llb.liquor_batch_id
+        LEFT JOIN laocz_liquor_management llm ON llb.liquor_management_id = llm.liquor_management_id
+        LEFT JOIN laocz_pottery_altar_management lpam ON llah.pottery_altar_id = lpam.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
+        LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
+        <where>
+            <if test="liquorAlarmHistoryId != null and liquorAlarmHistoryId != ''">
+                and llah.liquor_alarm_history_id = #{liquorAlarmHistoryId}
             </if>
         </where>
     </select>

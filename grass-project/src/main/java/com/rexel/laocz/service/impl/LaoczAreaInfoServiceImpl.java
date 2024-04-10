@@ -8,6 +8,7 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.vo.AreaVo;
+import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import com.rexel.laocz.mapper.LaoczAreaInfoMapper;
 import com.rexel.laocz.service.ILaoczAreaInfoService;
 import com.rexel.laocz.service.ILaoczFireZoneInfoService;
@@ -85,5 +86,11 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
         }
         return this.save(laoczAreaInfo);
     }
-
+    /**
+     * 联查全部防火区+场区
+     */
+    @Override
+    public List<FireZoneInfoVo> getAreaFire() {
+        return  baseMapper.selectAreaFire();
+    }
 }
