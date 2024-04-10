@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
+
 /**
  * 酒品字典对象 laocz_liquor_dict
  *
@@ -49,6 +53,7 @@ public class LaoczLiquorDict extends BaseEntity {
      */
     @Excel(name = "信息描述")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @NotBlank(message = "描述不能为空")
     private String wineDcitInfo;
 
 

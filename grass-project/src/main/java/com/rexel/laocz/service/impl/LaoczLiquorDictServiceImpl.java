@@ -1,19 +1,13 @@
 package com.rexel.laocz.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczLiquorDict;
-import com.rexel.laocz.domain.vo.LiquorRuleInfoVo;
-import com.rexel.laocz.domain.vo.LiquorVo;
 import com.rexel.laocz.mapper.LaoczLiquorDictMapper;
 import com.rexel.laocz.service.ILaoczLiquorDictService;
-import com.rexel.system.domain.vo.PointTagExportVO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,10 +31,6 @@ public class LaoczLiquorDictServiceImpl extends ServiceImpl<LaoczLiquorDictMappe
     @Override
     public List<LaoczLiquorDict> selectLaoczLiquorDictList(LaoczLiquorDict laoczLiquorDict) {
         List<LaoczLiquorDict> laoczLiquorDicts = baseMapper.selectLaoczLiquorDictList(laoczLiquorDict);
-        if (CollectionUtil.isEmpty(laoczLiquorDicts)){
-            LaoczLiquorDict laoczLiquorDict1 = new LaoczLiquorDict();
-            laoczLiquorDicts.add(laoczLiquorDict1);
-        }
         return laoczLiquorDicts;
     }
 
@@ -69,6 +59,7 @@ public class LaoczLiquorDictServiceImpl extends ServiceImpl<LaoczLiquorDictMappe
      * 新增酒品字典
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addLiquorDict(List<LaoczLiquorDict> laoczLiquorDicts) {
         if (laoczLiquorDicts != null & laoczLiquorDicts.size()>0){
 

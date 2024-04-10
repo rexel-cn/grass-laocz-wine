@@ -9,11 +9,14 @@ import com.rexel.laocz.domain.LaoczLiquorDict;
 import com.rexel.laocz.service.ILaoczLiquorDictService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.enums.BusinessType;
+
+import javax.validation.Valid;
 
 /**
  * 酒品字典Controller
@@ -23,6 +26,7 @@ import com.rexel.common.enums.BusinessType;
  */
 @RestController
 @RequestMapping("/rexel-api/liquorDict")
+@Validated
 public class LaoczLiquorDictController extends BaseController {
     @Autowired
     private ILaoczLiquorDictService laoczLiquorDictService;
@@ -50,7 +54,8 @@ public class LaoczLiquorDictController extends BaseController {
     @Log(title = "酒品字典", businessType = BusinessType.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @PostMapping
-    public AjaxResult add(@RequestBody List<LaoczLiquorDict> laoczLiquorDicts) {
+
+    public AjaxResult add(@RequestBody   @Valid  List<  LaoczLiquorDict> laoczLiquorDicts) {
 
         return toAjax(laoczLiquorDictService.addLiquorDict(laoczLiquorDicts));
     }

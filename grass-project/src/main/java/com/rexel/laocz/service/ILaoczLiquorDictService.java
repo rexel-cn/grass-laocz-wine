@@ -3,6 +3,7 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorDict;
 import com.rexel.laocz.domain.vo.LiquorVo;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
