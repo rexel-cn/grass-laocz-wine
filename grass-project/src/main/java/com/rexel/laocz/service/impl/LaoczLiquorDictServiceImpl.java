@@ -61,7 +61,7 @@ public class LaoczLiquorDictServiceImpl extends ServiceImpl<LaoczLiquorDictMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addLiquorDict(List<LaoczLiquorDict> laoczLiquorDicts) {
-        if (laoczLiquorDicts != null & laoczLiquorDicts.size()>0){
+        if (laoczLiquorDicts != null && laoczLiquorDicts.size()>0){
 
             QueryWrapper<LaoczLiquorDict> wrapper = new QueryWrapper<>();
             wrapper.eq("dict_type",laoczLiquorDicts.get(0).getDictType());
