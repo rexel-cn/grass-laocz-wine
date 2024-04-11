@@ -287,7 +287,7 @@ public class OSSUploadHelper {
             }
         }
         //文件名必须重新命名，以时间精确到毫秒命名
-        String filename = DateUtils.dateTimeNow() + "." + getExtension(file);
+        String filename = DateUtils.dateTimeNow(DateUtils.YYYYMMDDHHMMSSSSS) + "." + getExtension(file);
         if (needDatePathAndRandomName) {
             filename = datePath() + "/" + filename;
         }
