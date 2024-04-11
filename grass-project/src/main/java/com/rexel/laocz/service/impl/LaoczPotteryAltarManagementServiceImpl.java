@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -120,8 +121,11 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         String date = DateUtils.getTime();
         Date storageDuration = currentWineIndustryVO.getStoringTime();
         Date date1 = formatter.parse(date);
-        String datePoor = DateUtils.getDatePoor(date1, storageDuration);
-        currentWineIndustryVO.setStorageDuration(datePoor);
+        long differenceInDays = TimeUnit.DAYS.convert(
+                date1.getTime() - storageDuration.getTime(),
+                TimeUnit.MILLISECONDS
+        );
+        currentWineIndustryVO.setStorageDuration(String.valueOf(differenceInDays));
         return currentWineIndustryVO;
     }
 
