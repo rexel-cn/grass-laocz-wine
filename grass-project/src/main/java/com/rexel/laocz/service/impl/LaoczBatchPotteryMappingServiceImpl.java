@@ -6,6 +6,7 @@ import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 

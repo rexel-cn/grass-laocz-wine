@@ -275,7 +275,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
             //根据测点pointId获取主键Id
             QueryWrapper<GrassPointInfo> wrapper = new QueryWrapper<>();
-            wrapper.eq("point_id", weighingTankVo.getPointId());
+            wrapper.eq("device_id", weighingTankVo.getDeviceId())
+                    .eq("point_type", weighingTankVo.getPointType())
+                    .eq("point_id", weighingTankVo.getPointId());
             GrassPointInfo one = iGrassPointService.getOne(wrapper);
             //判断pointId是否已经被占用
             Integer countId1 = iLaoczPumpPointService.lambdaQuery().eq(LaoczPumpPoint::getPointPrimaryKey, one.getId()).count();

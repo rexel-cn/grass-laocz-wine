@@ -277,7 +277,9 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
 
             //根据测点pointId获取主键Id
             QueryWrapper<GrassPointInfo> wrapper = new QueryWrapper<>();
-            wrapper.eq("point_id", pumpImportDto.getPointId());
+            wrapper.eq("device_id", pumpImportDto.getDeviceId())
+                    .eq("point_type", pumpImportDto.getPointType())
+                    .eq("point_id", pumpImportDto.getPointId());
             GrassPointInfo one = iGrassPointService.getOne(wrapper);
             if (one == null){
                 throw new ServiceException(pumpImportDto.getPointId() + "不存在");

@@ -429,7 +429,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     public AjaxResult getPotteryAltarManagementQrCodePdf() {
         // 查询陶坛列表
         List<LaoczPotteryAltarManagement> list = baseMapper.selectLaoczPotteryAltarManagementList(null);
-
+        if (CollectionUtil.isEmpty(list)){
+            throw new ServiceException("没有二维码可以导出");
+        }
         // 生成图片集合
         LinkedHashMap<String, String> idMap = new LinkedHashMap<>();
         list.forEach(m -> {

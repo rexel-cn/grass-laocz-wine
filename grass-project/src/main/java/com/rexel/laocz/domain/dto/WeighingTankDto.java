@@ -45,4 +45,14 @@ public class WeighingTankDto {
      */
     @Excel(name = "测点Id")
     private String pointId;
+    /**
+     * 物联设备Id
+     */
+    @Excel(name = "物联设备Id")
+    private String deviceId;
+    /**
+     * 测点类型
+     */
+    @Excel(name = "测点类型")
+    private String pointType;
 }

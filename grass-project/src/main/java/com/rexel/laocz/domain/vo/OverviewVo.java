@@ -24,7 +24,7 @@ public class OverviewVo extends BoardDataVO {
      * 酒液酿造时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date createTime;
+    private Date liquorBrewingTime;
     /**
      * 满坛重量
      */
@@ -33,4 +33,8 @@ public class OverviewVo extends BoardDataVO {
      * 酒品管理ID
      */
     private Long liquorManagementId;
+    /**
+     * 存储时长
+     */
+    private Long retentionDays;
 }
