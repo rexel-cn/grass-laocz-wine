@@ -53,13 +53,13 @@ public class LaoczBatchPotteryMappingVO {
     /**
      * 酒液批次ID
      */
-    @Excel(name = "酒液批次ID")
+    @Excel(name = "酒液批次编号")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long liquorBatchId;
     /**
      * 该批次在此陶坛中的实际酒重量
      */
-    @Excel(name = "该批次在此陶坛中的实际酒重量")
+    @Excel(name = "该批次在此陶坛中的实际酒重量KG")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double actualWeight;
     /**

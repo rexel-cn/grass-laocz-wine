@@ -53,18 +53,18 @@ public class LaoczPotteryAltarOperationRecordExportVO {
     /**
      * 操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样
      */
-    @Excel(name = "操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样")
+    @Excel(name = "操作详细类型：1:入酒，2:出酒，3:倒坛入，4:倒坛出，5:取样")
     private String detailType;
     /**
      * 称重罐重量
      */
-    @Excel(name = "操作重量")
+    @Excel(name = "操作重量KG")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double weighingTankWeight;
     /**
      * 剩余重量
      */
-    @Excel(name = "剩余重量")
+    @Excel(name = "剩余重量KG")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double remainingWeight;
 }
