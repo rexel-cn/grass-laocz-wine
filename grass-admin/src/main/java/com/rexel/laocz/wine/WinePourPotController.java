@@ -1,6 +1,7 @@
 package com.rexel.laocz.wine;
 
 import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.laocz.domain.dto.QrInCodeScanDTO;
 import com.rexel.laocz.domain.dto.WinBaseDTO;
 import com.rexel.laocz.domain.dto.WineEntryDTO;
 import com.rexel.laocz.domain.dto.WinePourPotApplyDTO;
@@ -81,5 +82,27 @@ public class WinePourPotController {
         return AjaxResult.success();
     }
 
+
+    /**
+     * 二维码扫描获取倒坛出酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    @GetMapping("/qrOutCodeScan/{potteryAltarNumber}")
+    public AjaxResult qrOutCodeScan(@PathVariable("potteryAltarNumber") String potteryAltarNumber) {
+        return AjaxResult.success(winePourPotService.qrOutCodeScan(potteryAltarNumber));
+    }
+
+    /**
+     * 二维码扫描获取倒坛入酒陶坛信息
+     *
+     * @param qrInCodeScanDTO
+     * @return 陶坛信息
+     */
+    @PostMapping("/qrInCodeScan")
+    public AjaxResult qrInCodeScan(@RequestBody QrInCodeScanDTO qrInCodeScanDTO) {
+        return AjaxResult.success(winePourPotService.qrInCodeScan(qrInCodeScanDTO));
+    }
 
 }

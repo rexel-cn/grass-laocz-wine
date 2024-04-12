@@ -7,10 +7,7 @@ import com.rexel.common.utils.SequenceUtils;
 import com.rexel.dview.pojo.DViewVarInfo;
 import com.rexel.laocz.constant.WineConstants;
 import com.rexel.laocz.constant.WinePointConstants;
-import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
-import com.rexel.laocz.domain.LaoczLiquorBatch;
-import com.rexel.laocz.domain.LaoczWeighingTank;
-import com.rexel.laocz.domain.LaoczWineDetails;
+import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineEntryApplyDTO;
 import com.rexel.laocz.domain.dto.WineEntryDTO;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
@@ -22,10 +19,7 @@ import com.rexel.laocz.dview.DviewUtils;
 import com.rexel.laocz.dview.DviewUtilsPro;
 import com.rexel.laocz.dview.domain.DviewPointDTO;
 import com.rexel.laocz.enums.*;
-import com.rexel.laocz.service.ILaoczLiquorBatchService;
-import com.rexel.laocz.service.ILaoczWeighingTankService;
-import com.rexel.laocz.service.WineAbstract;
-import com.rexel.laocz.service.WineEntryApplyService;
+import com.rexel.laocz.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,6 +56,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     private ILaoczWeighingTankService iLaoczWeighingTankService;
     @Autowired
     private RedisCache redisCache;
+    @Autowired
+    private ILaoczLiquorManagementService iLaoczLiquorManagementService;
 
     /**
      * 生成酒品批次号
@@ -95,7 +91,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     @Override
     public List<WineOperaPotteryAltarVO> automaticChoosePotteryAltar(Double applyWeight) {
         List<WineOperaPotteryAltarVO> result = new ArrayList<>();
-        if (applyWeight == null || applyWeight < 0) {
+        if (applyWeight == null || applyWeight <= 0) {
             throw new CustomException("请填写正确的“申请重量”");
         }
         List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(new WineEntryPotteryAltarDTO());
@@ -103,13 +99,19 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             return result;
         }
         //计算出总重量对应的陶坛罐，例如满坛重量是100，总重量为1110，那么就需要11个陶坛罐
-        double sum = 0;
-        for (WineOperaPotteryAltarVO wineOperaPotteryAltarVO : wineOperaPotteryAltarVOS) {
-            sum += wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight();
-            if (sum > applyWeight) {
+        for (int i = 0; i < wineOperaPotteryAltarVOS.size(); i++) {
+            WineOperaPotteryAltarVO wineOperaPotteryAltarVO = wineOperaPotteryAltarVOS.get(i);
+            Double potteryAltarFullAltarWeight = wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight();
+            if (applyWeight > potteryAltarFullAltarWeight) {
+                wineOperaPotteryAltarVO.setApplyWeight(potteryAltarFullAltarWeight);
+            } else {
+                wineOperaPotteryAltarVO.setApplyWeight(applyWeight);
+            }
+            applyWeight -= potteryAltarFullAltarWeight;
+            result.add(wineOperaPotteryAltarVO);
+            if (applyWeight <= 0) {
                 break;
             }
-            result.add(wineOperaPotteryAltarVO);
         }
         return result;
     }
@@ -182,6 +184,11 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         double sum = wineEntryApplyDTO.getPotteryAltars().stream().mapToDouble(WineOutApplyDTO::getApplyWeight).sum();
         if (sum != wineEntryApplyDTO.getApplyWeight()) {
             throw new CustomException("申请重量与陶坛罐申请重量不符");
+        }
+        //检查酒品管理id是否存在
+        LaoczLiquorManagement byId = iLaoczLiquorManagementService.getById(wineEntryApplyDTO.getLiquorManagementId());
+        if (Objects.isNull(byId)) {
+            throw new CustomException("酒品管理不存在");
         }
     }
 
@@ -536,19 +543,20 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                 if (Double.parseDouble(finish) == 1) {
                     String weight = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
 
-
-                    redisCache.tryLock(WINE_ENTRY_APPLY_LOCK + wineDetailsId, wineDetailsId, 10);
-                    iLaoczWineDetailsService.lambdaUpdate()
-                            .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
-                            .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(weight))
-                            .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.COMPLETED.getValue())
-                            .update();
-                    pauseListener(wineDetailsId);
+                    try {
+                        redisCache.tryLock(WINE_ENTRY_APPLY_LOCK + wineDetailsId, wineDetailsId, 10);
+                        iLaoczWineDetailsService.lambdaUpdate()
+                                .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
+                                .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(weight))
+                                .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.COMPLETED.getValue())
+                                .update();
+                        pauseListener(wineDetailsId);
+                    } finally {
+                        redisCache.delete(WINE_ENTRY_APPLY_LOCK + wineDetailsId);
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } finally {
-                redisCache.delete(WINE_ENTRY_APPLY_LOCK + wineDetailsId);
             }
         };
         ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);

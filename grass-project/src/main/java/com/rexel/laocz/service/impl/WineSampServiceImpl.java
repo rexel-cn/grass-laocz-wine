@@ -110,6 +110,9 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
      */
     private void saveLaoczWineDetails(WineSampApplyDTO wineSampApplyDTO, String busyId, String workId, LaoczBatchPotteryMapping laoczBatchPotteryMapping) {
         LaoczWineDetails laoczWineDetails = buildLaoczWineDetails(busyId, workId, laoczBatchPotteryMapping.getLiquorBatchId(), wineSampApplyDTO.getPotteryAltarId(), wineSampApplyDTO.getSamplingWeight(), WineDetailTypeEnum.SAMPLING, wineSampApplyDTO.getSampPurpose());
+        //因取样特殊，取样重量就是陶坛申请重量，也是称重罐重量,后续查询"陶坛查询历史操作页面用到"，操作重量就是称重罐重量
+        Double potteryAltarApplyWeight = laoczWineDetails.getPotteryAltarApplyWeight();
+        laoczWineDetails.setWeighingTankWeight(potteryAltarApplyWeight);
         iLaoczWineDetailsService.save(laoczWineDetails);
     }
 

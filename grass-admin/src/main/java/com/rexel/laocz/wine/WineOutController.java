@@ -53,14 +53,5 @@ public class WineOutController extends BaseController {
         return AjaxResult.success();
     }
 
-    /**
-     * 二维码扫描获取入酒陶坛信息
-     *
-     * @param potteryAltarNumber 陶坛编号
-     * @return 陶坛信息
-     */
-    @GetMapping("/qrCodeScan/{potteryAltarNumber}")
-    public AjaxResult qrCodeScan(@PathVariable("potteryAltarNumber") String potteryAltarNumber) {
-        return AjaxResult.success(wineOutService.qrCodeScan(potteryAltarNumber));
-    }
+
 }

@@ -1,7 +1,9 @@
 package com.rexel.laocz.service;
 
+import com.rexel.laocz.domain.dto.QrInCodeScanDTO;
 import com.rexel.laocz.domain.dto.WineEntryDTO;
 import com.rexel.laocz.domain.dto.WinePourPotApplyDTO;
+import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 
 /**
  * @ClassName WinePourPotService
@@ -50,4 +52,22 @@ public interface WinePourPotService {
      * @param wineEntryDTO 酒入坛参数
      */
     void winePourPotInStart(WineEntryDTO wineEntryDTO);
+
+
+    /**
+     * 二维码扫描获取倒坛出酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    WineOperaPotteryAltarVO qrOutCodeScan(String potteryAltarNumber);
+
+    /**
+     * 二维码扫描获取倒坛出酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号，出酒陶坛id，出酒重量
+     * @return 陶坛信息
+     */
+    WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO potteryAltarNumber);
+
 }

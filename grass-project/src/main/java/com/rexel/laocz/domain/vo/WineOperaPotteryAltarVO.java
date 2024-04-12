@@ -58,4 +58,10 @@ public class WineOperaPotteryAltarVO {
      * 酒品
      */
     private LaoczLiquorManagement laoczLiquorManagement;
+
+
+    /**
+     * 自动分配重量时用，返回给前端页面
+     */
+    private Double applyWeight;
 }

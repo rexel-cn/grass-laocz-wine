@@ -11,16 +11,20 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.DateUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.*;
-import com.rexel.laocz.domain.dto.*;
+import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
+import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.*;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.laocz.utils.TinciPdfUtils;
 import com.rexel.laocz.utils.TinciQrCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -239,12 +243,21 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             throw new ServiceException("陶坛在使用中，禁止删除");
         } else {
             LaoczPotteryAltarManagement laoczPotteryAltarManagement = this.getById(potteryAltarId);
+            if (laoczPotteryAltarManagement == null) {
+                return false;
+            }
             //删除陶坛管理数据
             boolean flag = this.removeById(potteryAltarId);
-            //删除二维码图片
-            if (StringUtils.isNotEmpty(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress())) {
-                qrCodeUtils.deleteQrcode(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress());
-            }
+            //
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    //删除二维码图片
+                    if (StringUtils.isNotEmpty(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress())) {
+                        qrCodeUtils.deleteQrcode(laoczPotteryAltarManagement.getPotteryAltarQrCodeAddress());
+                    }
+                }
+            });
             return flag;
         }
     }

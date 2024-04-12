@@ -1,5 +1,6 @@
 package com.rexel.laocz.wine;
 
+import com.rexel.common.annotation.RateLimiter;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.dto.WinBaseDTO;
@@ -53,6 +54,7 @@ public class WineEntryController extends BaseController {
      * @return 操作结果
      */
     @PostMapping("/wineEntry")
+    @RateLimiter(time = 1, count = 1)
     public AjaxResult wineEntry(@RequestBody WineEntryDTO wineEntryDTO) {
         wineEntryApplyService.wineEntry(wineEntryDTO);
         return AjaxResult.success();
@@ -93,6 +95,18 @@ public class WineEntryController extends BaseController {
     @GetMapping("/qrCodeScan/{potteryAltarNumber}")
     public AjaxResult qrCodeScan(@PathVariable("potteryAltarNumber") String potteryAltarNumber) {
         return AjaxResult.success(wineEntryApplyService.qrCodeScan(potteryAltarNumber));
+    }
+
+
+    /**
+     * 自动选择陶坛
+     *
+     * @param applyWeight 申请重量
+     * @return 陶坛列表
+     */
+    @GetMapping("/automaticChoosePotteryAltar/{applyWeight}")
+    public AjaxResult automaticChoosePotteryAltar(@PathVariable("applyWeight") Double applyWeight) {
+        return AjaxResult.success(wineEntryApplyService.automaticChoosePotteryAltar(applyWeight));
     }
 
 }

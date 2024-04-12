@@ -139,80 +139,9 @@ public abstract class WineAbstract {
     }
 
 
-    protected void saveHistory(LaoczWineDetails wineDetailsId) {
-        Long detailType = wineDetailsId.getDetailType();
-        WineDetailTypeEnum wineDetailTypeEnum = WineDetailTypeEnum.getEnumByCode(detailType);
-
-        WineHistoryDTO wineHistoryDTO = laoczWineDetailsMapper.selectWineHistoryDTOList(wineDetailsId.getWineDetailsId());
-        LaoczWineHistory laoczWineHistory = BeanUtil.copyProperties(wineHistoryDTO, LaoczWineHistory.class);
-        LaoczBatchPotteryMapping batchPotteryMapping;
-        switch (wineDetailTypeEnum) {
-            case IN_WINE:
-                //剩余重量，因为是入酒所以剩余重量就是称重罐重量
-                laoczWineHistory.setRemainingWeight(laoczWineHistory.getWeighingTankWeight());
-                //因为是入酒所以，操作时间就是入酒时间
-                laoczWineHistory.setStoringTime(laoczWineHistory.getOperationTime());
-                //亏损重量=申请重量-称重罐重量
-                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
-                //入酒
-                iLaoczWineHistoryService.save(laoczWineHistory);
-                break;
-            case OUT_WINE:
-            case POUR_OUT:
-                //出酒
-                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
-                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
-                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
-                        .one();
-                //剩余重量
-                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
-                //入酒时间
-                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
-                //亏损重量=申请重量-称重罐重量
-                double lossWeight = BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue();
-                laoczWineHistory.setLossWeight(lossWeight);
-                //出酒历史保存
-                iLaoczWineHistoryService.save(laoczWineHistory);
-                break;
-            case POUR_IN:
-                //去历史表找到busyId一样并且是倒坛入酒的数据，查询入酒时间，对比俩个入酒时间以时间短的为基准
-                LaoczWineHistory history = iLaoczWineHistoryService.lambdaQuery()
-                        .eq(LaoczWineHistory::getBusyId, wineDetailsId.getBusyId())
-                        .eq(LaoczWineHistory::getDetailType, WineDetailTypeEnum.POUR_OUT.getCode())
-                        .one();
-
-                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
-                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
-                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
-                        .one();
-                //剩余重量
-                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
-                //因为是倒坛入，所以入酒时间=俩个入酒时间的最短值（出酒的入酒时间，或者本身的入酒时间（如果有））
-                Date outTime = history.getStoringTime();
-                Date inTime = batchPotteryMapping.getStoringTime();
-                laoczWineHistory.setStoringTime(outTime.before(inTime) ? outTime : inTime);
-                //亏损重量=申请重量-称重罐重量
-                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
-                //入酒
-                iLaoczWineHistoryService.save(laoczWineHistory);
-                //倒坛
-                break;
-            case SAMPLING:
-                //取样
-                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
-                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
-                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
-                        .one();
-                //剩余重量
-                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
-                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
-                //取样用途
-                laoczWineHistory.setSamplingPurpose(DictUtils.getDictLabel(WineDictConstants.SAMPLING_PURPOSE, laoczWineHistory.getSamplingPurpose()));
-                iLaoczWineHistoryService.save(laoczWineHistory);
-                saveSamplingHistory(wineDetailsId, laoczWineHistory);
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + wineDetailTypeEnum);
+    protected static void AltarStateCheck(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+        if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
+            throw new CustomException("陶坛罐已被封存");
         }
     }
 
@@ -265,32 +194,81 @@ public abstract class WineAbstract {
         iLaoczWineDetailsService.removeById(laoczWineDetails);
     }
 
-    /**
-     * 更新陶坛罐
-     *
-     * @param potteryAltarId 陶坛罐id
-     * @param operator       运算符 +  或 -
-     * @param actualWeight   实际重量
-     */
-    protected LaoczBatchPotteryMapping updatePotteryMappingState(Long potteryAltarId, String operator, Double actualWeight) {
-        LaoczBatchPotteryMapping laoczBatchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).one();
-        Double weight = laoczBatchPotteryMapping.getActualWeight();
-        if (weight == null) {
-            weight = 0.0;
+    protected void saveHistory(LaoczWineDetails wineDetailsId) {
+        Long detailType = wineDetailsId.getDetailType();
+        WineDetailTypeEnum wineDetailTypeEnum = WineDetailTypeEnum.getEnumByCode(detailType);
+
+        WineHistoryDTO wineHistoryDTO = laoczWineDetailsMapper.selectWineHistoryDTOList(wineDetailsId.getWineDetailsId());
+        LaoczWineHistory laoczWineHistory = BeanUtil.copyProperties(wineHistoryDTO, LaoczWineHistory.class);
+        LaoczBatchPotteryMapping batchPotteryMapping;
+        switch (wineDetailTypeEnum) {
+            case IN_WINE:
+                //剩余重量，因为是入酒所以剩余重量就是称重罐重量
+                laoczWineHistory.setRemainingWeight(laoczWineHistory.getWeighingTankWeight());
+                //因为是入酒所以，操作时间就是入酒时间
+                laoczWineHistory.setStoringTime(laoczWineHistory.getOperationTime());
+                //亏损重量=申请重量-称重罐重量
+                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                //入酒
+                iLaoczWineHistoryService.save(laoczWineHistory);
+                break;
+            case OUT_WINE:
+            case POUR_OUT:
+                //出酒
+                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
+                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
+                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
+                        .one();
+                //剩余重量
+                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                //入酒时间
+                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
+                //亏损重量=申请重量-称重罐重量
+                double lossWeight = BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue();
+                laoczWineHistory.setLossWeight(lossWeight);
+                //出酒历史保存
+                iLaoczWineHistoryService.save(laoczWineHistory);
+                break;
+            case POUR_IN:
+                //去历史表找到busyId一样并且是倒坛入酒的数据，查询入酒时间，对比俩个入酒时间以时间短的为基准
+                LaoczWineHistory history = iLaoczWineHistoryService.lambdaQuery()
+                        .eq(LaoczWineHistory::getBusyId, wineDetailsId.getBusyId())
+                        .eq(LaoczWineHistory::getDetailType, WineDetailTypeEnum.POUR_OUT.getCode())
+                        .one();
+
+                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
+                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
+                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
+                        .one();
+                //剩余重量
+                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                //因为是倒坛入，所以入酒时间=俩个入酒时间的最短值（出酒的入酒时间，或者本身的入酒时间（如果有））
+                Date outTime = history.getStoringTime();
+                Date inTime = batchPotteryMapping.getStoringTime();
+                laoczWineHistory.setStoringTime(outTime.before(inTime) ? inTime : outTime);
+                //亏损重量=申请重量-称重罐重量
+                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                //入酒
+                iLaoczWineHistoryService.save(laoczWineHistory);
+                //倒坛
+                break;
+            case SAMPLING:
+                //取样
+                batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
+                        .eq(LaoczBatchPotteryMapping::getLiquorBatchId, wineDetailsId.getLiquorBatchId())
+                        .eq(LaoczBatchPotteryMapping::getPotteryAltarId, wineDetailsId.getPotteryAltarId())
+                        .one();
+                //剩余重量
+                laoczWineHistory.setRemainingWeight(batchPotteryMapping.getActualWeight());
+                laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
+                //取样用途
+                laoczWineHistory.setSamplingPurpose(DictUtils.getDictLabel(WineDictConstants.SAMPLING_PURPOSE, laoczWineHistory.getSamplingPurpose()));
+                iLaoczWineHistoryService.save(laoczWineHistory);
+                saveSamplingHistory(wineDetailsId, laoczWineHistory);
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + wineDetailTypeEnum);
         }
-        //判断加减，如果加 更新重量和状态
-        //如果减那么判断是否减到0，如果没有到0，更新减法后的重量并更新状态，如果到0，那么就删除此条数据
-        if ("+".equals(operator)) {
-            laoczBatchPotteryMapping.setActualWeight(weight + actualWeight);
-            laoczBatchPotteryMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
-            laoczBatchPotteryMapping.setStoringTime(new Date());
-            iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
-        } else if ("-".equals(operator)) {
-            laoczBatchPotteryMapping.setActualWeight(weight - actualWeight);
-            laoczBatchPotteryMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
-            iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
-        }
-        return laoczBatchPotteryMapping;
     }
 
     /**
@@ -338,6 +316,35 @@ public abstract class WineAbstract {
         iLaoczBatchPotteryMappingService.updateById(batchPotteryMappings);
     }
 
+    /**
+     * 更新陶坛罐
+     *
+     * @param potteryAltarId 陶坛罐id
+     * @param operator       运算符 +  或 -
+     * @param actualWeight   实际重量
+     */
+    protected LaoczBatchPotteryMapping updatePotteryMappingState(Long potteryAltarId, String operator, Double actualWeight) {
+        LaoczBatchPotteryMapping laoczBatchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarId).one();
+        Double weight = laoczBatchPotteryMapping.getActualWeight();
+        if (weight == null) {
+            weight = 0.0;
+        }
+        //判断加减，如果加 更新重量和状态
+        //如果减那么判断是否减到0，如果没有到0，更新减法后的重量并更新状态，如果到0，那么就删除此条数据
+        if ("+".equals(operator)) {
+            laoczBatchPotteryMapping.setActualWeight(weight + actualWeight);
+            laoczBatchPotteryMapping.setStoringTime(new Date());
+        } else if ("-".equals(operator)) {
+            double v = weight - actualWeight;
+            if (v <= 0) {
+                v = 0.0;
+            }
+            laoczBatchPotteryMapping.setActualWeight(v);
+        }
+        laoczBatchPotteryMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
+        iLaoczBatchPotteryMappingService.updateById(laoczBatchPotteryMapping);
+        return laoczBatchPotteryMapping;
+    }
 
     /**
      * 批量检查
@@ -349,10 +356,11 @@ public abstract class WineAbstract {
         //验证陶坛是否可以使用，有没有被封存
         //验证陶坛是否已经被申请
         //验证陶坛的重量上限是否满足
+        List<Long> potteryAltarIds = potteryAltars.stream().map(WineOutApplyDTO::getPotteryAltarId).collect(Collectors.toList());
 
 
         //检查陶坛是否都可以使用
-        List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, potteryAltars).list();
+        List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, potteryAltarIds).list();
         if (potteryAltars.size() != laoczPotteryAltarManagements.size()) {
             throw new CustomException("陶坛罐不存在，请刷新重新选择");
         }
@@ -362,7 +370,7 @@ public abstract class WineAbstract {
             }
         }
         //检查入酒陶坛罐是否已经申请
-        List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery().in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltars).list();
+        List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery().in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarIds).list();
         if (!list.isEmpty()) {
             throw new CustomException("陶坛罐已经申请,请刷新重新选择");
         }
@@ -376,12 +384,11 @@ public abstract class WineAbstract {
         }
     }
 
-
     /**
      * 陶坛罐编号检查
      *
      * @param potteryAltarNumber 陶坛罐编号
-     * @param isUse              是否使用（有没有酒）
+     * @param isUse              是否使用（有没有酒） true 使用 false 不使用
      */
     protected void potteryAltarNumberCheck(String potteryAltarNumber, boolean isUse) {
         LaoczPotteryAltarManagement laoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery()
@@ -390,9 +397,7 @@ public abstract class WineAbstract {
             throw new CustomException("陶坛罐不存在");
         }
 
-        if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
-            throw new CustomException("陶坛罐已被封存");
-        }
+        AltarStateCheck(laoczPotteryAltarManagement);
 
         LaoczBatchPotteryMapping batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
                 .eq(LaoczBatchPotteryMapping::getPotteryAltarId, laoczPotteryAltarManagement.getPotteryAltarId()).one();
@@ -419,7 +424,10 @@ public abstract class WineAbstract {
      *
      * @param realStatus 陶坛罐状态
      */
-    public void checkRealStatus(RealStatusEnum realStatus) {
+    protected void checkRealStatus(RealStatusEnum realStatus) {
+        if (realStatus == null) {
+            throw new CustomException("陶坛罐状态异常,请联系管理员");
+        }
         switch (realStatus) {
             case OCCUPY:
                 throw new CustomException("陶坛罐已被申请");

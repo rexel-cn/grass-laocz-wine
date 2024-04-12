@@ -5,8 +5,8 @@ import com.rexel.common.utils.SequenceUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.LaoczWineDetails;
-import com.rexel.laocz.domain.dto.WineEntryDTO;
-import com.rexel.laocz.domain.dto.WinePourPotApplyDTO;
+import com.rexel.laocz.domain.dto.*;
+import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.RealStatusEnum;
 import com.rexel.laocz.enums.WineDetailTypeEnum;
@@ -45,17 +45,13 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void winePourPotApply(WinePourPotApplyDTO winePourPotApplyDTO) {
-        if (winePourPotApplyDTO.getInPotteryAltarId().equals(winePourPotApplyDTO.getOutPotteryAltarId())) {
-            throw new CustomException("出酒陶坛罐和入酒陶坛罐不能是同一个");
-        }
+        applyCheck(winePourPotApplyDTO.getOutPotteryAltarId(), winePourPotApplyDTO.getApplyWeight(), winePourPotApplyDTO.getInPotteryAltarId());
+
         List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery()
                 .in(LaoczBatchPotteryMapping::getPotteryAltarId, Arrays.asList(winePourPotApplyDTO.getInPotteryAltarId(),
                         winePourPotApplyDTO.getOutPotteryAltarId())).list();
         LaoczBatchPotteryMapping outMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getOutPotteryAltarId())).findFirst().orElse(null);
         LaoczBatchPotteryMapping inMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getInPotteryAltarId())).findFirst().orElse(null);
-        //检查陶坛罐实时状态
-        winePourApplyCheck(winePourPotApplyDTO, inMapping);
-
 
         //新增 工单表（流程审批创建）,然后需要把laocz_liquor_batch的liquor_batch_id字段作为业务id来和流程关联
         String workId = SequenceUtils.nextId().toString();
@@ -76,6 +72,13 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
             return laoczBatchPotteryMapping;
         }).collect(Collectors.toList()));
 
+    }
+
+    private void applyCheck(Long outPotteryAltarId, Double applyWeight, Long inPotteryAltarId) {
+        if (outPotteryAltarId.equals(inPotteryAltarId)) {
+            throw new CustomException("出酒陶坛罐和入酒陶坛罐不能是同一个");
+        }
+        check(outPotteryAltarId, applyWeight, inPotteryAltarId);
     }
 
     /**
@@ -134,6 +137,121 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         wineEntryApplyService.wineIn(wineEntryDTO);
     }
 
+
+    /**
+     * 二维码扫描获取倒坛出酒陶坛信息
+     *
+     * @param potteryAltarNumber 陶坛编号
+     * @return 陶坛信息
+     */
+    @Override
+    public WineOperaPotteryAltarVO qrOutCodeScan(String potteryAltarNumber) {
+        //陶坛验证，是否存在，是否被封存， 实时表 验证，是否被使用
+        super.potteryAltarNumberCheck(potteryAltarNumber, true);
+        WineOutPotteryAltarDTO wineOutPotteryAltarDTO = new WineOutPotteryAltarDTO();
+        wineOutPotteryAltarDTO.setEqPotteryAltarNumber(potteryAltarNumber);
+        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+        if (wineOperaPotteryAltarVOS.isEmpty()) {
+            throw new CustomException("系统异常，请联系管理员");
+        }
+        return wineOperaPotteryAltarVOS.get(0);
+    }
+
+    /**
+     * 倒坛 申请前验证
+     *
+     * @param outPotteryAltarId 出酒陶坛id
+     * @param applyWeight       申请重量
+     * @param inPotteryAltarId  入酒陶坛id
+     * @return 入酒陶坛罐 是否已经有酒 true 有酒 false 没酒
+     */
+    private boolean check(Long outPotteryAltarId, Double applyWeight, Long inPotteryAltarId) {
+        if (outPotteryAltarId == null || inPotteryAltarId == null) {
+            throw new CustomException("陶坛编号有误，请重新操作");
+        }
+        if (applyWeight == null || applyWeight <= 0) {
+            throw new CustomException("重量有误，请重新操作");
+        }
+        List<LaoczPotteryAltarManagement> altarManagements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, Arrays.asList(inPotteryAltarId, outPotteryAltarId)).list();
+        LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = altarManagements.stream().filter(e -> e.getPotteryAltarId().equals(inPotteryAltarId)).findFirst().orElse(null);
+        LaoczPotteryAltarManagement outLaoczPotteryAltarManagement = altarManagements.stream().filter(e -> e.getPotteryAltarId().equals(outPotteryAltarId)).findFirst().orElse(null);
+        if (outLaoczPotteryAltarManagement == null) {
+            throw new CustomException("出酒陶坛不存在");
+        }
+        //出酒验证是否可以使用
+        AltarStateCheck(outLaoczPotteryAltarManagement);
+        if (inLaoczPotteryAltarManagement == null) {
+            throw new CustomException("入酒陶坛不存在");
+        }
+        //入酒验证是否可以使用
+        AltarStateCheck(inLaoczPotteryAltarManagement);
+
+        //查询陶坛是否存在
+        List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery()
+                .in(LaoczBatchPotteryMapping::getPotteryAltarId, Arrays.asList(inLaoczPotteryAltarManagement.getPotteryAltarId(), outPotteryAltarId))
+                .list();
+        LaoczBatchPotteryMapping outMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(outPotteryAltarId)).findFirst().orElse(null);
+        if (outMapping == null) {
+            throw new CustomException("出酒陶坛未存储酒液，操作失败");
+        }
+        //验证入酒实时状态是否可以出酒
+        checkRealStatus(RealStatusEnum.getEnumByCode(outMapping.getRealStatus()));
+        LaoczBatchPotteryMapping inMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(inLaoczPotteryAltarManagement.getPotteryAltarId())).findFirst().orElse(null);
+        //申请入酒的陶坛，是否已经有酒 true 有酒 false 没酒
+        boolean inMappingIsNull = inMapping != null;
+        //查询陶坛是否有酒，如果有酒就比较批次和重量
+        //如果没有酒就没事了
+        if (inMappingIsNull) {
+            //验证入酒实时状态是否可以出酒
+            checkRealStatus(RealStatusEnum.getEnumByCode(inMapping.getRealStatus()));
+            //判断批次
+            if (!inMapping.getLiquorBatchId().equals(outMapping.getLiquorBatchId())) {
+                throw new CustomException("入酒陶坛罐不是同一批次");
+            }
+            if (inMapping.getActualWeight() + applyWeight > inLaoczPotteryAltarManagement.getPotteryAltarFullAltarWeight()) {
+                throw new CustomException("入酒陶坛罐容量不足");
+            }
+        } else {
+            if (applyWeight > inLaoczPotteryAltarManagement.getPotteryAltarFullAltarWeight()) {
+                throw new CustomException("入酒陶坛罐容量不足");
+            }
+        }
+        return inMappingIsNull;
+    }
+
+
+    /**
+     * 二维码扫描获取倒坛出酒陶坛信息
+     *
+     * @param qrInCodeScanDTO 陶坛编号，出酒陶坛id，出酒重量
+     * @return 陶坛信息
+     */
+    @Override
+    public WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO qrInCodeScanDTO) {
+        String potteryAltarNumber = qrInCodeScanDTO.getPotteryAltarNumber();
+        LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery().eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
+        boolean inMappingIsNull = check(qrInCodeScanDTO.getOutPotteryAltarId(), qrInCodeScanDTO.getOutWeight(), inLaoczPotteryAltarManagement.getPotteryAltarId());
+        //查询陶坛是否有酒，如果有酒就比较批次和重量
+        //如果没有酒就没事了
+        if (inMappingIsNull) {
+            WineOutPotteryAltarDTO wineOutPotteryAltarDTO = new WineOutPotteryAltarDTO();
+            wineOutPotteryAltarDTO.setEqPotteryAltarNumber(potteryAltarNumber);
+            List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+            if (wineOperaPotteryAltarVOS.isEmpty()) {
+                throw new CustomException("系统异常，请联系管理员");
+            }
+            return wineOperaPotteryAltarVOS.get(0);
+        } else {
+            WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO = new WineEntryPotteryAltarDTO();
+            wineEntryPotteryAltarDTO.setEqPotteryAltarNumber(potteryAltarNumber);
+            List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
+            if (wineOperaPotteryAltarVOS.isEmpty()) {
+                throw new CustomException("系统异常，请联系管理员");
+            }
+            return wineOperaPotteryAltarVOS.get(0);
+        }
+    }
+
     /**
      * 入酒前判断，出酒是否已经完成
      *
@@ -172,50 +290,6 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         iLaoczBatchPotteryMappingService.save(laoczBatchPotteryMapping);
     }
 
-    /**
-     * 倒坛申请校验
-     *
-     * @param winePourPotApplyDTO 倒坛申请参数
-     * @param inMapping           入酒陶坛罐实时关系表
-     */
-    private void winePourApplyCheck(WinePourPotApplyDTO winePourPotApplyDTO, LaoczBatchPotteryMapping inMapping) {
-        List<LaoczPotteryAltarManagement> managements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, Arrays.asList(winePourPotApplyDTO.getInPotteryAltarId(), winePourPotApplyDTO.getOutPotteryAltarId())).list();
-        LaoczPotteryAltarManagement outPotteryAltar = managements.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getOutPotteryAltarId())).findFirst().orElse(null);
-        LaoczPotteryAltarManagement inPotteryAltar = managements.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getInPotteryAltarId())).findFirst().orElse(null);
-        if (outPotteryAltar == null) {
-            throw new CustomException("选择的出酒陶坛罐不存在");
-        }
-        if (inPotteryAltar == null) {
-            throw new CustomException("选择的入酒陶坛罐不存在");
-        }
-        potteryAltarNumberCheck(outPotteryAltar.getPotteryAltarNumber(), true);
-
-        if (inMapping == null) {
-            //如果是空陶坛就先判断重量，在判断状态
-            Double applyWeight = winePourPotApplyDTO.getApplyWeight();
-            if (applyWeight > inPotteryAltar.getPotteryAltarFullAltarWeight()) {
-                throw new CustomException("入酒陶坛罐容量不足");
-            }
-            potteryAltarNumberCheck(inPotteryAltar.getPotteryAltarNumber(), false);
-        } else {
-            //有酒的校验
-            //判断入酒的陶坛罐子是否是存储状态
-            //判断入酒的陶坛罐子是否是同一批次
-            //判断入酒的陶坛罐子剩余容量是否可以盛下
-
-            //判断容量
-            if (winePourPotApplyDTO.getApplyWeight() > (inPotteryAltar.getPotteryAltarFullAltarWeight() - inMapping.getActualWeight())) {
-                throw new CustomException("入酒陶坛罐容量不足");
-            }
-            //判断批次
-            if (!inMapping.getLiquorBatchId().equals(outPotteryAltar.getLiquorBatchId())) {
-                throw new CustomException("入酒陶坛罐不是同一批次");
-            }
-
-            RealStatusEnum realStatus = RealStatusEnum.getEnumByCode(inMapping.getRealStatus());
-            super.checkRealStatus(realStatus);
-        }
-    }
 
     /**
      * 保存laocz_wine_details

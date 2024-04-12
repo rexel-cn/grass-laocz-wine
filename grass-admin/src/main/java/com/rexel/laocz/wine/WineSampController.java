@@ -43,7 +43,7 @@ public class WineSampController {
 
 
     /**
-     * 二维码扫描获取入酒陶坛信息
+     * 二维码扫描获取取样陶坛信息
      *
      * @param potteryAltarNumber 陶坛编号
      * @return 陶坛信息

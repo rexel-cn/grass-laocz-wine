@@ -8,9 +8,7 @@ import com.rexel.laocz.constant.WinePointConstants;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.WineOutApplyDTO;
-import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
-import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 import com.rexel.laocz.dview.DviewUtils;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.RealStatusEnum;
@@ -88,28 +86,12 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
                     throw new CustomException("申请重量大于实际重量，请重新申请");
                 }
             }
+            //校验陶坛状态
+            checkRealStatus(RealStatusEnum.getEnumByCode(batchPotteryMapping.getRealStatus()));
         }
         return batchPotteryMappings;
     }
 
-    /**
-     * 二维码扫描获取入酒陶坛信息
-     *
-     * @param potteryAltarNumber 陶坛编号
-     * @return 陶坛信息
-     */
-    @Override
-    public WineOperaPotteryAltarVO qrCodeScan(String potteryAltarNumber) {
-        //陶坛验证，是否存在，是否被封存， 实时表 验证，是否被使用
-        super.potteryAltarNumberCheck(potteryAltarNumber, true);
-        WineOutPotteryAltarDTO wineOutPotteryAltarDTO = new WineOutPotteryAltarDTO();
-        wineOutPotteryAltarDTO.setEqPotteryAltarNumber(potteryAltarNumber);
-        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
-        if (wineOperaPotteryAltarVOS.isEmpty()) {
-            throw new CustomException("系统异常，请联系管理员");
-        }
-        return wineOperaPotteryAltarVOS.get(0);
-    }
 
     /**
      * 出酒操作，称重罐称重量
@@ -164,7 +146,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         LaoczBatchPotteryMapping laoczBatchPotteryMapping = super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
                 laoczWineDetails.getPotteryAltarApplyWeight());
-        //备份酒操作业务表9
+        //备份酒操作业务表
         super.backupWineDetails(laoczWineDetails);
         //新增数据到历史表
         super.saveHistory(laoczWineDetails);

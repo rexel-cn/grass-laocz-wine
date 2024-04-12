@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
 import com.rexel.laocz.constant.WineDictConstants;
-import com.rexel.laocz.domain.LaoczFireZoneInfo;
-import com.rexel.laocz.domain.LaoczPump;
-import com.rexel.laocz.domain.LaoczWineDetails;
-import com.rexel.laocz.domain.LaoczWineOperations;
+import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
@@ -17,10 +14,7 @@ import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.WineBusyStatusEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineOperationsMapper;
-import com.rexel.laocz.service.ILaoczFireZoneInfoService;
-import com.rexel.laocz.service.ILaoczPumpService;
-import com.rexel.laocz.service.ILaoczWineDetailsService;
-import com.rexel.laocz.service.ILaoczWineOperationsService;
+import com.rexel.laocz.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +37,8 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     private ILaoczPumpService iLaoczPumpService;
     @Autowired
     private ILaoczFireZoneInfoService iLaoczFireZoneInfoService;
+    @Autowired
+    private ILaoczWeighingTankService iLaoczWeighingTankService;
 
     /**
      * 查询酒操作业务列表
@@ -127,6 +123,10 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
      */
     @Override
     public Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank) {
+        LaoczWeighingTank tank = iLaoczWeighingTankService.getById(weighingTank.getWeighingTank());
+        if (tank == null) {
+            throw new CustomException("称重罐不存在");
+        }
         LaoczWineDetails details = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWineDetailsId, weighingTank.getWineDetailsId()).one();
         if (!WineBusyStatusEnum.NOT_STARTED.getValue().equals(details.getBusyStatus())) {
             throw new CustomException("酒操作已开始，无法设置称重罐");
