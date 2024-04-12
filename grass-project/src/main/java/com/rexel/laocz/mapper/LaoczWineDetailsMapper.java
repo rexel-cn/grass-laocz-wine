@@ -6,6 +6,7 @@ import com.rexel.laocz.domain.dto.WineHistoryDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public interface LaoczWineDetailsMapper extends BaseMapper<LaoczWineDetails> {
      * @param busyId 业务id
      * @return 事项详情列表
      */
-    List<MatterDetailVO> selectMatterDetailVOList(String busyId);
+    List<MatterDetailVO> selectMatterDetailVOList(@Param("busyId") String busyId, @Param("areaId") Long areaId, @Param("fireZoneId") Long fireZoneId);
 
 
     /**

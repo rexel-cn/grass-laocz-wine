@@ -224,8 +224,7 @@ public abstract class WineAbstract {
                 //入酒时间
                 laoczWineHistory.setStoringTime(batchPotteryMapping.getStoringTime());
                 //亏损重量=申请重量-称重罐重量
-                double lossWeight = BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue();
-                laoczWineHistory.setLossWeight(lossWeight);
+                laoczWineHistory.setLossWeight(BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue());
                 //出酒历史保存
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 break;
@@ -247,7 +246,7 @@ public abstract class WineAbstract {
                 Date inTime = batchPotteryMapping.getStoringTime();
                 laoczWineHistory.setStoringTime(outTime.before(inTime) ? inTime : outTime);
                 //亏损重量=申请重量-称重罐重量
-                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                laoczWineHistory.setLossWeight(BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue());
                 //入酒
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 //倒坛

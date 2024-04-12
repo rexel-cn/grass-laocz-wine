@@ -2,7 +2,9 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczWineOperations;
+import com.rexel.laocz.domain.dto.MatterDetailDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
+import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
@@ -17,20 +19,13 @@ import java.util.List;
  */
 public interface ILaoczWineOperationsService extends IService<LaoczWineOperations> {
 
-    /**
-     * 查询酒操作业务列表
-     *
-     * @param laoczWineOperations 酒操作业务
-     * @return 酒操作业务集合
-     */
-    List<LaoczWineOperations> selectLaoczWineOperationsList(LaoczWineOperations laoczWineOperations);
 
     /**
      * 获取我的事项
      *
      * @return 我的事项列表
      */
-    List<MatterVO> getMatterVOList();
+    List<MatterVO> getMatterVOList(WineOperationDTO wineOperationDTO);
 
     /**
      * 获取我的事项详情
@@ -38,7 +33,7 @@ public interface ILaoczWineOperationsService extends IService<LaoczWineOperation
      * @param wineOperationsId 酒操作业务表 主键
      * @return 我的事项详情列表
      */
-    List<MatterDetailVO> getMatterDetailVOList(Long wineOperationsId);
+    List<MatterDetailVO> getMatterDetailVOList(MatterDetailDTO wineOperationsId);
 
     /**
      * 获取入酒详情

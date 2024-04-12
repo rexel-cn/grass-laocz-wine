@@ -2,6 +2,7 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczWineOperations;
+import com.rexel.laocz.domain.dto.WineOperationDTO;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface LaoczWineOperationsMapper extends BaseMapper<LaoczWineOperation
      * @param laoczWineOperations 酒操作业务
      * @return 酒操作业务集合
      */
-    List<LaoczWineOperations> selectLaoczWineOperationsList(LaoczWineOperations laoczWineOperations);
+    List<LaoczWineOperations> selectLaoczWineOperationsList(WineOperationDTO laoczWineOperations);
 
     /**
      * 批量新增酒操作业务

@@ -6,7 +6,9 @@ import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
 import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
+import com.rexel.laocz.domain.dto.MatterDetailDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
+import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
@@ -41,24 +43,19 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     private ILaoczWeighingTankService iLaoczWeighingTankService;
 
     /**
-     * 查询酒操作业务列表
-     *
-     * @param laoczWineOperations 酒操作业务
-     * @return 酒操作业务
-     */
-    @Override
-    public List<LaoczWineOperations> selectLaoczWineOperationsList(LaoczWineOperations laoczWineOperations) {
-        return baseMapper.selectLaoczWineOperationsList(laoczWineOperations);
-    }
-
-    /**
      * 获取我的事项
      *
      * @return 我的事项列表
      */
     @Override
-    public List<MatterVO> getMatterVOList() {
-        List<LaoczWineOperations> list = list();
+    public List<MatterVO> getMatterVOList(WineOperationDTO wineOperationDTO) {
+        //判断时间
+        if (wineOperationDTO.getBeginTime() != null && wineOperationDTO.getEndTime() != null) {
+            if (wineOperationDTO.getBeginTime().after(wineOperationDTO.getEndTime())) {
+                throw new CustomException("开始时间不能大于结束时间");
+            }
+        }
+        List<LaoczWineOperations> list = baseMapper.selectLaoczWineOperationsList(wineOperationDTO);
         return list.stream().map(laoczWineOperations -> {
             MatterVO matterVO = new MatterVO();
             matterVO.setWineOperationsId(laoczWineOperations.getWineOperationsId());
@@ -77,10 +74,13 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
      * @return 我的事项详情列表
      */
     @Override
-    public List<MatterDetailVO> getMatterDetailVOList(Long wineOperationsId) {
-        LaoczWineOperations operations = getById(wineOperationsId);
+    public List<MatterDetailVO> getMatterDetailVOList(MatterDetailDTO wineOperationsId) {
+        LaoczWineOperations operations = getById(wineOperationsId.getWineOperationsId());
+        if (operations == null) {
+            throw new CustomException("事项详情不存在，请刷新页面重试");
+        }
         String busyId = operations.getBusyId();
-        List<MatterDetailVO> matterDetailVOS = laoczWineDetailsMapper.selectMatterDetailVOList(busyId);
+        List<MatterDetailVO> matterDetailVOS = laoczWineDetailsMapper.selectMatterDetailVOList(busyId, wineOperationsId.getAreaId(), wineOperationsId.getFireZoneId());
         for (MatterDetailVO matterDetailVO : matterDetailVOS) {
             matterDetailVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, matterDetailVO.getDetailType()));
         }

@@ -166,7 +166,7 @@
         LEFT JOIN laocz_fire_zone_info lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
         LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
         <where>
-            <if test="liquorAlarmHistoryId != null and liquorAlarmHistoryId != ''">
+            <if test="liquorAlarmHistoryId != null">
                 and llah.liquor_alarm_history_id = #{liquorAlarmHistoryId}
             </if>
         </where>

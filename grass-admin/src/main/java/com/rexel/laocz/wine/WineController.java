@@ -2,7 +2,9 @@ package com.rexel.laocz.wine;
 
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.laocz.domain.dto.MatterDetailDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
+import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.service.ILaoczWineOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,20 +27,21 @@ public class WineController extends BaseController {
      *
      * @return 我的事项列表
      */
-    @GetMapping("/getMatterVOList")
-    public AjaxResult getMatterVOList() {
-        return AjaxResult.success(iLaoczWineOperationsService.getMatterVOList());
+    @PostMapping("/getMatterVOList")
+    public AjaxResult getMatterVOList(@RequestBody WineOperationDTO wineOperationDTO) {
+        startPage();
+        return AjaxResult.success(iLaoczWineOperationsService.getMatterVOList(wineOperationDTO));
     }
 
     /**
      * 获取我的事项详情
      *
-     * @param wineOperationsId 酒操作业务表 主键
+     * @param matterDetailDTO 酒操作业务表 主键 和 区域id 和 防火区Id
      * @return
      */
-    @GetMapping("/getMatterDetailVOList/{wineOperationsId}")
-    public AjaxResult getMatterDetailVOList(@PathVariable("wineOperationsId") Long wineOperationsId) {
-        return AjaxResult.success(iLaoczWineOperationsService.getMatterDetailVOList(wineOperationsId));
+    @PostMapping("/getMatterDetailVOList")
+    public AjaxResult getMatterDetailVOList(@RequestBody MatterDetailDTO matterDetailDTO) {
+        return AjaxResult.success(iLaoczWineOperationsService.getMatterDetailVOList(matterDetailDTO));
     }
 
     /**

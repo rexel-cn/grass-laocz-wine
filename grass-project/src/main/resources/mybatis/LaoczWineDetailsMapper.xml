@@ -89,12 +89,26 @@
         </where>
     </select>
     <select id="selectMatterDetailVOList" resultType="com.rexel.laocz.domain.vo.MatterDetailVO">
-        SELECT lwd.wine_details_id,
-               lpam.pottery_altar_number,
-               lwd.detail_type
-        FROM laocz_wine_details lwd
-                 LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
-        WHERE lwd.busy_id = #{busyId}
+        SELECT
+        lwd.wine_details_id,
+        lpam.pottery_altar_number,
+        lwd.detail_type
+        FROM
+        laocz_wine_details lwd
+        LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info lfzi ON lpam.fire_zone_id = lfzi.fire_zone_id
+        LEFT JOIN laocz_area_info lai ON lfzi.area_id = lai.area_id
+        <where>
+            <if test="busyId!=null and busyId!=''">
+                lwd.busy_id = #{busyId}
+            </if>
+            <if test="areaId!=null ">
+                and lai.area_id = #{areaId}
+            </if>
+            <if test="fireZoneId!=null ">
+                and lfzi.fire_zone_id = #{fireZoneId}
+            </if>
+        </where>
     </select>
     <select id="selectWineDetailVOById" resultType="com.rexel.laocz.domain.vo.WineDetailVO">
         SELECT

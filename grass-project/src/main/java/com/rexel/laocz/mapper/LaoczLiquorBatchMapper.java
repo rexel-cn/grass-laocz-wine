@@ -30,5 +30,10 @@ public interface LaoczLiquorBatchMapper extends BaseMapper<LaoczLiquorBatch> {
      */
     int batchLaoczLiquorBatch(List<LaoczLiquorBatch> laoczLiquorBatchList);
 
+    /**
+     * 出酒时，酒液批次下拉框，只显示有酒并且是存储的批次
+     *
+     * @return 酒液批次相关信息
+     */
     List<LaoczLiquorBatch> wineOutLaoczLiquorBatchList();
 }
