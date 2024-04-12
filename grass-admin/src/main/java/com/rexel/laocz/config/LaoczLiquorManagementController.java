@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczLiquorManagement;
 import com.rexel.laocz.domain.vo.LiquorVo;
@@ -39,7 +40,7 @@ public class LaoczLiquorManagementController extends BaseController {
     public TableDataInfo list(LaoczLiquorManagement laoczLiquorManagement) {
         startPage();
         List<LaoczLiquorManagement> list = laoczLiquorManagementService.selectLaoczLiquorManagementList(laoczLiquorManagement);
-        return getDataTable(list,"jiupin");
+        return getDataTable(list, "jiupin");
     }
 
     /**
@@ -56,6 +57,9 @@ public class LaoczLiquorManagementController extends BaseController {
     @Log(title = "酒品管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody LaoczLiquorManagement laoczLiquorManagement) {
+        if (Long.parseLong(laoczLiquorManagement.getLiquorContent()) < 1 || Long.parseLong(laoczLiquorManagement.getLiquorContent()) > 100) {
+            throw new ServiceException("请合理设置酒精度数");
+        }
         return toAjax(laoczLiquorManagementService.save(laoczLiquorManagement));
     }
 
@@ -65,6 +69,9 @@ public class LaoczLiquorManagementController extends BaseController {
     @Log(title = "酒品管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody LaoczLiquorManagement laoczLiquorManagement) {
+        if (Long.parseLong(laoczLiquorManagement.getLiquorContent()) < 1 || Long.parseLong(laoczLiquorManagement.getLiquorContent()) > 100) {
+            throw new ServiceException("请合理设置酒精度数");
+        }
         return toAjax(laoczLiquorManagementService.updateById(laoczLiquorManagement));
     }
 
@@ -79,6 +86,7 @@ public class LaoczLiquorManagementController extends BaseController {
 
     /**
      * 酒品管理模板下载
+     *
      * @param response
      * @throws IOException
      */
@@ -90,6 +98,7 @@ public class LaoczLiquorManagementController extends BaseController {
 
     /**
      * 酒品管理批量导入
+     *
      * @param file
      * @return
      * @throws Exception

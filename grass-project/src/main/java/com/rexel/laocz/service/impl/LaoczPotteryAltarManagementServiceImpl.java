@@ -173,6 +173,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0){
+            throw new ServiceException("满坛重量应大于0");
+        }
 
         laoczPotteryAltarManagement.setPotteryAltarQrCodeAddress(" ");
 
@@ -202,6 +205,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0){
+            throw new ServiceException("满坛重量应大于0");
+        }
 
         QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
 
@@ -450,6 +456,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean importPotteryAltar(List<PotteryAltarVo> potteryAltarVos) {
         //检查excel是否为空
         List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = new ArrayList<>();
@@ -476,6 +483,12 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         //导入
         for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
+            if (!potteryAltarVo.getPotteryAltarState().equals("1")&&!potteryAltarVo.getPotteryAltarState().equals("2")){
+                throw new ServiceException("陶坛状态值必须为1或2");
+            }
+            if (potteryAltarVo.getPotteryAltarFullAltarWeight()<=0){
+                throw new ServiceException("满坛重量应大于0");
+            }
             // 获取防火区Id
             for (FireZoneInfoVo areaFire : areaFires) {
                 String excelInfo = potteryAltarVo.getAreaName() + potteryAltarVo.getFireZoneName();

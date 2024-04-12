@@ -50,6 +50,9 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
         check(liquorVos);
 
         liquorVos.stream().map((item) -> {
+            if (Long.parseLong(item.getLiquorContent()) < 1 || Long.parseLong(item.getLiquorContent()) > 100) {
+                throw new ServiceException("请合理设置酒精度数");
+            }
 
             // 去重，如果该酒品名称已经存在，则该数据不进行导入
             QueryWrapper<LaoczLiquorManagement> queryWrapper = new QueryWrapper<>();

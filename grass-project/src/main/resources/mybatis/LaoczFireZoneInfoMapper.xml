@@ -62,7 +62,7 @@
                 and tenant_id = #{tenantId}
             </if>
             <if test="areaId != null ">
-                and area_id = #{areaId}
+                and ai.area_id = #{areaId}
             </if>
             <if test="fireZoneId != null ">
                 and fire_zone_id = #{fireZoneId}

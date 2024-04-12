@@ -149,6 +149,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateByIdWithWeighingTank(WeighingTankAddDto weighingTankAddDto) {
+        if (Long.parseLong(weighingTankAddDto.getFullTankUpperLimit()) <= 0){
+            throw new ServiceException("满罐上限值必须大于0");
+        }
         QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.eq("weighing_tank_number", weighingTankAddDto.getWeighingTankNumber());
@@ -190,6 +193,10 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addWeighingTank(WeighingTankAddDto weighingTankAddDto) {
+        if (Long.parseLong(weighingTankAddDto.getFullTankUpperLimit()) <= 0){
+            throw new ServiceException("满罐上限值必须大于0");
+        }
+
         QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.eq("weighing_tank_number", weighingTankAddDto.getWeighingTankNumber());
@@ -249,7 +256,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
         Map<String, String> weighingTankDtoMap = new HashMap<>(weighingTankDtos.size());
         // 验证称重罐编号是否已存在
         for (WeighingTankDto weighingTankVo : weighingTankDtos) {
-
+            if (Long.parseLong(weighingTankVo.getFullTankUpperLimit()) <= 0){
+                throw new ServiceException("满罐上限值必须大于0");
+            }
             if (!weighingTankDtoMap.containsKey(weighingTankVo.getWeighingTankNumber())){
                 QueryWrapper<LaoczWeighingTank> queryWrapper = new QueryWrapper<>();
 
@@ -371,6 +380,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             }
             if (StrUtil.isEmpty(weighingTankVo.getPointId())) {
                 errList.add("第" + (i + 2) + "行测点为空");
+            }
+            if (Long.parseLong(weighingTankVo.getFullTankUpperLimit()) <= 0){
+                errList.add("满罐重量不能小于等于0");
             }
         }
         if (CollectionUtil.isNotEmpty(errList)) {

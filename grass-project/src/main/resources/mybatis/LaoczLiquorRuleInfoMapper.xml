@@ -79,7 +79,10 @@
     </select>
     <select id="dropDown" resultType="java.lang.String">
         select distinct liquor_batch_id
-        from laocz_wine_details
+        from laocz_batch_pottery_mapping
+        <where>
+            real_status = 1
+        </where>
     </select>
     <select id="selectLaoczLiquorRuleInfoListVo" resultType="com.rexel.laocz.domain.vo.LiquorRuleInfoVo">
         select liquor_rule_id,

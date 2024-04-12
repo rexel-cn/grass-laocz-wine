@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.core.domain.entity.SysUser;
 import com.rexel.common.utils.DateUtils;
+import com.rexel.common.utils.JudgeUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczLiquorAlarmHistory;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -222,7 +224,8 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
                             // 将毫秒数差异转换为秒数
                             long diffInSeconds = diffInMillis / 1000;
                             long day = 24 * 60 * 60;
-                            if (diffInSeconds >= Long.parseLong(liquorRuleThreshold) * day) {
+                            //判断是否报警
+                            if(JudgeUtils.judge(laoczLiquorRuleInfo.getLiquorRuleJudge(),new BigDecimal(diffInSeconds),new BigDecimal(Long.parseLong(liquorRuleThreshold) * day))){
                                 //超过报警阈值,保存报警记录，并通知
                                 alarmHistories.add(getAlarm(laoczLiquorRuleInfo, batchPotteryMapping, diffInSeconds / day));
                                 //格式化报警消息体
@@ -233,6 +236,17 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
                                 //报警
                                 messageSend.startSend(sysUserList, phSendFormat, null, 0L);
                             }
+/*                            if (diffInSeconds >= Long.parseLong(liquorRuleThreshold) * day) {
+                                //超过报警阈值,保存报警记录，并通知
+                                alarmHistories.add(getAlarm(laoczLiquorRuleInfo, batchPotteryMapping, diffInSeconds / day));
+                                //格式化报警消息体
+                                String phSendFormat = phSendFormat(batchPotteryMapping, laoczLiquorRuleInfo, diffInSeconds / day);
+                                List<SysUser> sysUserList = iSysUserService.lambdaQuery()
+                                        .in(SysUser::getUserId, Arrays.asList(laoczLiquorRuleInfo.getNoticePeopleArray()))
+                                        .list();
+                                //报警
+                                messageSend.startSend(sysUserList, phSendFormat, null, 0L);
+                            }*/
                         }
                     }
                 }
