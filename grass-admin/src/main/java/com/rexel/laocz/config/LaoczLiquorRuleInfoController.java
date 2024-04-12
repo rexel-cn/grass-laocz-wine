@@ -65,7 +65,7 @@ public class LaoczLiquorRuleInfoController extends BaseController {
     public TableDataInfo get(@PathVariable Long id) {
         startPage();
         List<UserInfoVo> userInfos = laoczLiquorRuleInfoService.getByIdWithUserInfo(id);
-        return getDataTable(userInfos);
+        return getDataTable(userInfos,"userRule");
     }
 
     /**

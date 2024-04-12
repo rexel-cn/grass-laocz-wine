@@ -236,17 +236,6 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
                                 //报警
                                 messageSend.startSend(sysUserList, phSendFormat, null, 0L);
                             }
-/*                            if (diffInSeconds >= Long.parseLong(liquorRuleThreshold) * day) {
-                                //超过报警阈值,保存报警记录，并通知
-                                alarmHistories.add(getAlarm(laoczLiquorRuleInfo, batchPotteryMapping, diffInSeconds / day));
-                                //格式化报警消息体
-                                String phSendFormat = phSendFormat(batchPotteryMapping, laoczLiquorRuleInfo, diffInSeconds / day);
-                                List<SysUser> sysUserList = iSysUserService.lambdaQuery()
-                                        .in(SysUser::getUserId, Arrays.asList(laoczLiquorRuleInfo.getNoticePeopleArray()))
-                                        .list();
-                                //报警
-                                messageSend.startSend(sysUserList, phSendFormat, null, 0L);
-                            }*/
                         }
                     }
                 }
