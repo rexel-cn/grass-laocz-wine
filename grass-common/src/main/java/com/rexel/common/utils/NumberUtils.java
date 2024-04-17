@@ -1,5 +1,7 @@
 package com.rexel.common.utils;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -92,5 +94,10 @@ public class NumberUtils implements Serializable {
         BigDecimal noZeros = value.stripTrailingZeros();
         String result = noZeros.toPlainString();
         return result;
+    }
+
+
+    public static Integer parseInt(String str) {
+        return StrUtil.isNotEmpty(str) ? Integer.valueOf(str) : null;
     }
 }
