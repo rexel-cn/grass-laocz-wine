@@ -5,6 +5,8 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.rexel.common.enums.CommonStatusEnum;
+import com.rexel.common.exception.CustomException;
+import com.rexel.user.ISysUserServiceFrameworkApi;
 import com.rexl.bpm.framework.flowable.core.enums.BpmTaskCandidateStrategyEnum;
 import com.rexl.bpm.framework.flowable.core.util.BpmnModelUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.rexl.bpm.framework.constant.ErrorCodeConstants.MODEL_DEPLOY_FAIL_TASK_CANDIDATE_NOT_CONFIG;
+import static com.rexl.bpm.framework.constant.ErrorCodeConstants.TASK_CREATE_FAIL_NO_CANDIDATE_USER;
+
 /**
  * {@link BpmTaskCandidateStrategy} 的调用者，用于调用对应的策略，实现任务的候选人的计算
  *
@@ -27,15 +32,15 @@ public class BpmTaskCandidateInvoker {
 
     private final Map<BpmTaskCandidateStrategyEnum, BpmTaskCandidateStrategy> strategyMap = new HashMap<>();
 
-    private final AdminUserApi adminUserApi;
+    private final ISysUserServiceFrameworkApi iSysUserServiceFrameworkApi;
 
     public BpmTaskCandidateInvoker(List<BpmTaskCandidateStrategy> strategyList,
-                                   AdminUserApi adminUserApi) {
+                                   ISysUserServiceFrameworkApi iSysUserServiceFrameworkApi) {
         strategyList.forEach(strategy -> {
             BpmTaskCandidateStrategy oldStrategy = strategyMap.put(strategy.getStrategy(), strategy);
             Assert.isNull(oldStrategy, "策略(%s) 重复", strategy.getStrategy());
         });
-        this.adminUserApi = adminUserApi;
+        this.iSysUserServiceFrameworkApi = iSysUserServiceFrameworkApi;
     }
 
     /**
@@ -54,11 +59,11 @@ public class BpmTaskCandidateInvoker {
             Integer strategy = BpmnModelUtils.parseCandidateStrategy(userTask);
             String param = BpmnModelUtils.parseCandidateParam(userTask);
             if (strategy == null) {
-                throw exception(MODEL_DEPLOY_FAIL_TASK_CANDIDATE_NOT_CONFIG, userTask.getName());
+                throw new CustomException(MODEL_DEPLOY_FAIL_TASK_CANDIDATE_NOT_CONFIG, userTask.getName());
             }
             BpmTaskCandidateStrategy candidateStrategy = getCandidateStrategy(strategy);
             if (candidateStrategy.isParamRequired() && StrUtil.isBlank(param)) {
-                throw exception(MODEL_DEPLOY_FAIL_TASK_CANDIDATE_NOT_CONFIG, userTask.getName());
+                throw new CustomException(MODEL_DEPLOY_FAIL_TASK_CANDIDATE_NOT_CONFIG, userTask.getName());
             }
             // 2. 具体策略校验
             getCandidateStrategy(strategy).validateParam(param);
@@ -71,35 +76,34 @@ public class BpmTaskCandidateInvoker {
      * @param execution 执行任务
      * @return 用户编号集合
      */
-    @DataPermission(enable = false) // 忽略数据权限，避免因为过滤，导致找不到候选人
     public Set<Long> calculateUsers(DelegateExecution execution) {
         Integer strategy = BpmnModelUtils.parseCandidateStrategy(execution.getCurrentFlowElement());
         String param = BpmnModelUtils.parseCandidateParam(execution.getCurrentFlowElement());
         // 1.1 计算任务的候选人
         Set<Long> userIds = getCandidateStrategy(strategy).calculateUsers(execution, param);
         // 1.2 移除被禁用的用户
-        removeDisableUsers(userIds);
+        //removeDisableUsers(userIds);
 
         // 2. 校验是否有候选人
         if (CollUtil.isEmpty(userIds)) {
             log.error("[calculateUsers][流程任务({}/{}/{}) 任务规则({}/{}) 找不到候选人]", execution.getId(),
                     execution.getProcessDefinitionId(), execution.getCurrentActivityId(), strategy, param);
-            throw exception(TASK_CREATE_FAIL_NO_CANDIDATE_USER);
+            throw new CustomException(TASK_CREATE_FAIL_NO_CANDIDATE_USER);
         }
         return userIds;
     }
 
-    @VisibleForTesting
-    void removeDisableUsers(Set<Long> assigneeUserIds) {
-        if (CollUtil.isEmpty(assigneeUserIds)) {
-            return;
-        }
-        Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(assigneeUserIds);
-        assigneeUserIds.removeIf(id -> {
-            AdminUserRespDTO user = userMap.get(id);
-            return user == null || !CommonStatusEnum.ENABLE.getStatus().equals(user.getStatus());
-        });
-    }
+//    @VisibleForTesting
+//    void removeDisableUsers(Set<Long> assigneeUserIds) {
+//        if (CollUtil.isEmpty(assigneeUserIds)) {
+//            return;
+//        }
+//        Map<Long, AdminUserRespDTO> userMap = iSysUserServiceFrameworkApi.getUserMap(assigneeUserIds);
+//        assigneeUserIds.removeIf(id -> {
+//            AdminUserRespDTO user = userMap.get(id);
+//            return user == null || !CommonStatusEnum.ENABLE.getStatus().equals(user.getStatus());
+//        });
+//    }
 
     private BpmTaskCandidateStrategy getCandidateStrategy(Integer strategy) {
         BpmTaskCandidateStrategyEnum strategyEnum = BpmTaskCandidateStrategyEnum.valueOf(strategy);

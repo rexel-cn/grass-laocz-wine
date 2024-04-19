@@ -13,14 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class BpmWebConfiguration {
 
-    /**
-     * bpm 模块的 API 分组
-     */
-    @Bean
-    public GroupedOpenApi bpmGroupedOpenApi() {
-        return YudaoSwaggerAutoConfiguration.buildGroupedOpenApi("bpm");
-    }
-
+    int FLOWABLE_FILTER = -98; // 需要保证在 Spring Security 过滤后面
     /**
      * 配置 Flowable Web 过滤器
      */
@@ -28,7 +21,7 @@ public class BpmWebConfiguration {
     public FilterRegistrationBean<FlowableWebFilter> flowableWebFilter() {
         FilterRegistrationBean<FlowableWebFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new FlowableWebFilter());
-        registrationBean.setOrder(WebFilterOrderEnum.FLOWABLE_FILTER);
+        registrationBean.setOrder(FLOWABLE_FILTER);
         return registrationBean;
     }
 
