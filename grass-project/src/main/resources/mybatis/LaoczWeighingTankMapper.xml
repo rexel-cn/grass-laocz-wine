@@ -69,6 +69,7 @@
         lai.area_name,
         lfzi.fire_zone_name,
         lwt.full_tank_upper_limit,
+        lwt.about,
         lai.area_id,
         lfzi.fire_zone_id
         FROM laocz_weighing_tank lwt

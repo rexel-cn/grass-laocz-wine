@@ -42,4 +42,9 @@ public class WeighingTankAddDto {
 
 
     private List<WeighingTankAddVo> weighingTankAddVos;
+
+    /**
+     * 1左，2右
+     */
+    private String about;
 }

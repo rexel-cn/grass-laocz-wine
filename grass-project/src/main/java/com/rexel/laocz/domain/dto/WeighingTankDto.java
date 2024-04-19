@@ -55,4 +55,10 @@ public class WeighingTankDto {
      */
     @Excel(name = "测点类型")
     private String pointType;
+
+    /**
+     * 1左，2右
+     */
+    @Excel(name = "1左，2右",readConverterExp = "1=左,2=右")
+    private String about;
 }

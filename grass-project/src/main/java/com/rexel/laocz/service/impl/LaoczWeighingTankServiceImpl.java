@@ -96,10 +96,14 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
      */
     @Override
     public WeighingTankAddDto getByIdWithTank(Long weighingTankId) {
+        WeighingTankAddDto weighingTankAddDto = new WeighingTankAddDto();
         //查询使用标识的名字
         List<WeighingTankAddVo> weightMark = this.getAddVo("weight_mark");
         //封装
         LaoczWeighingTank laoczWeighingTank = this.getById(weighingTankId);
+        if(ObjectUtil.isNull(laoczWeighingTank)){
+            return weighingTankAddDto;
+        }
 
         Long fireZoneId = laoczWeighingTank.getFireZoneId();
 
@@ -107,7 +111,7 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
 
         LaoczAreaInfo laoczAreaInfo = iLaoczAreaInfoService.getById(laoczFireZoneInfo.getAreaId());
 
-        WeighingTankAddDto weighingTankAddDto = new WeighingTankAddDto();
+
         BeanUtil.copyProperties(laoczWeighingTank, weighingTankAddDto);
         weighingTankAddDto.setAreaId(laoczAreaInfo.getAreaId());
         weighingTankAddDto.setFireZoneId(laoczFireZoneInfo.getFireZoneId());

@@ -44,6 +44,10 @@ public class LaoczWeighingTank extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long fireZoneId;
     /**
+     * 1左，2右
+     */
+    private String about;
+    /**
      * 称重罐编号
      */
     @Excel(name = "称重罐编号")
