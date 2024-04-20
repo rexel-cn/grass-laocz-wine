@@ -208,7 +208,7 @@ public abstract class WineAbstract {
                 //因为是入酒所以，操作时间就是入酒时间
                 laoczWineHistory.setStoringTime(laoczWineHistory.getOperationTime());
                 //亏损重量=申请重量-称重罐重量
-                laoczWineHistory.setLossWeight(laoczWineHistory.getPotteryAltarApplyWeight() - laoczWineHistory.getWeighingTankWeight());
+                laoczWineHistory.setLossWeight(BigDecimal.valueOf(laoczWineHistory.getPotteryAltarApplyWeight()).subtract(BigDecimal.valueOf(laoczWineHistory.getWeighingTankWeight())).doubleValue());
                 //入酒
                 iLaoczWineHistoryService.save(laoczWineHistory);
                 break;

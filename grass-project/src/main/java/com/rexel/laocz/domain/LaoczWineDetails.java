@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -25,6 +22,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class LaoczWineDetails extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -100,10 +98,37 @@ public class LaoczWineDetails extends BaseEntity {
     @Excel(name = "称重罐重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double weighingTankWeight;
+
+
+    /**
+     * 开始之前重量
+     */
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @Excel(name = "开始之前重量")
+    private Double beforeWeight;
+    /**
+     * 结束之后重量
+     */
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @Excel(name = "结束之后重量")
+    private Double afterWeight;
+    /**
+     * 开始之前时间
+     */
+    @Excel(name = "开始之前时间")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Date beforeTime;
+    /**
+     * 结束之后时间
+     */
+    @Excel(name = "结束之后时间")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Date afterTime;
     /**
      * 业务时间（出酒、入酒、取样时间）
      */
     @Excel(name = "业务时间", readConverterExp = "出=酒、入酒、取样时间")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Date operationTime;
     /**
      * 取样用途
@@ -113,26 +138,4 @@ public class LaoczWineDetails extends BaseEntity {
     private String samplingPurpose;
 
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
-                .append("wineDetailsId", getWineDetailsId())
-                .append("workOrderId", getWorkOrderId())
-                .append("tenantId", getTenantId())
-                .append("busyId", getBusyId())
-                .append("liquorBatchId", getLiquorBatchId())
-                .append("potteryAltarId", getPotteryAltarId())
-                .append("potteryAltarApplyWeight", getPotteryAltarApplyWeight())
-                .append("weighingTank", getWeighingTank())
-                .append("pumpId", getPumpId())
-                .append("weighingTankWeight", getWeighingTankWeight())
-                .append("operationTime", getOperationTime())
-                .append("samplingPurpose", getSamplingPurpose())
-                .append("createBy", getCreateBy())
-                .append("createTime", getCreateTime())
-                .append("updateBy", getUpdateBy())
-                .append("updateTime", getUpdateTime())
-                .append("remark", getRemark())
-                .toString();
-    }
 }

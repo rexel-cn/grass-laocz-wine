@@ -18,6 +18,10 @@
         <result property="weighingTankWeight" column="weighing_tank_weight"/>
         <result property="operationTime" column="operation_time"/>
         <result property="samplingPurpose" column="sampling_purpose"/>
+        <result property="beforeWeight" column="before_weight"/>
+        <result property="afterWeight" column="after_weight"/>
+        <result property="beforeTime" column="before_time"/>
+        <result property="afterTime" column="after_time"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
@@ -39,6 +43,10 @@
                weighing_tank_weight,
                operation_time,
                sampling_purpose,
+               before_weight,
+               after_weight,
+               before_time,
+               after_time,
                create_by,
                create_time,
                update_by,

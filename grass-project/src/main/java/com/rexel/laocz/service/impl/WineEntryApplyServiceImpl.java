@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import com.rexel.common.core.redis.RedisCache;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -278,23 +280,31 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             //查询称重罐，需要的业务字段：称重罐重量上限，称重罐编号等。
             LaoczWeighingTank weighingTank = iLaoczWeighingTankService.getById(wineDetails.getWeighingTank());
 
+            Map<String, WineDetailPointVO> pumpMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
+            Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
+
+            //检查测点存在与否
+            pointCheck(pumpMap, wineDetailPointVOMap);
+
+
             //更新实时表状态 入酒开始
             super.updatePotteryMappingState(wineDetails.getPotteryAltarId(), RealStatusEnum.WINE_IN);
+
 
             String eventStatus = WineConstants.SUCCESS;
             try {
                 switch (WineOperationTypeEnum.getByValue(wineEntryDTO.getStatus())) {
                     case START:
                         //开始
-                        start(wineDetails, weighingTankPointVOList, pumpPointVOList, weighingTank);
+                        start(wineDetails, wineDetailPointVOMap, pumpMap, weighingTank);
                         break;
                     case EMERGENCY_STOP:
                         //急停
-                        pause(wineDetails, pumpPointVOList);
+                        pause(wineDetails, pumpMap);
                         break;
                     case CONTINUE:
                         //继续
-                        winContinue(wineDetails, pumpPointVOList, weighingTankPointVOList);
+                        winContinue(wineDetails, pumpMap, wineDetailPointVOMap);
                         break;
                     default:
                         throw new CustomException("入酒状态错误");
@@ -310,6 +320,37 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         } finally {
             redisCache.deleteObject(WINE_ENTRY_APPLY_LOCK + wineEntryDTO.getWineDetailsId());
         }
+    }
+
+    private void pointCheck(Map<String, WineDetailPointVO> pumpMap, Map<String, WineDetailPointVO> wineDetailPointVOMap) {
+        for (MonitorPointConfig value : MonitorPointConfig.values()) {
+            if (value.getType().equals("2")) {
+                if (!pumpMap.containsKey(value.getUseMark())) {
+                    throw new CustomException("泵测点不存在");
+                }
+            }
+            if (value.getType().equals("1")) {
+                if (!wineDetailPointVOMap.containsKey(value.getUseMark())) {
+                    throw new CustomException("称重罐测点不存在");
+                }
+            }
+        }
+        //申请重量测点
+        WineDetailPointVO weightPoint = pumpMap.get(WinePointConstants.WEIGHT_POINT);
+        if (weightPoint == null) {
+            throw new CustomException("申请重量测点不存在");
+        }
+        //称重罐号测点
+        WineDetailPointVO weighingTankNumberPoint = pumpMap.get(WinePointConstants.WEIGHING_TANK_NUMBER);
+        if (weighingTankNumberPoint == null) {
+            throw new CustomException("称重罐号测点不存在");
+        }
+        //启动信号测点
+        WineDetailPointVO startSignalPoint = pumpMap.get(WinePointConstants.START_SIGNAL);
+        if (startSignalPoint == null) {
+            throw new CustomException("启动信号测点不存在");
+        }
+
     }
 
 
@@ -395,31 +436,31 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 入酒继续.并继续监听
      *
-     * @param wineDetails     酒操作详情
-     * @param pumpPointVOList 泵测点
-     * @param weighingTank    称重罐
+     * @param wineDetails          酒操作详情
+     * @param pumpMap              泵测点
+     * @param wineDetailPointVOMap 称重罐
      * @throws IOException 异常
      */
-    private void winContinue(LaoczWineDetails wineDetails, List<WineDetailPointVO> pumpPointVOList, List<WineDetailPointVO> weighingTank) throws IOException {
+    private void winContinue(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> pumpMap, Map<String, WineDetailPointVO> wineDetailPointVOMap) throws IOException {
         //更新酒操作详情状态，开始
         updateWineDetails(wineDetails.getWineDetailsId(), WineBusyStatusEnum.STARTED);
         //下发继续测点
-        continuePlc(pumpPointVOList, weighingTank);
+        continuePlc(pumpMap, wineDetailPointVOMap);
         //继续监听
-        startListener(wineDetails.getWineDetailsId(), weighingTank, pumpPointVOList);
+        startListener(wineDetails.getWineDetailsId(), wineDetailPointVOMap, pumpMap);
     }
 
     /**
      * 下发急停，并取消监听
      *
-     * @param wineDetails     酒操作详情
-     * @param pumpPointVOList 泵测点
+     * @param wineDetails 酒操作详情
+     * @param pumpMap     泵测点
      */
-    private void pause(LaoczWineDetails wineDetails, List<WineDetailPointVO> pumpPointVOList) {
+    private void pause(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> pumpMap) {
         //更新酒操作详情状态，开始
         updateWineDetails(wineDetails.getWineDetailsId(), WineBusyStatusEnum.EMERGENCY_STOP);
         //下发急停测点
-        pausePlc(pumpPointVOList);
+        pausePlc(pumpMap);
         //取消监听
         pauseListener(wineDetails.getWineDetailsId());
     }
@@ -427,20 +468,36 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 下发启动并开始监听
      *
-     * @param wineDetails             酒操作详情
-     * @param weighingTankPointVOList 称重罐测点
-     * @param pumpPointVOList         泵测点
-     * @param weighingTank            称重罐
+     * @param wineDetails          酒操作详情
+     * @param wineDetailPointVOMap 称重罐测点
+     * @param pumpMap              泵测点
+     * @param weighingTank         称重罐
      * @throws IOException          io网络异常，测点-dview交互异常
      * @throws InterruptedException 打断异常
      */
-    private void start(LaoczWineDetails wineDetails, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
-        //更新酒操作详情状态，开始
-        updateWineDetails(wineDetails.getWineDetailsId(), WineBusyStatusEnum.STARTED);
+    private void start(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap, Map<String, WineDetailPointVO> pumpMap, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
+        //记录开始前的重量及开始时间，更新酒操作详情状态，开始
+        recordWeightAndTimeBeforeStart(wineDetails, wineDetailPointVOMap);
         //下发测点
-        startPlc(wineDetails, weighingTankPointVOList, pumpPointVOList, weighingTank);
+        startPlc(wineDetails, wineDetailPointVOMap, pumpMap, weighingTank);
         //开始监听
-        startListener(wineDetails.getWineDetailsId(), weighingTankPointVOList, pumpPointVOList);
+        startListener(wineDetails.getWineDetailsId(), wineDetailPointVOMap, pumpMap);
+    }
+
+    private void recordWeightAndTimeBeforeStart(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap) throws IOException {
+        //称重罐重量测点
+        WineDetailPointVO zlOut = wineDetailPointVOMap.get(WinePointConstants.ZL_OUT);
+        String weight = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
+        if (StrUtil.isEmpty(weight)) {
+            throw new CustomException("称重罐重量未获取");
+        }
+        iLaoczWineDetailsService.lambdaUpdate()
+                .eq(LaoczWineDetails::getWineDetailsId, wineDetails.getWineDetailsId())
+                .set(LaoczWineDetails::getBeforeTime, new Date())
+                .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.STARTED.getValue())
+                .set(LaoczWineDetails::getBeforeWeight, Double.parseDouble(weight));
+
+
     }
 
     /**
@@ -520,17 +577,15 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 启动监听，监听称重罐重量，以及完成信号，如果完成记录称重罐重量，并更新相关数据,然后取消监听
      *
-     * @param wineDetailsId           酒操作业务详情id
-     * @param weighingTankPointVOList 称重罐测点
-     * @param pumpPointVOList         泵测点
+     * @param wineDetailsId        酒操作业务详情id
+     * @param wineDetailPointVOMap 称重罐测点
+     * @param pointVOMap           泵测点
      */
-    private void startListener(Long wineDetailsId, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList) {
+    private void startListener(Long wineDetailsId, Map<String, WineDetailPointVO> wineDetailPointVOMap, Map<String, WineDetailPointVO> pointVOMap) {
         ScheduledFuture<?> future = threadMap.get(wineDetailsId);
         if (future != null) {
             return;
         }
-        Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
-        Map<String, WineDetailPointVO> pointVOMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
         //完成测点
         WineDetailPointVO finishPoint = pointVOMap.get(WinePointConstants.FINISH_POINT);
         //称重罐重量测点
@@ -538,16 +593,28 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //监听完成测点,如果完成，查询称重罐重量并保存到数据库中
         final Runnable task = () -> {
             try {
-
                 String finish = DviewUtils.queryPointValue(finishPoint.getPointId(), finishPoint.getPointType());
+                if (StrUtil.isEmpty(finish)) {
+                    log.error("入酒监听获取完成信号失败");
+                    return;
+                }
                 if (Double.parseDouble(finish) == 1) {
                     String weight = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
-
+                    if (StrUtil.isEmpty(weight)) {
+                        log.error("入酒监听获取重量失败");
+                        return;
+                    }
                     try {
                         redisCache.tryLock(WINE_ENTRY_APPLY_LOCK + wineDetailsId, wineDetailsId, 10);
+                        LaoczWineDetails wineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
+                        //获取实际重量= 开始前重量 - 结束后重量
+                        double weighingTankWeight = BigDecimal.valueOf(wineDetails.getBeforeWeight()).subtract(BigDecimal.valueOf(Double.parseDouble(weight))).doubleValue();
+
                         iLaoczWineDetailsService.lambdaUpdate()
                                 .eq(LaoczWineDetails::getWineDetailsId, wineDetailsId)
-                                .set(LaoczWineDetails::getWeighingTankWeight, Double.parseDouble(weight))
+                                .set(LaoczWineDetails::getWeighingTankWeight, weighingTankWeight)
+                                .set(LaoczWineDetails::getAfterWeight, Double.parseDouble(weight))
+                                .set(LaoczWineDetails::getAfterTime, new Date())
                                 .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.COMPLETED.getValue())
                                 .update();
                         pauseListener(wineDetailsId);
@@ -566,14 +633,14 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 下发启动测点
      *
-     * @param wineDetails             酒操作详情
-     * @param weighingTankPointVOList 称重罐测点
-     * @param pumpPointVOList         泵测点
-     * @param weighingTank            称重罐
+     * @param wineDetails          酒操作详情
+     * @param wineDetailPointVOMap 称重罐测点
+     * @param pumpMap              泵测点
+     * @param weighingTank         称重罐
      * @throws IOException          io网络异常，测点-dview交互异常
      * @throws InterruptedException 打断异常
      */
-    private void startPlc(LaoczWineDetails wineDetails, List<WineDetailPointVO> weighingTankPointVOList, List<WineDetailPointVO> pumpPointVOList, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
+    private void startPlc(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap, Map<String, WineDetailPointVO> pumpMap, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
         /*
          【监控测点】
           DJ_SEX_TTK_B1_ES 陶坛库1号泵急停（1为急停状态）          泵单位
@@ -598,27 +665,15 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
              3：称重罐最大重量
              4：
          */
-        Map<String, WineDetailPointVO> pumpMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
-        Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
         List<DviewPointDTO> pointIdList = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
-        for (MonitorPointConfig value : MonitorPointConfig.values()) {
-            if (value.getType().equals("2")) {
-                if (!pumpMap.containsKey(value.getUseMark())) {
-                    throw new CustomException("泵测点不存在");
-                }
-                WineDetailPointVO wineDetailPointVO = pumpMap.get(value.getUseMark());
-                pointIdList.add(new DviewPointDTO(wineDetailPointVO.getPointId(), wineDetailPointVO.getPointType(), wineDetailPointVO.getPointName(), null));
-                map.put(value.getUseMark(), wineDetailPointVO.getPointId());
-            }
-            if (value.getType().equals("1")) {
-                if (!wineDetailPointVOMap.containsKey(value.getUseMark())) {
-                    throw new CustomException("称重罐测点不存在");
-                }
-                WineDetailPointVO wineDetailPointVO = wineDetailPointVOMap.get(value.getUseMark());
-                pointIdList.add(new DviewPointDTO(wineDetailPointVO.getPointId(), wineDetailPointVO.getPointType(), wineDetailPointVO.getPointName(), null));
-                map.put(value.getUseMark(), wineDetailPointVO.getPointId());
-            }
+        for (Map.Entry<String, WineDetailPointVO> stringWineDetailPointVOEntry : pumpMap.entrySet()) {
+            pointIdList.add(new DviewPointDTO(stringWineDetailPointVOEntry.getValue().getPointId(), stringWineDetailPointVOEntry.getValue().getPointType(), stringWineDetailPointVOEntry.getValue().getPointName(), null));
+            map.put(stringWineDetailPointVOEntry.getKey(), stringWineDetailPointVOEntry.getValue().getPointId());
+        }
+        for (Map.Entry<String, WineDetailPointVO> stringWineDetailPointVOEntry : wineDetailPointVOMap.entrySet()) {
+            pointIdList.add(new DviewPointDTO(stringWineDetailPointVOEntry.getValue().getPointId(), stringWineDetailPointVOEntry.getValue().getPointType(), stringWineDetailPointVOEntry.getValue().getPointName(), null));
+            map.put(stringWineDetailPointVOEntry.getKey(), stringWineDetailPointVOEntry.getValue().getPointId());
         }
 
         List<DViewVarInfo> pumpPointValues = DviewUtils.queryCachePointValue(pointIdList);
@@ -626,21 +681,21 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
 
         for (MonitorPointConfig value : MonitorPointConfig.values()) {
             DViewVarInfo dViewVarInfo = pointValues.get(map.get(value.getUseMark()));
-            //判断这次遍历是 ZL_OUT
-            if (value.name().equals(MonitorPointConfig.ZL_OUT.name())) {
-                //判断是否上限
-                //称重罐上限
-                String fullTankUpperLimit = weighingTank.getFullTankUpperLimit();
-                //申请重量
-                Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
-                //查询已有的重量
-                Double value1 = Double.parseDouble(dViewVarInfo.getValue().toString());
-                //判断申请重量+已有重量>称重罐上限就报错
-                if (!value.getCheck().checkValue(String.valueOf(potteryAltarApplyWeight + value1), fullTankUpperLimit)) {
-                    throw new CustomException("申请重量:{},已有重量:{},称重罐上限:{}", potteryAltarApplyWeight, value1, fullTankUpperLimit);
-                }
-                continue;
-            }
+//            //判断这次遍历是 ZL_OUT
+//            if (value.name().equals(MonitorPointConfig.ZL_OUT.name())) {
+//                //判断是否上限
+//                //称重罐上限
+//                String fullTankUpperLimit = weighingTank.getFullTankUpperLimit();
+//                //申请重量
+//                Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
+//                //查询已有的重量
+//                Double value1 = Double.parseDouble(dViewVarInfo.getValue().toString());
+//                //判断申请重量+已有重量>称重罐上限就报错
+//                if (!value.getCheck().checkValue(String.valueOf(potteryAltarApplyWeight + value1), fullTankUpperLimit)) {
+//                    throw new CustomException("申请重量:{},已有重量:{},称重罐上限:{}", potteryAltarApplyWeight, value1, fullTankUpperLimit);
+//                }
+//                continue;
+//            }
             //object 1.0 转换为整型
             int i = Double.valueOf(dViewVarInfo.getValue().toString()).intValue();
             //其他都按照配置进行判断即可
@@ -650,7 +705,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         }
 
         //称重罐编号
-        String weighingTankWeight = weighingTank.getWeighingTankNumber();
+        String about = weighingTank.getAbout();
 
         //申请重量
         Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
@@ -674,7 +729,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
 
         DviewUtilsPro.writePointValue(
                 new DviewPointDTO(weightPoint.getPointId(), weightPoint.getPointType(), weightPoint.getPointName(), String.valueOf(potteryAltarApplyWeight)),
-                new DviewPointDTO(weighingTankNumberPoint.getPointId(), weighingTankNumberPoint.getPointType(), weighingTankNumberPoint.getPointName(), weighingTankWeight)
+                new DviewPointDTO(weighingTankNumberPoint.getPointId(), weighingTankNumberPoint.getPointType(), weighingTankNumberPoint.getPointName(), about)
         );
         Thread.sleep(500);
         DviewUtilsPro.writePointValue(new DviewPointDTO(startSignalPoint.getPointId(), startSignalPoint.getPointType(), startSignalPoint.getPointName(), "1"));
@@ -683,14 +738,13 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 下发急停功能
      *
-     * @param pumpPointVOList 泵测点
+     * @param pumpPointMap 泵测点
      */
-    private void pausePlc(List<WineDetailPointVO> pumpPointVOList) {
+    private void pausePlc(Map<String, WineDetailPointVO> pumpPointMap) {
         /*
             【下发测点】
             以泵为单位急停信号（待提供）
          */
-        Map<String, WineDetailPointVO> pumpPointMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
         if (!pumpPointMap.containsKey(WinePointConstants.EMERGENCY_STOP)) {
             throw new CustomException("急停测点不存在");
         }
@@ -701,11 +755,11 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 继续测点
      *
-     * @param pumpPointVOList         泵测点
-     * @param weighingTankPointVOList 称重罐测点
+     * @param pumpMap              泵测点
+     * @param wineDetailPointVOMap 称重罐测点
      * @throws IOException io网络异常，测点-dview交互异常
      */
-    private void continuePlc(List<WineDetailPointVO> pumpPointVOList, List<WineDetailPointVO> weighingTankPointVOList) throws IOException {
+    private void continuePlc(Map<String, WineDetailPointVO> pumpMap, Map<String, WineDetailPointVO> wineDetailPointVOMap) throws IOException {
         /*
         【监控测点】
         DJ_SEX_TTK_B1_ES 陶坛库1号泵急停（1为急停状态）
@@ -718,27 +772,16 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         【下发测点】
         以泵为单位下发继续信号（待提供）
          */
-        Map<String, WineDetailPointVO> pumpMap = pumpPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
-        Map<String, WineDetailPointVO> wineDetailPointVOMap = weighingTankPointVOList.stream().collect(Collectors.toMap(WineDetailPointVO::getUseMark, Function.identity()));
+
         List<DviewPointDTO> pointIdList = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
-        for (MonitorPointConfig value : MonitorPointConfig.values()) {
-            if (value.getType().equals("2")) {
-                if (!pumpMap.containsKey(value.getUseMark())) {
-                    throw new CustomException("泵测点不存在");
-                }
-                WineDetailPointVO wineDetailPointVO = pumpMap.get(value.getUseMark());
-                pointIdList.add(new DviewPointDTO(wineDetailPointVO.getPointId(), wineDetailPointVO.getPointType(), wineDetailPointVO.getPointName(), null));
-                map.put(value.getUseMark(), wineDetailPointVO.getPointId());
-            }
-            if (value.getType().equals("1")) {
-                if (!wineDetailPointVOMap.containsKey(value.getUseMark())) {
-                    throw new CustomException("称重罐测点不存在");
-                }
-                WineDetailPointVO wineDetailPointVO = wineDetailPointVOMap.get(value.getUseMark());
-                pointIdList.add(new DviewPointDTO(wineDetailPointVO.getPointId(), wineDetailPointVO.getPointType(), wineDetailPointVO.getPointName(), null));
-                map.put(value.getUseMark(), wineDetailPointVO.getPointId());
-            }
+        for (Map.Entry<String, WineDetailPointVO> stringWineDetailPointVOEntry : pumpMap.entrySet()) {
+            pointIdList.add(new DviewPointDTO(stringWineDetailPointVOEntry.getValue().getPointId(), stringWineDetailPointVOEntry.getValue().getPointType(), stringWineDetailPointVOEntry.getValue().getPointName(), null));
+            map.put(stringWineDetailPointVOEntry.getKey(), stringWineDetailPointVOEntry.getValue().getPointId());
+        }
+        for (Map.Entry<String, WineDetailPointVO> stringWineDetailPointVOEntry : wineDetailPointVOMap.entrySet()) {
+            pointIdList.add(new DviewPointDTO(stringWineDetailPointVOEntry.getValue().getPointId(), stringWineDetailPointVOEntry.getValue().getPointType(), stringWineDetailPointVOEntry.getValue().getPointName(), null));
+            map.put(stringWineDetailPointVOEntry.getKey(), stringWineDetailPointVOEntry.getValue().getPointId());
         }
 
         List<DViewVarInfo> pumpPointValues = DviewUtils.queryCachePointValue(pointIdList);
