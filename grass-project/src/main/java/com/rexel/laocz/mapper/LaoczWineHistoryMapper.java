@@ -76,5 +76,5 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
                                                             @Param("fireZoneId") Long fireZoneId,
                                                             @Param("areaId") Long areaId);
 
-    List<LaoczWineHistoryVO> selectOperation(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("workOrderId") String workOrderId);
+    List<LaoczWineHistoryVO> selectOperation(@Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("operationType") String operationType, @Param("workOrderId") String workOrderId);
 }

@@ -410,8 +410,8 @@
             <if test="fromTime != null and fromTime != '' and endTime != null and endTime != ''">
                 and lwh.operation_time between #{fromTime} and #{endTime}
             </if>
-            <if test="detailType != null and detailType != ''">
-                and lwh.detail_type = #{detailType}
+            <if test="operationType != null and operationType != ''">
+                and lwh.operation_type = #{operationType}
             </if>
             <if test="workOrderId != null  and workOrderId != ''">
                 and lwh.work_order_id like concat('%', #{workOrderId}, '%')

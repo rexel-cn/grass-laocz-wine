@@ -238,9 +238,8 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     }
 
     @Override
-    public List<LaoczWineHistoryVO> selectOperation(String fromTime, String endTime, String detailType, String workOrderId) {
-        List<LaoczWineHistoryVO> list = baseMapper.selectOperation(fromTime, endTime, detailType, workOrderId);
-        return list;
+    public List<LaoczWineHistoryVO> selectOperation(String fromTime, String endTime, String operationType, String workOrderId) {
+        return baseMapper.selectOperation(fromTime, endTime, operationType, workOrderId);
     }
 
     @Override

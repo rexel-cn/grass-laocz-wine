@@ -162,14 +162,14 @@ public class LaoczWineHistoryController extends BaseController {
      *
      * @param fromTime    开始时间
      * @param endTime     结束时间
-     * @param detailType  操作类型
+     * @param operationType  操作类型
      * @param workOrderId 工单Id
      * @return 分页数据
      */
     @GetMapping("/listOperation")
-    public TableDataInfo selectOperation(String fromTime, String endTime, String detailType, String workOrderId) {
+    public TableDataInfo selectOperation(String fromTime, String endTime, String operationType, String workOrderId) {
         startPage();
-        List<LaoczWineHistoryVO> list = laoczWineHistoryService.selectOperation(fromTime, endTime, detailType, workOrderId);
+        List<LaoczWineHistoryVO> list = laoczWineHistoryService.selectOperation(fromTime, endTime, operationType, workOrderId);
         return getDataTable(list, "historyInfo");
     }
 
