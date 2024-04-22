@@ -2,7 +2,6 @@ package com.rexel.laocz.asset;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,13 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.rexel.laocz.domain.LaoczWeighingTank;
 import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
-import com.rexel.laocz.domain.vo.LiquorVo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.service.ILaoczWeighingTankService;
-import com.rexel.system.domain.dto.PulsePointQueryDTO;
-import com.rexel.system.service.IGrassPointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.rexel.common.annotation.Log;

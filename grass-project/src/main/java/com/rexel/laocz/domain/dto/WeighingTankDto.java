@@ -59,6 +59,6 @@ public class WeighingTankDto {
     /**
      * 1左，2右
      */
-    @Excel(name = "1左，2右",readConverterExp = "1=左,2=右")
+    @Excel(name = "左,右",readConverterExp = "1=左,2=右")
     private String about;
 }
