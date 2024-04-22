@@ -52,7 +52,7 @@ public class DviewUtils {
      * 是否自动启动 dview采集、DCS状态刷新、输送监控
      * true:自动启动，false:不自动启动
      */
-    private static final boolean IS_AUTO_RUNNING = false;
+    private static final boolean IS_AUTO_RUNNING = true;
     private static final String DVIEW_ADDRESS = "dview_address";
     private static final String DVIEW_IP = "ip";
     private static final String DVIEW_PORT = "port";

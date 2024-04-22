@@ -403,7 +403,7 @@
         sdd.dict_label AS detail_type,
         case when lwo.create_time is null then lwoh.create_time else lwo.create_time end as create_time
         from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
+        LEFT JOIN sys_dict_data sdd ON lwh.operation_type = sdd.dict_value AND sdd.dict_type = 'operation_type'
         LEFT JOIN laocz_wine_operations lwo on lwo.work_order_id = lwh.work_order_id
         LEFT JOIN laocz_wine_operations_his lwoh on lwoh.work_order_id = lwh.work_order_id
         <where>
