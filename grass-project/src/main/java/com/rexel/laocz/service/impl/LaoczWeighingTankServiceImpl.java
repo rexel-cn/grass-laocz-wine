@@ -385,6 +385,9 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
             if (StrUtil.isEmpty(weighingTankVo.getPointId())) {
                 errList.add("第" + (i + 2) + "行测点为空");
             }
+            if (StrUtil.isEmpty(weighingTankVo.getAbout())) {
+                errList.add("第" + (i + 2) + "行罐位置为空");
+            }
             if (Long.parseLong(weighingTankVo.getFullTankUpperLimit()) <= 0){
                 errList.add("满罐重量不能小于等于0");
             }

@@ -218,18 +218,14 @@ public class LaoczLiquorRuleInfoServiceImpl extends ServiceImpl<LaoczLiquorRuleI
                             Date storingTime = batchPotteryMapping.getStoringTime();
                             //获取当前时间
                             Date nowDate = DateUtils.getNowDate();
-                            // 计算两个Date对象之间的毫秒数差异
-                            long diffInMillis = nowDate.getTime() - storingTime.getTime();
-
-                            // 将毫秒数差异转换为秒数
-                            long diffInSeconds = diffInMillis / 1000;
-                            long day = 24 * 60 * 60;
+                            //计算天数
+                            int daysBetween = DateUtils.daysBetween(storingTime, nowDate);
                             //判断是否报警
-                            if(JudgeUtils.judge(laoczLiquorRuleInfo.getLiquorRuleJudge(),new BigDecimal(diffInSeconds),new BigDecimal(Long.parseLong(liquorRuleThreshold) * day))){
+                            if(JudgeUtils.judge(laoczLiquorRuleInfo.getLiquorRuleJudge(),new BigDecimal(daysBetween),new BigDecimal(Long.parseLong(liquorRuleThreshold)))){
                                 //超过报警阈值,保存报警记录，并通知
-                                alarmHistories.add(getAlarm(laoczLiquorRuleInfo, batchPotteryMapping, diffInSeconds / day));
+                                alarmHistories.add(getAlarm(laoczLiquorRuleInfo, batchPotteryMapping, daysBetween));
                                 //格式化报警消息体
-                                String phSendFormat = phSendFormat(batchPotteryMapping, laoczLiquorRuleInfo, diffInSeconds / day);
+                                String phSendFormat = phSendFormat(batchPotteryMapping, laoczLiquorRuleInfo, daysBetween);
                                 List<SysUser> sysUserList = iSysUserService.lambdaQuery()
                                         .in(SysUser::getUserId, Arrays.asList(laoczLiquorRuleInfo.getNoticePeopleArray()))
                                         .list();
