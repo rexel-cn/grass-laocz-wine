@@ -230,6 +230,9 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     public WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO qrInCodeScanDTO) {
         String potteryAltarNumber = qrInCodeScanDTO.getPotteryAltarNumber();
         LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery().eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
+        if(inLaoczPotteryAltarManagement==null){
+            throw new CustomException("此陶坛不存在，请重新扫描");
+        }
         boolean inMappingIsNull = check(qrInCodeScanDTO.getOutPotteryAltarId(), qrInCodeScanDTO.getOutWeight(), inLaoczPotteryAltarManagement.getPotteryAltarId());
         //查询陶坛是否有酒，如果有酒就比较批次和重量
         //如果没有酒就没事了
