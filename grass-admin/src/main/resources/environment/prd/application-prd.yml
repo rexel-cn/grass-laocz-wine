@@ -37,15 +37,15 @@ spring:
       testOnBorrow: false
       testOnReturn: false
       webStatFilter:
-        enabled: true
+        enabled: false
       statViewServlet:
-        enabled: true
+        enabled: false
         # 设置白名单，不填则允许所有访问
         allow:
         url-pattern: /druid/*
         # 控制台管理用户名和密码
-        login-username:
-        login-password:
+        login-username: root
+        login-password: RexelRoot!@#
       filter:
         stat:
           enabled: true
@@ -128,7 +128,7 @@ pulse:
 ##   MQTT Conf
 ##=================================================
 mqtt:
-  clientId: laocz_app_fhw
+  clientId: laocz_app
   topics: test
   serverUrls: tcp://192.168.12.101:1883
   userName: admin
