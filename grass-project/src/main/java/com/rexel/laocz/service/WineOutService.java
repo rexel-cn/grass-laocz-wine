@@ -1,6 +1,8 @@
 package com.rexel.laocz.service;
 
+import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.WineOutApplyDTO;
+import com.rexel.laocz.domain.dto.WineOutStartDTO;
 
 import java.util.List;
 
@@ -22,10 +24,10 @@ public interface WineOutService {
     /**
      * 出酒操作，称重罐称重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 称重量
      */
-    String wineOutStart(Long wineDetailsId);
+    LaoczWineDetails wineOutStart(WineOutStartDTO wineOutStartDTO);
 
     /**
      * 出酒操作完成

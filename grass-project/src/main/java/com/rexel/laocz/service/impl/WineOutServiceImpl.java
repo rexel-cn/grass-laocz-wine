@@ -1,5 +1,6 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.SequenceUtils;
@@ -8,12 +9,10 @@ import com.rexel.laocz.constant.WinePointConstants;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.WineOutApplyDTO;
+import com.rexel.laocz.domain.dto.WineOutStartDTO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.dview.DviewUtils;
-import com.rexel.laocz.enums.OperationTypeEnum;
-import com.rexel.laocz.enums.RealStatusEnum;
-import com.rexel.laocz.enums.WineDetailTypeEnum;
-import com.rexel.laocz.enums.WineOperationTypeEnum;
+import com.rexel.laocz.enums.*;
 import com.rexel.laocz.service.WineAbstract;
 import com.rexel.laocz.service.WineOutService;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -96,23 +97,43 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
     /**
      * 出酒操作，称重罐称重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 称重量
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String wineOutStart(Long wineDetailsId) {
+    public LaoczWineDetails wineOutStart(WineOutStartDTO wineOutStartDTO) {
+
+        Long wineDetailsId = wineOutStartDTO.getWineDetailsId();
+
         LaoczWineDetails wineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
+        if(wineDetails==null){
+            throw new CustomException("请刷新后重试");
+        }
         //查询称重罐测点
         List<WineDetailPointVO> weighingTankPointVOList = laoczWineDetailsMapper.selectWineDetailWeighingTankPointVOList(wineDetailsId);
         WineDetailPointVO zlOut = getZlOut(weighingTankPointVOList);
         String eventStatus = WineConstants.SUCCESS;
         try {
             String pointValue = DviewUtils.queryPointValue(zlOut.getPointId(), zlOut.getPointType());
-            wineDetails.setWeighingTankWeight(Double.parseDouble(pointValue));
+
+            if(wineOutStartDTO.getType().equals(WineOutTypeEnum.WINE_OUT_BEFORE.getCode())){
+                if(wineDetails.getAfterTime()!=null||wineDetails.getAfterWeight()!=null){
+                    throw new CustomException("出酒前已经称重，请勿重复称重");
+                }
+                wineDetails.setBeforeWeight(Double.parseDouble(pointValue));
+                wineDetails.setBeforeTime(new Date());
+            }else if(wineOutStartDTO.getType().equals(WineOutTypeEnum.WINE_OUT_AFTER.getCode())){
+                wineDetails.setAfterWeight(Double.parseDouble(pointValue));
+                wineDetails.setAfterTime(new Date());
+
+                BigDecimal subtract = BigDecimal.valueOf(wineDetails.getAfterWeight()).subtract(BigDecimal.valueOf(wineDetails.getBeforeWeight()));
+
+                wineDetails.setWeighingTankWeight(subtract.doubleValue());
+            }
             iLaoczWineDetailsService.updateById(wineDetails);
             super.updatePotteryMappingState(wineDetails.getPotteryAltarId(), RealStatusEnum.WINE_OUT);
-            return pointValue;
+            return wineDetails;
         } catch (IOException e) {
             eventStatus = WineConstants.FAIL;
             throw new CustomException("采集称重罐重量失败，请重试");
@@ -184,15 +205,18 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
      * @return 称重罐测点
      */
     private WineDetailPointVO getZlOut(List<WineDetailPointVO> weighingTankPointVOList) {
+        if(CollectionUtil.isEmpty(weighingTankPointVOList)){
+            throw new CustomException("未找到称重罐测点");
+        }
         for (WineDetailPointVO weighingTankPointVO : weighingTankPointVOList) {
             if (WinePointConstants.ZL_OUT.equals(weighingTankPointVO.getUseMark())) {
                 if (StrUtil.isEmpty(weighingTankPointVO.getPointId()) || StrUtil.isEmpty(weighingTankPointVO.getPointType())) {
-                    throw new RuntimeException("称重罐测点信息不全,请联系管理员");
+                    throw new CustomException("称重罐测点信息不全,请联系管理员");
                 }
                 return weighingTankPointVO;
             }
         }
-        throw new RuntimeException("未找到称重罐测点");
+        throw new CustomException("未找到称重罐测点");
     }
 
     /**

@@ -84,14 +84,14 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     /**
      * 倒坛出酒开始获取重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 重量
      */
     @Override
-    public String winePourPotOutStart(Long wineDetailsId) {
-        LaoczWineDetails wineDetailsById = getWineDetailsById(wineDetailsId);
+    public LaoczWineDetails winePourPotOutStart(WineOutStartDTO wineOutStartDTO) {
+        LaoczWineDetails wineDetailsById = getWineDetailsById(wineOutStartDTO.getWineDetailsId());
         checkDetailType(wineDetailsById.getDetailType(), WineDetailTypeEnum.POUR_IN);
-        return wineOutService.wineOutStart(wineDetailsId);
+        return wineOutService.wineOutStart(wineOutStartDTO);
     }
 
     /**

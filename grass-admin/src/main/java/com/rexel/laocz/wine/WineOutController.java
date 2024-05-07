@@ -4,6 +4,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.dto.WinBaseDTO;
 import com.rexel.laocz.domain.dto.WineOutApplyDTO;
+import com.rexel.laocz.domain.dto.WineOutStartDTO;
 import com.rexel.laocz.service.WineOutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,12 @@ public class WineOutController extends BaseController {
     /**
      * 出酒操作，称重罐称重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 称重量
      */
-    @GetMapping("/start/{wineDetailsId}")
-    public AjaxResult wineOutStart(@PathVariable("wineDetailsId") Long wineDetailsId) {
-        Object value = wineOutService.wineOutStart(wineDetailsId);
-        return AjaxResult.success(value);
+    @PostMapping("/start")
+    public AjaxResult wineOutStart(@RequestBody WineOutStartDTO wineOutStartDTO) {
+        return AjaxResult.success(wineOutService.wineOutStart(wineOutStartDTO));
     }
 
     /**

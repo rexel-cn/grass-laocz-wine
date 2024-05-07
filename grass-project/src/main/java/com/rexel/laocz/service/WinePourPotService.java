@@ -1,7 +1,9 @@
 package com.rexel.laocz.service;
 
+import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.QrInCodeScanDTO;
 import com.rexel.laocz.domain.dto.WineEntryDTO;
+import com.rexel.laocz.domain.dto.WineOutStartDTO;
 import com.rexel.laocz.domain.dto.WinePourPotApplyDTO;
 import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 
@@ -24,10 +26,10 @@ public interface WinePourPotService {
     /**
      * 倒坛出酒开始获取重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 重量
      */
-    String winePourPotOutStart(Long wineDetailsId);
+    LaoczWineDetails winePourPotOutStart(WineOutStartDTO wineOutStartDTO);
 
     /**
      * 倒坛出酒

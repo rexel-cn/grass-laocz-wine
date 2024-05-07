@@ -1,10 +1,7 @@
 package com.rexel.laocz.wine;
 
 import com.rexel.common.core.domain.AjaxResult;
-import com.rexel.laocz.domain.dto.QrInCodeScanDTO;
-import com.rexel.laocz.domain.dto.WinBaseDTO;
-import com.rexel.laocz.domain.dto.WineEntryDTO;
-import com.rexel.laocz.domain.dto.WinePourPotApplyDTO;
+import com.rexel.laocz.domain.dto.*;
 import com.rexel.laocz.service.WinePourPotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,13 +32,12 @@ public class WinePourPotController {
     /**
      * 倒坛出酒开始获取重量
      *
-     * @param wineDetailsId 酒操作业务详情id
+     * @param wineOutStartDTO 酒操作业务详情id
      * @return 重量
      */
-    @GetMapping("/outStart/{wineDetailsId}")
-    public AjaxResult winePourPotOutStart(@PathVariable("wineDetailsId") Long wineDetailsId) {
-        Object outWeight = winePourPotService.winePourPotOutStart(wineDetailsId);
-        return AjaxResult.success(outWeight);
+    @PostMapping("/outStart")
+    public AjaxResult winePourPotOutStart(@RequestBody WineOutStartDTO wineOutStartDTO) {
+        return AjaxResult.success(winePourPotService.winePourPotOutStart(wineOutStartDTO));
     }
 
     /**
