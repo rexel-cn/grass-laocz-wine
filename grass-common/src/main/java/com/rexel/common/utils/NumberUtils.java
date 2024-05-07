@@ -20,6 +20,9 @@ public class NumberUtils implements Serializable {
     public static final DecimalFormat DF_ONE = new DecimalFormat("#.0");
     public static final DecimalFormat DF_TWO = new DecimalFormat("###.00");
 
+    public static Long parseLong(String str) {
+        return StrUtil.isNotEmpty(str) ? Long.valueOf(str) : null;
+    }
     /**
      * 是否是 数字
      */

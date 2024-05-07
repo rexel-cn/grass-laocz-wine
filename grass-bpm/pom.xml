@@ -11,6 +11,15 @@
     <artifactId>grass-bpm</artifactId>
 
     <dependencies>
+        <!-- Flowable 工作流相关 -->
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-process</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-actuator</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.rexel</groupId>
             <artifactId>grass-common</artifactId>
@@ -23,14 +32,6 @@
             <groupId>com.rexel</groupId>
             <artifactId>grass-framework</artifactId>
         </dependency>
-        <!-- Flowable 工作流相关 -->
-        <dependency>
-            <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter-process</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter-actuator</artifactId>
-        </dependency>
+
     </dependencies>
 </project>

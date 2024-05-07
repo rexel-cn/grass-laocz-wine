@@ -1,6 +1,7 @@
 package com.rexel.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -11,8 +12,11 @@ import com.rexel.common.core.domain.entity.SysUser;
 import com.rexel.common.core.domain.model.LoginUser;
 import com.rexel.common.core.domain.vo.BaseNameValueVO;
 import com.rexel.common.core.redis.RedisCache;
+import com.rexel.common.enums.CommonStatusEnum;
 import com.rexel.common.enums.UserStatus;
+import com.rexel.common.exception.CustomException;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.CollectionUtils;
 import com.rexel.common.utils.LoginTokenUtils;
 import com.rexel.common.utils.SecurityUtils;
 import com.rexel.framework.web.service.SysPermissionService;
@@ -549,5 +553,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return UserConstants.USER_TYPE_TENANT_USER;
         }
         return null;
+    }
+
+    /**
+     * 校验用户们是否有效。如下情况，视为无效：
+     * 1. 用户编号不存在
+     * 2. 用户被禁用
+     *
+     * @param ids 用户编号数组
+     */
+    @Override
+    public void validateUserList(Collection<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return;
+        }
+        // 获得岗位信息
+        List<SysUser> users = selectUserByIds(ids.toArray(new Long[0]));
+        Map<Long, SysUser> userMap = CollectionUtils.convertMap(users, SysUser::getUserId);
+        // 校验
+        ids.forEach(id -> {
+            SysUser user = userMap.get(id);
+            if (user == null) {
+                throw new  CustomException("用户不存在");
+            }
+            if (!CommonStatusEnum.ENABLE.getStatus().equals(user.getStatus())) {
+                throw new  CustomException("名字为【{}】的用户已被禁用", user.getUserName());
+            }
+        });
     }
 }

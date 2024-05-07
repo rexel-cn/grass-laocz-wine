@@ -11,10 +11,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -34,7 +31,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     public static String MM_DD = "MM-dd";
     public static String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
     public static String YYYYMMDDHHMMSSSSS = "yyyyMMddHHmmssSSS";
-    public static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+    public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
     public static String YYYY_MM_DD_HH_MM_SS_SSS = "yyyy-MM-dd HH:mm:ss.SSS";
     private static String[] parsePatterns = {
             "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
@@ -696,6 +693,38 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             e.printStackTrace();
         }
         return false;
+    }
+    /**
+     * 将 LocalDateTime 转换成 Date
+     *
+     * @param date LocalDateTime
+     * @return LocalDateTime
+     */
+    public static Date of(LocalDateTime date) {
+        if (date == null) {
+            return null;
+        }
+        // 将此日期时间与时区相结合以创建 ZonedDateTime
+        ZonedDateTime zonedDateTime = date.atZone(ZoneId.systemDefault());
+        // 本地时间线 LocalDateTime 到即时时间线 Instant 时间戳
+        Instant instant = zonedDateTime.toInstant();
+        // UTC时间(世界协调时间,UTC + 00:00)转北京(北京,UTC + 8:00)时间
+        return Date.from(instant);
+    }
+    /**
+     * 将 Date 转换成 LocalDateTime
+     *
+     * @param date Date
+     * @return LocalDateTime
+     */
+    public static LocalDateTime of(Date date) {
+        if (date == null) {
+            return null;
+        }
+        // 转为时间戳
+        Instant instant = date.toInstant();
+        // UTC时间(世界协调时间,UTC + 00:00)转北京(北京,UTC + 8:00)时间
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 }
 

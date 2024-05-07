@@ -10,6 +10,7 @@ import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.RealStatusEnum;
 import com.rexel.laocz.enums.WineDetailTypeEnum;
+import com.rexel.laocz.enums.WineProcessDefinitionKeyEnum;
 import com.rexel.laocz.service.WineAbstract;
 import com.rexel.laocz.service.WineSampService;
 import org.jetbrains.annotations.NotNull;
@@ -59,17 +60,16 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
 
         LaoczBatchPotteryMapping laoczBatchPotteryMapping = check(wineSampApplyDTO);
 
-
         //新增酒操作业务表
         //新增酒操作业务详情
-        //新增 工单表（流程审批创建）,然后需要把laocz_liquor_batch的liquor_batch_id字段作为业务id来和流程关联
-        String workId = SequenceUtils.nextId().toString();
         //生成busy_id
         String busyId = SequenceUtils.nextId().toString();
+        //新增流程实例
+        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.POUR_TANK);
         //新增laocz_wine_operations
-        saveLaoczWineOperations(busyId, workId, OperationTypeEnum.SAMPLING);
+        saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.SAMPLING);
         //新增laocz_wine_details
-        saveLaoczWineDetails(wineSampApplyDTO, busyId, workId, laoczBatchPotteryMapping);
+        saveLaoczWineDetails(wineSampApplyDTO, busyId, processInstanceId, laoczBatchPotteryMapping);
 
         //更新陶坛实时关系表，占用
         LaoczBatchPotteryMapping mapping = new LaoczBatchPotteryMapping();
