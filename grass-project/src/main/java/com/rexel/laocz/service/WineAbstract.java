@@ -2,8 +2,11 @@ package com.rexel.laocz.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSON;
+import com.rexel.bpm.domain.task.BpmProcessInstanceCreateReqDTO;
+import com.rexel.bpm.service.task.BpmProcessInstanceService;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
+import com.rexel.common.utils.SecurityUtils;
 import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineHistoryDTO;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +62,8 @@ public abstract class WineAbstract {
     protected ILaoczWineHistoryService iLaoczWineHistoryService;
     @Autowired
     protected ILaoczPotteryAltarManagementService iLaoczPotteryAltarManagementService;
-
+    @Resource
+    private BpmProcessInstanceService processInstanceService;
 
     protected void saveWineEvent(LaoczWineDetails wineDetails, String Status, List<String> points, String eventStatus) {
         LaoczWineEvent laoczWineEvent = new LaoczWineEvent();
@@ -136,6 +141,15 @@ public abstract class WineAbstract {
         //操作类型 1入酒 2出酒 3倒坛 4取样
         operations.setOperationType(operationTypeEnum.getValue());
         iLaoczWineOperationsService.save(operations);
+    }
+
+
+    protected String saveProcessInstancesService(String businessKey, WineProcessDefinitionKeyEnum wineProcessDefinitionKeyEnum){
+        //创建流程实例
+        return processInstanceService.createProcessInstance(
+                new BpmProcessInstanceCreateReqDTO()
+                        .setProcessDefinitionKey(wineProcessDefinitionKeyEnum.getKey())
+                        .setBusinessKey(businessKey));
     }
 
 

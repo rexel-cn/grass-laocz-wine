@@ -39,7 +39,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpasyncclient.version>4.1.5</httpasyncclient.version>
-        <hutool.version>5.8.4</hutool.version>
+        <hutool.version>5.8.25</hutool.version>
         <javax.mail.version>1.4.7</javax.mail.version>
         <aliyun-java-sdk-core.version>4.6.1</aliyun-java-sdk-core.version>
         <spring-boot.web-socket>2.6.2</spring-boot.web-socket>
@@ -54,6 +54,10 @@
         <javase.version>3.3.0</javase.version>
         <itextpdf.version>5.5.13</itextpdf.version>
         <skipTests>true</skipTests><!-- install或package 打包时跳过测试 -->
+        <!-- Bpm 工作流相关 -->
+        <flowable.version>6.8.0</flowable.version>
+        <guava.version>33.0.0-jre</guava.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
     <!-- 依赖声明 -->
@@ -63,7 +67,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.7.1</version>
+                <version>2.7.18</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -259,6 +263,11 @@
                 <artifactId>grass-project</artifactId>
                 <version>${grass.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rexel</groupId>
+                <artifactId>grass-bpm</artifactId>
+                <version>${grass.version}</version>
+            </dependency>
             <!-- minio -->
             <dependency>
                 <groupId>io.minio</groupId>
@@ -351,6 +360,38 @@
                 <artifactId>itextpdf</artifactId>
                 <version>${itextpdf.version}</version>
             </dependency>
+            <!-- 工作流相关 -->
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-process</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-actuator</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+            <!-- 工作流相关结束 -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId> <!-- use mapstruct-jdk8 for Java 8 or higher -->
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-jdk8</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -368,6 +409,7 @@
         <module>grass-dview</module>
         <module>grass-framework/grass-framework-system-api</module>
         <module>grass-project</module>
+        <module>grass-bpm</module>
     </modules>
 
     <build>

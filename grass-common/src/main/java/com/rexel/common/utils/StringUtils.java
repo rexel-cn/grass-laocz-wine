@@ -1,5 +1,6 @@
 package com.rexel.common.utils;
 
+import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.StrUtil;
 import com.rexel.common.constant.Constants;
 import com.rexel.common.core.text.StrFormatter;
@@ -12,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 字符串工具类
@@ -564,5 +566,13 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             str = str.replaceFirst(regex, "{" + i + "}");
         }
         return str;
+    }
+    public static Set<Long> splitToLongSet(String value) {
+        return splitToLongSet(value, StrPool.COMMA);
+    }
+
+    public static Set<Long> splitToLongSet(String value, CharSequence separator) {
+        long[] longs = StrUtil.splitToLong(value, separator);
+        return Arrays.stream(longs).boxed().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

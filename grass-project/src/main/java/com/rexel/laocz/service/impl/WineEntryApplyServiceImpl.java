@@ -100,8 +100,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             return result;
         }
         //计算出总重量对应的陶坛罐，例如满坛重量是100，总重量为1110，那么就需要11个陶坛罐
-        for (int i = 0; i < wineOperaPotteryAltarVOS.size(); i++) {
-            WineOperaPotteryAltarVO wineOperaPotteryAltarVO = wineOperaPotteryAltarVOS.get(i);
+        for (WineOperaPotteryAltarVO wineOperaPotteryAltarVO : wineOperaPotteryAltarVOS) {
             Double potteryAltarFullAltarWeight = wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight();
             if (applyWeight > potteryAltarFullAltarWeight) {
                 wineOperaPotteryAltarVO.setApplyWeight(potteryAltarFullAltarWeight);
@@ -154,18 +153,18 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         wineEntryApplyCheck(wineEntryApplyDTO);
         //新增    laocz_liquor_batch
         saveLiquorBatch(wineEntryApplyDTO);
-        //新增 工单表（流程审批创建）,然后需要把laocz_liquor_batch的liquor_batch_id字段作为业务id来和流程关联
-        String workId = SequenceUtils.nextId().toString();
         //将创建工单生成的id与laocz_liquor_batch进行关联更新
         //后续的表也新增
         //新增 laocz_batch_pottery_mapping
         savalaoczBatchPotteryMapping(wineEntryApplyDTO);
         //生成busy_id
         String busyId = SequenceUtils.nextId().toString();
+        //新增流程实例
+        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.IN_WINE);
         //新增laocz_wine_operations
-        saveLaoczWineOperations(busyId, workId, OperationTypeEnum.WINE_ENTRY);
+        saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.WINE_ENTRY);
         //新增laocz_wine_details
-        saveLaoczWineDetails(wineEntryApplyDTO, busyId, workId);
+        saveLaoczWineDetails(wineEntryApplyDTO, busyId, processInstanceId);
     }
 
     /**

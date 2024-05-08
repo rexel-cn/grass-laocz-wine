@@ -3,6 +3,7 @@ package com.rexel.system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.common.core.domain.entity.SysUser;
 import com.rexel.common.core.domain.vo.BaseNameValueVO;
+import com.rexel.common.utils.CollectionUtils;
 import com.rexel.system.domain.dto.user.*;
 import com.rexel.system.domain.dto.user.profile.UserProfileUpdatePasswordReqDTO;
 import com.rexel.system.domain.dto.user.profile.UserProfileUpdateReqDTO;
@@ -10,7 +11,9 @@ import com.rexel.system.domain.vo.NotificationVO;
 import com.rexel.system.domain.vo.user.UserRespVO;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户 业务层
@@ -160,4 +163,16 @@ public interface ISysUserService extends IService<SysUser> {
      */
     String setUserType(String userType);
 
+    default Map<Long, SysUser> getUserMap(Collection<Long> ids) {
+        List<SysUser> sysUsers = selectUserByIds(ids.toArray(new Long[0]));
+        return CollectionUtils.convertMap(sysUsers, SysUser::getUserId);
+    }
+    /**
+     * 校验用户们是否有效。如下情况，视为无效：
+     * 1. 用户编号不存在
+     * 2. 用户被禁用
+     *
+     * @param ids 用户编号数组
+     */
+    void validateUserList(Collection<Long> ids);
 }

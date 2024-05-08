@@ -17,6 +17,10 @@
         </dependency>
         <dependency>
             <groupId>com.rexel</groupId>
+            <artifactId>grass-bpm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rexel</groupId>
             <artifactId>grass-dview</artifactId>
         </dependency>
         <dependency>
@@ -35,5 +39,6 @@
             <groupId>com.rexel</groupId>
             <artifactId>grass-component</artifactId>
         </dependency>
+
     </dependencies>
 </project>

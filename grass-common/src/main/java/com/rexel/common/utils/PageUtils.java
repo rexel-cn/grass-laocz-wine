@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PageUtils extends PageHelper {
+    public static int getStart(PageDomain pageParam) {
+        return (pageParam.getPageNum() - 1) * pageParam.getPageSize();
+    }
     /**
      * 设置请求分页数据
      */

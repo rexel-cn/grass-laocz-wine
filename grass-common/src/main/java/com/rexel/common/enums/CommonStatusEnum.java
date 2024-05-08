@@ -20,13 +20,11 @@ public enum CommonStatusEnum {
     /**
      * 状态值
      */
+    @Getter
     private final Integer status;
     /**
      * 状态名
      */
     private final String name;
 
-    public Integer getStatus() {
-        return status;
-    }
 }

@@ -52,14 +52,14 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         List<LaoczBatchPotteryMapping> batchPotteryMappings = check(list);
 
 
-        //新增 工单表（流程审批创建）,然后需要把laocz_liquor_batch的liquor_batch_id字段作为业务id来和流程关联
-        String workId = SequenceUtils.nextId().toString();
         //生成busy_id
         String busyId = SequenceUtils.nextId().toString();
+        //新增流程实例
+        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.OUT_WINE);
         //新增laocz_wine_operations
-        saveLaoczWineOperations(busyId, workId, OperationTypeEnum.WINE_OUT);
+        saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.WINE_OUT);
         //新增laocz_wine_details
-        saveLaoczWineDetails(list, busyId, workId, batchPotteryMappings);
+        saveLaoczWineDetails(list, busyId, processInstanceId, batchPotteryMappings);
 
         //更新陶坛状态 为占用，目的为了不让别的业务申请
         super.updatePotteryMappingState(batchPotteryMappings.stream().map(wineOutApplyDTO -> {
