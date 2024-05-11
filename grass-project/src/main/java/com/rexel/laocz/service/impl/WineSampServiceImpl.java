@@ -1,7 +1,7 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.common.exception.CustomException;
-import com.rexel.common.utils.SequenceUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
@@ -17,7 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName WineSampServiceImpl
@@ -45,6 +49,32 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         }
         return wineOperaPotteryAltarVOS.get(0);
     }
+
+    /**
+     * 取样审批结束后处理，审批通过或不通过
+     *
+     * @param busyId 业务id
+     */
+    @Override
+    public void updateWineSampStatus(String busyId) {
+        List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
+        //如果审批不通过
+        // 陶坛与批次实时关系表修改为存储状态
+        if (CollectionUtil.isNotEmpty(list)) {
+            List<Long> potteryAltarIds = list.stream().map(LaoczWineDetails::getPotteryAltarId).collect(Collectors.toList());
+            //修改陶坛与批次实时关系表
+            iLaoczBatchPotteryMappingService.lambdaUpdate().in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarIds)
+                    .set(LaoczBatchPotteryMapping::getRealStatus, RealStatusEnum.STORAGE.getCode()).update();
+            //备份酒操作业务表
+            super.backupWineDetails(list);
+        }
+        //laocz_wine_operations备份到his，然后删除
+        taskVerify(busyId);
+
+        //备份所有数据到laocz_wine_history，并标记为不通过
+        rejectSaveHistory(busyId);
+    }
+
     /**
      * 酒取样申请
      *
@@ -53,7 +83,6 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void wineSampApply(WineSampApplyDTO wineSampApplyDTO) {
-
         //查询 使用中，有酒，必须是存储状态
         //二维码扫描:有没有这个罐子，是否在使用中，必须有酒，必须是存储状态
         //手动输入：有没有这个罐子，是否在使用中，必须有酒,必须是存储状态，申请重量必须小于等于实际重量
@@ -63,9 +92,13 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         //新增酒操作业务表
         //新增酒操作业务详情
         //生成busy_id
-        String busyId = SequenceUtils.nextId().toString();
+        String busyId = super.getBusyId();
+        Collection<String> values = iLaoczLiquorBatchService.getLiquorManagementNameMap(Collections.singletonList(laoczBatchPotteryMapping.getLiquorBatchId())).values();
+        String liquorNames = String.join(",", values);
         //新增流程实例
-        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.POUR_TANK);
+        String processInstanceId = saveProcessInstancesService(busyId
+                , super.getVariables(laoczBatchPotteryMapping.getLiquorBatchId(), OperationTypeEnum.SAMPLING.getValue(),liquorNames)
+                , WineProcessDefinitionKeyEnum.POUR_TANK);
         //新增laocz_wine_operations
         saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.SAMPLING);
         //新增laocz_wine_details
@@ -103,9 +136,10 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
 
     /**
      * 新增酒操作业务表
-     * @param wineSampApplyDTO 酒取样申请
-     * @param busyId 业务id
-     * @param workId 工单id
+     *
+     * @param wineSampApplyDTO         酒取样申请
+     * @param busyId                   业务id
+     * @param workId                   工单id
      * @param laoczBatchPotteryMapping 陶坛实时关系表
      */
     private void saveLaoczWineDetails(WineSampApplyDTO wineSampApplyDTO, String busyId, String workId, LaoczBatchPotteryMapping laoczBatchPotteryMapping) {
@@ -115,7 +149,6 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
         laoczWineDetails.setWeighingTankWeight(potteryAltarApplyWeight);
         iLaoczWineDetailsService.save(laoczWineDetails);
     }
-
 
     /**
      * 酒取样完成

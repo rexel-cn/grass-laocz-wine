@@ -13,13 +13,13 @@ import java.util.List;
  * @Date 2024/3/11 14:01
  **/
 public interface WineOutService {
+
     /**
      * 出酒申请
      *
      * @param list 出酒申请参数：陶坛罐ID，申请重量
      */
     void wineOutApply(List<WineOutApplyDTO> list);
-
 
     /**
      * 出酒操作，称重罐称重量
@@ -35,5 +35,9 @@ public interface WineOutService {
      */
     void wineOutFinish(Long wineDetailsId);
 
-
+    /**
+     * 出酒审批结束后处理，审批通过或不通过
+     * @param busyId 业务id
+     */
+    void updateWineOutStatus(String busyId);
 }

@@ -1,12 +1,14 @@
 package com.rexel.laocz.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson2.JSON;
 import com.rexel.bpm.domain.task.BpmProcessInstanceCreateReqDTO;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.bpm.service.task.BpmProcessInstanceService;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
-import com.rexel.common.utils.SecurityUtils;
+import com.rexel.common.utils.SequenceUtils;
 import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineHistoryDTO;
@@ -20,25 +22,22 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.rexel.laocz.constant.BpmWineVariablesConstants.*;
+
 /**
  * @ClassName WineAbstract
- * @Description
+ * @Description 酒品抽象类
  * @Author 孟开通
  * @Date 2024/3/13 17:48
  **/
 @Service
 @Slf4j
 public abstract class WineAbstract {
-    protected static final String APPLY_LOCK = "apply_lock";
-
     @Autowired
     @Qualifier("laoczTtlScheduledExecutorService")
     protected ScheduledExecutorService threadPoolTaskScheduler;
@@ -63,8 +62,29 @@ public abstract class WineAbstract {
     @Autowired
     protected ILaoczPotteryAltarManagementService iLaoczPotteryAltarManagementService;
     @Resource
+    protected ILaoczLiquorBatchService iLaoczLiquorBatchService;
+    @Resource
     private BpmProcessInstanceService processInstanceService;
 
+    /**
+     * 陶坛罐状态检查
+     *
+     * @param laoczPotteryAltarManagement 陶坛罐
+     */
+    protected void AltarStateCheck(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+        if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
+            throw new CustomException("陶坛罐已被封存");
+        }
+    }
+
+    /**
+     * 保存酒品事件 入酒出酒操作PLC下发测点记录
+     *
+     * @param wineDetails 酒品详情
+     * @param Status      操作类型
+     * @param points      测点
+     * @param eventStatus 事件状态
+     */
     protected void saveWineEvent(LaoczWineDetails wineDetails, String Status, List<String> points, String eventStatus) {
         LaoczWineEvent laoczWineEvent = new LaoczWineEvent();
         //工单id
@@ -96,7 +116,7 @@ public abstract class WineAbstract {
      * @param liquorBatchId  酒品批次号
      * @param potteryAltarId 陶坛罐id
      * @param applyWeight    申请重量
-     * @return LaoczWineDetails
+     * @return LaoczWineDetails 酒品详情
      */
     protected LaoczWineDetails buildLaoczWineDetails(String busyId,
                                                      String workId,
@@ -140,23 +160,25 @@ public abstract class WineAbstract {
         operations.setWorkOrderId(workId);
         //操作类型 1入酒 2出酒 3倒坛 4取样
         operations.setOperationType(operationTypeEnum.getValue());
+        //操作状态 1审批中 2审批通过 3审批不通过
+        operations.setApprovalResults(BpmTaskStatusEnum.RUNNING.getStatus());
         iLaoczWineOperationsService.save(operations);
     }
 
-
-    protected String saveProcessInstancesService(String businessKey, WineProcessDefinitionKeyEnum wineProcessDefinitionKeyEnum){
+    /**
+     * 创建流程实例
+     * @param businessKey 业务id
+     * @param variables 业务变量 说明：跟随流程走的变量
+     * @param wineProcessDefinitionKeyEnum 流程定义key 参考{@link WineProcessDefinitionKeyEnum}
+     * @return 流程实例id
+     */
+    protected String saveProcessInstancesService(String businessKey, Map<String, Object> variables, WineProcessDefinitionKeyEnum wineProcessDefinitionKeyEnum) {
         //创建流程实例
         return processInstanceService.createProcessInstance(
                 new BpmProcessInstanceCreateReqDTO()
                         .setProcessDefinitionKey(wineProcessDefinitionKeyEnum.getKey())
+                        .setVariables(variables)
                         .setBusinessKey(businessKey));
-    }
-
-
-    protected static void AltarStateCheck(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
-        if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
-            throw new CustomException("陶坛罐已被封存");
-        }
     }
 
     /**
@@ -208,12 +230,54 @@ public abstract class WineAbstract {
         iLaoczWineDetailsService.removeById(laoczWineDetails);
     }
 
+    /**
+     * 备份酒品详情
+     *
+     * @param laoczWineDetails 酒品详情
+     */
+    protected void backupWineDetails(List<LaoczWineDetails> laoczWineDetails) {
+        if (laoczWineDetails == null) {
+            throw new CustomException("业务异常，请联系管理员");
+        }
+        List<LaoczWineDetailsHis> laoczWineDetailsHis = BeanUtil.copyToList(laoczWineDetails, LaoczWineDetailsHis.class);
+        for (LaoczWineDetailsHis laoczWineDetailsHi : laoczWineDetailsHis) {
+            laoczWineDetailsHi.setOperationTime(new Date());
+            laoczWineDetailsHi.setBusyStatus(WineBusyStatusEnum.COMPLETED.getValue());
+        }
+        if (CollectionUtil.isNotEmpty(laoczWineDetailsHis)) {
+            iLaoczWineDetailsHisService.saveBatch(laoczWineDetailsHis);
+        }
+        if (CollectionUtil.isNotEmpty(laoczWineDetails)) {
+            List<Long> ids = laoczWineDetails.stream().map(LaoczWineDetails::getWineDetailsId).collect(Collectors.toList());
+            iLaoczWineDetailsService.removeByIds(ids);
+        }
+    }
+
+    /**
+     * 审批不通过确认后保存历史数据
+     * @param busyId 业务id
+     */
+    protected void rejectSaveHistory(String busyId) {
+        List<WineHistoryDTO> wineHistoryDTOS = laoczWineDetailsMapper.selectWineHistoryListByBusyId(busyId);
+        List<LaoczWineHistory> laoczWineHistories = BeanUtil.copyToList(wineHistoryDTOS, LaoczWineHistory.class);
+        for (LaoczWineHistory laoczWineHistory : laoczWineHistories) {
+            laoczWineHistory.setApprovalResults(BpmTaskStatusEnum.REJECT.getStatus());
+        }
+        iLaoczWineHistoryService.saveBatch(laoczWineHistories);
+    }
+
+    /**
+     * 酒操作业务流转，保存历史数据
+     *
+     * @param wineDetailsId 酒详情id
+     */
     protected void saveHistory(LaoczWineDetails wineDetailsId) {
         Long detailType = wineDetailsId.getDetailType();
         WineDetailTypeEnum wineDetailTypeEnum = WineDetailTypeEnum.getEnumByCode(detailType);
 
         WineHistoryDTO wineHistoryDTO = laoczWineDetailsMapper.selectWineHistoryDTOList(wineDetailsId.getWineDetailsId());
         LaoczWineHistory laoczWineHistory = BeanUtil.copyProperties(wineHistoryDTO, LaoczWineHistory.class);
+        laoczWineHistory.setApprovalResults(BpmTaskStatusEnum.APPROVE.getStatus());
         LaoczBatchPotteryMapping batchPotteryMapping;
         switch (wineDetailTypeEnum) {
             case IN_WINE:
@@ -371,7 +435,6 @@ public abstract class WineAbstract {
         //验证陶坛的重量上限是否满足
         List<Long> potteryAltarIds = potteryAltars.stream().map(WineOutApplyDTO::getPotteryAltarId).collect(Collectors.toList());
 
-
         //检查陶坛是否都可以使用
         List<LaoczPotteryAltarManagement> laoczPotteryAltarManagements = iLaoczPotteryAltarManagementService.lambdaQuery().in(LaoczPotteryAltarManagement::getPotteryAltarId, potteryAltarIds).list();
         if (potteryAltars.size() != laoczPotteryAltarManagements.size()) {
@@ -401,7 +464,7 @@ public abstract class WineAbstract {
      * 陶坛罐编号检查
      *
      * @param potteryAltarNumber 陶坛罐编号
-     * @param isUse              是否使用（有没有酒） true 使用 false 不使用
+     * @param isUse 是否使用（有没有酒） true 使用 false 不使用
      */
     protected void potteryAltarNumberCheck(String potteryAltarNumber, boolean isUse) {
         LaoczPotteryAltarManagement laoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery()
@@ -409,7 +472,7 @@ public abstract class WineAbstract {
         if (laoczPotteryAltarManagement == null) {
             throw new CustomException("陶坛罐不存在");
         }
-
+        //验证陶坛是否可以使用，有没有被封存
         AltarStateCheck(laoczPotteryAltarManagement);
 
         LaoczBatchPotteryMapping batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
@@ -453,14 +516,56 @@ public abstract class WineAbstract {
         }
     }
 
-
+    /**
+     * 验证酒状态是否是期望的
+     * @param detailType 酒状态
+     * @param wineDetailTypeEnum 期望的酒状态
+     */
     protected void checkDetailType(Long detailType, WineDetailTypeEnum wineDetailTypeEnum) {
         if (!wineDetailTypeEnum.getCode().equals(detailType)) {
             throw new CustomException("酒操作业务详情不是" + wineDetailTypeEnum.getDesc());
         }
     }
 
+    /**
+     * 根据酒详情id，获取酒
+     *
+     * @param wineDetailsId 酒详情id
+     * @return 酒
+     */
     protected LaoczWineDetails getWineDetailsById(Long wineDetailsId) {
         return iLaoczWineDetailsService.getById(wineDetailsId);
+    }
+
+    /**
+     * 获取业务id
+     * @return 业务id
+     */
+    protected String getBusyId() {
+        return SequenceUtils.nextId().toString();
+    }
+
+    /**
+     * 获取流程定义参数
+     * @param liquorBatchId 酒品批次号
+     * @param operationType 操作类型
+     * @param liquorName 酒品名称
+     * @return 流程定义参数
+     */
+    protected Map<String, Object> getVariables(Object liquorBatchId, Object operationType, Object liquorName) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put(LIQUOR_BATCH_ID, liquorBatchId.toString());
+        variables.put(OPERATION_TYPE, operationType.toString());
+        variables.put(LIQUOR_NAME, liquorName.toString());
+        return variables;
+    }
+
+    /**
+     * 获取酒操作业务详情实时
+     * @param busyId 业务id
+     * @return 酒操作业务详情实时
+     */
+    protected List<LaoczWineDetails> getDetailsInBusyId(String busyId) {
+        return iLaoczWineDetailsService.lambdaQuery().in(LaoczWineDetails::getBusyId, busyId).list();
     }
 }

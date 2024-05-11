@@ -1,7 +1,9 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
 import com.rexel.laocz.constant.WineDictConstants;
@@ -41,10 +43,19 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     private ILaoczFireZoneInfoService iLaoczFireZoneInfoService;
     @Autowired
     private ILaoczWeighingTankService iLaoczWeighingTankService;
+    @Autowired
+    private WineEntryApplyService wineEntryApplyService;
+    @Autowired
+    private WineOutService wineOutService;
+    @Autowired
+    private WinePourPotService winePourPotService;
+    @Autowired
+    private WineSampService wineSampService;
 
     /**
      * 获取我的事项
      *
+     * @param wineOperationDTO 酒操作业务表
      * @return 我的事项列表
      */
     @Override
@@ -63,6 +74,7 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
             matterVO.setApplyTime(laoczWineOperations.getCreateTime());
             matterVO.setOperationType(OperationTypeEnum.getNameByValue(laoczWineOperations.getOperationType()));
             matterVO.setOperationTypeNumber(laoczWineOperations.getOperationType());
+            matterVO.setApprovalResult(BpmTaskStatusEnum.getName(laoczWineOperations.getApprovalResults()));
             return matterVO;
         }).collect(Collectors.toList());
     }
@@ -103,7 +115,7 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
     /**
      * 取样用途
      *
-     * @param wineDetailVO
+     * @param wineDetailVO 酒详情
      */
     private void buildSamplingPurpose(WineDetailVO wineDetailVO) {
         if (wineDetailVO == null) {
@@ -120,6 +132,7 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
      * 设置称重罐
      *
      * @param weighingTank 称重罐
+     * @return 是否成功
      */
     @Override
     public Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank) {
@@ -142,5 +155,73 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
                 .update();
     }
 
+    /**
+     * 确认审批失败(审批失败确认后业务处理)
+     * @param wineOperationsId 酒操作业务表 主键
+     * @return 结果
+     */
+    @Override
+    public Boolean confirmApprovalFailed(Long wineOperationsId) {
+        LaoczWineOperations operations = getById(wineOperationsId);
 
+        validateOperations(operations);
+
+        if (!operations.getApprovalResults().equals(BpmTaskStatusEnum.REJECT.getStatus())) {
+            throw new CustomException("该事项不是审批不通过状态,请刷新后重试");
+        }
+        //1：入酒，2出酒，3倒坛，4取样
+        Long operationType = operations.getOperationType();
+        OperationTypeEnum typeEnum = OperationTypeEnum.getByValue(operationType);
+        switch (typeEnum) {
+            case WINE_ENTRY:
+                wineEntryApplyService.updateWineEntryStatus(operations.getBusyId());
+                break;
+            case WINE_OUT:
+                wineOutService.updateWineOutStatus(operations.getBusyId());
+                break;
+            case POUR_POT:
+                winePourPotService.updateWinePourStatus(operations.getBusyId());
+                break;
+            case SAMPLING:
+                wineSampService.updateWineSampStatus(operations.getBusyId());
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + operationType);
+        }
+        return true;
+    }
+
+    /**
+     * 确认审批状态
+     *
+     * @param busyId 业务id
+     * @param status 状态
+     * @return 是否成功
+     */
+    @Override
+    public Boolean confirmApprovalStatus(String busyId, Integer status) {
+        validateWineOperationsExistsByBusyId(busyId);
+        return lambdaUpdate().eq(LaoczWineOperations::getBusyId, busyId).set(LaoczWineOperations::getApprovalResults, status).update();
+    }
+
+    /**
+     * 根据业务id验证事项是否存在
+     *
+     * @param busyId 业务id
+     */
+    private void validateWineOperationsExistsByBusyId(String busyId) {
+        LaoczWineOperations operations = lambdaQuery().eq(LaoczWineOperations::getBusyId, busyId).one();
+        validateOperations(operations);
+    }
+
+    /**
+     * 验证事项是否存在
+     *
+     * @param operations 事项
+     */
+    private void validateOperations(LaoczWineOperations operations) {
+        if (ObjectUtil.isNull(operations)) {
+            throw new CustomException("事项不存在，请刷新页面重试");
+        }
+    }
 }

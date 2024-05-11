@@ -97,6 +97,31 @@ public class LaoczWineDetailsHis extends BaseEntity {
     @Excel(name = "称重罐重量")
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Double weighingTankWeight;
+
+    /**
+     * 开始之前重量
+     */
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @Excel(name = "开始之前重量")
+    private Double beforeWeight;
+    /**
+     * 结束之后重量
+     */
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    @Excel(name = "结束之后重量")
+    private Double afterWeight;
+    /**
+     * 开始之前时间
+     */
+    @Excel(name = "开始之前时间")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Date beforeTime;
+    /**
+     * 结束之后时间
+     */
+    @Excel(name = "结束之后时间")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Date afterTime;
     /**
      * 业务时间（出酒、入酒、取样时间）
      */

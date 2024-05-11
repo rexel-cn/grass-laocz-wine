@@ -8,6 +8,7 @@ import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
+import liquibase.pro.packaged.B;
 
 import java.util.List;
 
@@ -18,8 +19,6 @@ import java.util.List;
  * @date 2024-03-12
  */
 public interface ILaoczWineOperationsService extends IService<LaoczWineOperations> {
-
-
     /**
      * 获取我的事项
      *
@@ -49,4 +48,19 @@ public interface ILaoczWineOperationsService extends IService<LaoczWineOperation
      * @param weighingTank 称重罐
      */
     Boolean setWeighingTank(WineEntryApplyParamDTO weighingTank);
+
+    /**
+     * 确认审批失败(审批失败确认后业务处理)
+     * @param wineOperationsId 酒操作业务表 主键
+     * @return 结果
+     */
+    Boolean confirmApprovalFailed(Long wineOperationsId);
+
+    /**
+     * 确认审批状态
+     * @param busy 业务id
+     * @param status 状态
+     * @return 结果
+     */
+    Boolean confirmApprovalStatus(String busy, Integer status);
 }

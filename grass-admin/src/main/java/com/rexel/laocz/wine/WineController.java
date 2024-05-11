@@ -65,4 +65,16 @@ public class WineController extends BaseController {
     public AjaxResult setWeighingTank(@RequestBody WineEntryApplyParamDTO weighingTank) {
         return AjaxResult.success(iLaoczWineOperationsService.setWeighingTank(weighingTank));
     }
+
+
+    /**
+     * 确认审批失败
+     *
+     * @param matterDetailDTO 酒操作业务表 主键
+     * @return
+     */
+    @PostMapping("/confirmApprovalFailed")
+    public AjaxResult confirmApprovalFailed(@RequestBody MatterDetailDTO matterDetailDTO) {
+        return AjaxResult.success(iLaoczWineOperationsService.confirmApprovalFailed(matterDetailDTO.getWineOperationsId()));
+    }
 }

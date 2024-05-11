@@ -1,13 +1,10 @@
 package com.rexel.laocz.asset;
 
-import com.rexel.common.annotation.Log;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
-import com.rexel.common.enums.BusinessType;
 import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
-import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
@@ -21,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -196,6 +192,7 @@ public class LaoczPotteryAltarManagementController extends BaseController {
         List<PotteryAltarVo> potteryAltarVos = iLaoczPotteryAltarManagementService.selectLaoczPotteryAltarManagementListDetail(null);
         util.exportExcel(response, potteryAltarVos, "陶坛管理");
     }
+
     /**
      * 导入陶坛管理列表
      */

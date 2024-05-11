@@ -10,6 +10,7 @@
         <result property="tenantId" column="tenant_id"/>
         <result property="workOrderId" column="work_order_id"/>
         <result property="operationType" column="operation_type"/>
+        <result property="approvalResults" column="approval_results"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
@@ -23,6 +24,7 @@
                tenant_id,
                work_order_id,
                operation_type,
+               approval_results,
                create_by,
                create_time,
                update_by,
@@ -38,6 +40,7 @@
         tenant_id,
         work_order_id,
         operation_type,
+        approval_results,
         create_by,
         create_time,
         update_by,

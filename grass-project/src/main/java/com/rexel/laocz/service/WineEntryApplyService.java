@@ -29,7 +29,6 @@ public interface WineEntryApplyService {
      */
     List<WineOperaPotteryAltarVO> automaticChoosePotteryAltar(Double applyWeight);
 
-
     /**
      * 二维码扫描获取入酒陶坛信息
      *
@@ -67,12 +66,18 @@ public interface WineEntryApplyService {
      */
     WineRealDataVO getWineRealData(Long wineDetailsId);
 
-
     /**
      * 入酒结束
      *
      * @param wineDetailsId 酒操作业务详情id
      */
     void wineEntryFinish(Long wineDetailsId);
+
+    /**
+     * 入酒审批结束后处理，审批不通过后确认操作
+     * @param busyId 业务id
+     */
+    void updateWineEntryStatus(String busyId);
+
 
 }

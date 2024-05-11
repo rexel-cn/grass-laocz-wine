@@ -1,7 +1,7 @@
 package com.rexel.laocz.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.common.exception.CustomException;
-import com.rexel.common.utils.SequenceUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
 import com.rexel.laocz.domain.LaoczWineDetails;
@@ -15,14 +15,12 @@ import com.rexel.laocz.service.WineAbstract;
 import com.rexel.laocz.service.WineEntryApplyService;
 import com.rexel.laocz.service.WineOutService;
 import com.rexel.laocz.service.WinePourPotService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +30,7 @@ import java.util.stream.Collectors;
  * @Date 2024/4/1 15:38
  **/
 @Service
+@Slf4j
 public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotService {
     @Autowired
     private WineOutService wineOutService;
@@ -46,18 +45,24 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void winePourPotApply(WinePourPotApplyDTO winePourPotApplyDTO) {
+        //申请前验证
         applyCheck(winePourPotApplyDTO.getOutPotteryAltarId(), winePourPotApplyDTO.getApplyWeight(), winePourPotApplyDTO.getInPotteryAltarId());
 
         List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery()
                 .in(LaoczBatchPotteryMapping::getPotteryAltarId, Arrays.asList(winePourPotApplyDTO.getInPotteryAltarId(),
                         winePourPotApplyDTO.getOutPotteryAltarId())).list();
-        LaoczBatchPotteryMapping outMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getOutPotteryAltarId())).findFirst().orElse(null);
+        LaoczBatchPotteryMapping outMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getOutPotteryAltarId())).findFirst().orElseThrow(() -> new CustomException("出酒陶坛罐不存在"));
         LaoczBatchPotteryMapping inMapping = list.stream().filter(e -> e.getPotteryAltarId().equals(winePourPotApplyDTO.getInPotteryAltarId())).findFirst().orElse(null);
 
         //生成busy_id
-        String busyId = SequenceUtils.nextId().toString();
+        String busyId = super.getBusyId();
+
+        Collection<String> values = iLaoczLiquorBatchService.getLiquorManagementNameMap(Collections.singletonList(outMapping.getLiquorBatchId())).values();
+        String liquorNames = String.join(",", values);
         //新增流程实例
-        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.POUR_TANK);
+        String processInstanceId = saveProcessInstancesService(busyId
+                , super.getVariables(outMapping.getLiquorBatchId(), OperationTypeEnum.POUR_POT.getValue(),liquorNames)
+                , WineProcessDefinitionKeyEnum.POUR_TANK);
         //新增laocz_wine_operations
         saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.POUR_POT);
         //新增laocz_wine_details
@@ -75,6 +80,12 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
 
     }
 
+    /**
+     * 倒坛申请前验证
+     * @param outPotteryAltarId 出酒陶坛id
+     * @param applyWeight 申请重量
+     * @param inPotteryAltarId 入酒陶坛id
+     */
     private void applyCheck(Long outPotteryAltarId, Double applyWeight, Long inPotteryAltarId) {
         if (outPotteryAltarId.equals(inPotteryAltarId)) {
             throw new CustomException("出酒陶坛罐和入酒陶坛罐不能是同一个");
@@ -137,7 +148,6 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         //入酒开始
         wineEntryApplyService.wineIn(wineEntryDTO);
     }
-
 
     /**
      * 二维码扫描获取倒坛出酒陶坛信息
@@ -220,7 +230,6 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         return inMappingIsNull;
     }
 
-
     /**
      * 二维码扫描获取倒坛出酒陶坛信息
      *
@@ -231,7 +240,7 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     public WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO qrInCodeScanDTO) {
         String potteryAltarNumber = qrInCodeScanDTO.getPotteryAltarNumber();
         LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery().eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
-        if(inLaoczPotteryAltarManagement==null){
+        if (inLaoczPotteryAltarManagement == null) {
             throw new CustomException("此陶坛不存在，请重新扫描");
         }
         boolean inMappingIsNull = check(qrInCodeScanDTO.getOutPotteryAltarId(), qrInCodeScanDTO.getOutWeight(), inLaoczPotteryAltarManagement.getPotteryAltarId());
@@ -254,6 +263,33 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
             }
             return wineOperaPotteryAltarVOS.get(0);
         }
+    }
+
+    /**
+     * 倒坛审批结束后处理，审批通过或不通过
+     *
+     * @param busyId 业务id
+     */
+    @Override
+    public void updateWinePourStatus(String busyId) {
+        List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
+        if (CollectionUtil.isNotEmpty(list)) {
+            LaoczWineDetails pourIn = list.stream().filter(laoczWineDetails -> laoczWineDetails.getDetailType().equals(WineDetailTypeEnum.POUR_IN.getCode())).findFirst().orElseThrow(() -> new CustomException("倒坛审核不通过后，处理数据异常"));
+            LaoczWineDetails pourOut = list.stream().filter(laoczWineDetails -> laoczWineDetails.getDetailType().equals(WineDetailTypeEnum.POUR_OUT.getCode())).findFirst().orElseThrow(() -> new CustomException("倒坛审核不通过后，处理数据异常"));
+            List<Long> potteryAltarIds = list.stream().map(LaoczWineDetails::getPotteryAltarId).collect(Collectors.toList());
+            List<LaoczBatchPotteryMapping> mappings = iLaoczBatchPotteryMappingService.lambdaQuery()
+                    .in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarIds).list();
+            LaoczBatchPotteryMapping outMapping = mappings.stream().filter(e -> e.getPotteryAltarId().equals(pourOut.getPotteryAltarId())).findFirst().orElseThrow(() -> new CustomException("倒坛审核不通过后，处理数据异常"));
+            LaoczBatchPotteryMapping inMapping = mappings.stream().filter(e -> e.getPotteryAltarId().equals(pourIn.getPotteryAltarId())).findFirst().orElseThrow(() -> new CustomException("倒坛审核不通过后，处理数据异常"));
+            outMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
+            iLaoczBatchPotteryMappingService.updateById(outMapping);
+            iLaoczBatchPotteryMappingService.removeById(inMapping.getMappingId());
+        }
+        //laocz_wine_operations备份到his，然后删除
+        taskVerify(busyId);
+
+        //备份所有数据到laocz_wine_history，并标记为不通过
+        rejectSaveHistory(busyId);
     }
 
     /**
@@ -294,7 +330,6 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         iLaoczBatchPotteryMappingService.save(laoczBatchPotteryMapping);
     }
 
-
     /**
      * 保存laocz_wine_details
      *
@@ -314,6 +349,5 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         list.add(in);
         iLaoczWineDetailsService.saveBatch(list);
     }
-
 
 }

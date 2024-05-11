@@ -1,7 +1,9 @@
 package com.rexel.laocz.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.rexel.common.annotation.Excel;
 import com.rexel.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.data.annotation.Id;
 
 /**
  * 酒液批次相关信息对象 laocz_liquor_batch
@@ -28,6 +31,7 @@ public class LaoczLiquorBatch extends BaseEntity {
     /**
      * 酒批次ID
      */
+    @TableId(type = IdType.INPUT)
     private String liquorBatchId;
     /**
      * 申请的工单id

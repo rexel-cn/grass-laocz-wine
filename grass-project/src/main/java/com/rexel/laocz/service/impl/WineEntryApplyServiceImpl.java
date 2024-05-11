@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.rexel.common.core.redis.RedisCache;
 import com.rexel.common.exception.CustomException;
-import com.rexel.common.utils.SequenceUtils;
+import com.rexel.common.utils.DateUtils;
 import com.rexel.dview.pojo.DViewVarInfo;
 import com.rexel.laocz.constant.WineConstants;
 import com.rexel.laocz.constant.WinePointConstants;
@@ -32,7 +32,9 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -70,7 +72,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         // 获取当前的日期和时间
         LocalDateTime now = LocalDateTime.now();
         // 定义一个没有分隔符的日期时间格式
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateUtils.YYYYMMDDHHMMSS);
         String format = now.format(formatter);
         String time = atomicReference.get();
         if (format.equals(time)) {
@@ -135,7 +137,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         return wineOperaPotteryAltarVOS.get(0);
     }
 
-
     /**
      * 入酒申请
      *
@@ -150,17 +151,22 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //二维码扫描：1：有没有这个罐子，空罐子，可使用的，
 
         //校验
-        wineEntryApplyCheck(wineEntryApplyDTO);
-        //新增    laocz_liquor_batch
-        saveLiquorBatch(wineEntryApplyDTO);
+        LaoczLiquorManagement liquorManagement = wineEntryApplyCheck(wineEntryApplyDTO);
+
         //将创建工单生成的id与laocz_liquor_batch进行关联更新
         //后续的表也新增
         //新增 laocz_batch_pottery_mapping
         savalaoczBatchPotteryMapping(wineEntryApplyDTO);
         //生成busy_id
-        String busyId = SequenceUtils.nextId().toString();
+        String busyId = super.getBusyId();
+
         //新增流程实例
-        String processInstanceId = saveProcessInstancesService(busyId, WineProcessDefinitionKeyEnum.IN_WINE);
+        String processInstanceId = saveProcessInstancesService(
+                busyId
+                , super.getVariables(wineEntryApplyDTO.getLiquorBatchId(), OperationTypeEnum.WINE_ENTRY.getValue(), liquorManagement.getLiquorName())
+                , WineProcessDefinitionKeyEnum.IN_WINE);
+        //新增    laocz_liquor_batch
+        saveLiquorBatch(wineEntryApplyDTO, processInstanceId);
         //新增laocz_wine_operations
         saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.WINE_ENTRY);
         //新增laocz_wine_details
@@ -170,9 +176,10 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     /**
      * 入酒申请校验
      *
-     * @param wineEntryApplyDTO
+     * @param wineEntryApplyDTO 入酒申请参数
+     * @return 酒品管理
      */
-    private void wineEntryApplyCheck(WineEntryApplyDTO wineEntryApplyDTO) {
+    private LaoczLiquorManagement wineEntryApplyCheck(WineEntryApplyDTO wineEntryApplyDTO) {
         //先验证选择的陶坛是否存在
         //验证陶坛是否可以使用，有没有被封存
         //验证陶坛是否已经被申请
@@ -190,6 +197,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         if (Objects.isNull(byId)) {
             throw new CustomException("酒品管理不存在");
         }
+        return byId;
     }
 
     /**
@@ -232,8 +240,9 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * 新增酒批次
      *
      * @param wineEntryApplyDTO 入酒申请参数
+     * @param processInstanceId 流程实例id
      */
-    private void saveLiquorBatch(WineEntryApplyDTO wineEntryApplyDTO) {
+    private void saveLiquorBatch(WineEntryApplyDTO wineEntryApplyDTO, String processInstanceId) {
         LaoczLiquorBatch liquorBatch = new LaoczLiquorBatch();
         //酒品批次号
         liquorBatch.setLiquorBatchId(wineEntryApplyDTO.getLiquorBatchId());
@@ -241,6 +250,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         liquorBatch.setApplyWeight(wineEntryApplyDTO.getApplyWeight());
         //酒品管理id
         liquorBatch.setLiquorManagementId(wineEntryApplyDTO.getLiquorManagementId());
+        //工单id
+        liquorBatch.setWorkOrderId(processInstanceId);
         iLaoczLiquorBatchService.save(liquorBatch);
     }
 
@@ -257,9 +268,14 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             throw new CustomException("酒操作业务详情不存在");
         }
         checkDetailType(wineDetailsById.getDetailType(), WineDetailTypeEnum.IN_WINE);
+        //入酒开始
         wineIn(wineEntryDTO);
     }
 
+    /**
+     * 入酒开始
+     * @param wineEntryDTO 入酒参数
+     */
     @Override
     public void wineIn(WineEntryDTO wineEntryDTO) {
         //查询酒操作详情
@@ -331,7 +347,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                         throw new CustomException("入酒状态错误");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 log.error("入酒操作异常:{}", e.getMessage());
                 eventStatus = WineConstants.FAIL;
                 throw new CustomException("入酒操作异常：{}", e.getMessage());
@@ -344,6 +359,11 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         }
     }
 
+    /**
+     * 测点检查
+     * @param pumpMap 泵测点
+     * @param wineDetailPointVOMap 称重罐测点
+     */
     private void pointCheck(Map<String, WineDetailPointVO> pumpMap, Map<String, WineDetailPointVO> wineDetailPointVOMap) {
         for (MonitorPointConfig value : MonitorPointConfig.values()) {
             if (value.getType().equals("2")) {
@@ -374,7 +394,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         }
 
     }
-
 
     /**
      * 入酒状态判断
@@ -437,7 +456,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                 .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.getValue())
                 .update();
     }
-
 
     /**
      * 保存酒事件
@@ -506,6 +524,12 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         startListener(wineDetails.getWineDetailsId(), wineDetailPointVOMap, pumpMap);
     }
 
+    /**
+     * 记录开始前的重量及开始时间，更新酒操作详情状态，开始
+     * @param wineDetails 酒操作详情
+     * @param wineDetailPointVOMap 称重罐测点
+     * @throws IOException io网络异常，测点-dview交互异常
+     */
     private void recordWeightAndTimeBeforeStart(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap) throws IOException {
         //称重罐重量测点
         WineDetailPointVO zlOut = wineDetailPointVOMap.get(WinePointConstants.ZL_OUT);
@@ -540,9 +564,9 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         WineDetailPointVO wineDetailPointVO = wineDetailPointVOMap.get(WinePointConstants.ZL_OUT);
         try {
             Double beforeWeight = laoczWineDetails.getBeforeWeight();
-            if(beforeWeight!=null){
+            if (beforeWeight != null) {
                 String realWeight = DviewUtils.queryCachePointValue(wineDetailPointVO.getPointId(), wineDetailPointVO.getPointType());
-                if(StrUtil.isNotEmpty(realWeight)){
+                if (StrUtil.isNotEmpty(realWeight)) {
                     wineRealDataVO.setCurrentWeight(BigDecimal.valueOf(beforeWeight).subtract(BigDecimal.valueOf(Double.parseDouble(realWeight))).setScale(BigDecimal.ROUND_HALF_EVEN, RoundingMode.CEILING).doubleValue());
                 }
             }
@@ -571,6 +595,30 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         super.saveHistory(laoczWineDetails);
         //查询当前业务id还有没有正在完成的任务，如果没有了，就备份酒操作业务表
         super.taskVerify(laoczWineDetails.getBusyId());
+    }
+
+    /**
+     * 入酒审批结束后处理，审批不通过后确认操作
+     * @param busyId 业务id
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateWineEntryStatus(String busyId) {
+        //如果审批不通过
+        // 陶坛与批次实时关系表删除
+        //laocz_wine_details备份到his，然后删除
+        List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
+        if (CollectionUtil.isNotEmpty(list)) {
+            List<Long> potteryAltarIds = list.stream().map(LaoczWineDetails::getPotteryAltarId).collect(Collectors.toList());
+            //删除陶坛与批次实时关系表
+            iLaoczBatchPotteryMappingService.lambdaUpdate().in(LaoczBatchPotteryMapping::getPotteryAltarId, potteryAltarIds).remove();
+            //备份酒操作业务表
+            super.backupWineDetails(list);
+        }
+        //laocz_wine_operations备份到his，然后删除
+        taskVerify(busyId);
+        //备份所有数据到laocz_wine_history，并标记为不通过
+        rejectSaveHistory(busyId);
     }
 
     /**
@@ -645,7 +693,7 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                                 .set(LaoczWineDetails::getBusyStatus, WineBusyStatusEnum.COMPLETED.getValue())
                                 .update();
                         //每次完成信号为1后，读取重量，然后完成信号复位
-                        DviewUtils.writePointValue(finishPoint.getPointId(),finishPoint.getPointType(),"0");
+                        DviewUtils.writePointValue(finishPoint.getPointId(), finishPoint.getPointType(), "0");
                         pauseListener(wineDetailsId);
                     } finally {
                         redisCache.delete(WINE_ENTRY_APPLY_LOCK + wineDetailsId);
@@ -837,12 +885,4 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         WineDetailPointVO weightPoint = pumpMap.get(WinePointConstants.POINT_CONTINUE);
         DviewUtils.writePointValue(weightPoint.getPointId(), weightPoint.getPointType(), "1");
     }
-
-    private void cancelPlc() {
-        /*
-          【下发测点】
-          以泵为单位下发任务取消（待提供）
-         */
-    }
-
 }

@@ -54,6 +54,13 @@ public class LaoczWineOperationsHis extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private Long operationType;
 
+    /**
+     * 审批结果:1:通过,2:不通过,3:取消,4:退回
+     */
+    @Excel(name = "审批结果:1:通过,2:不通过,3:取消,4:退回")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Long approvalResults;
+
 
     @Override
     public String toString() {

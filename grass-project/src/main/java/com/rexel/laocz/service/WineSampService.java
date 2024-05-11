@@ -32,4 +32,10 @@ public interface WineSampService {
      * @return 陶坛信息
      */
     WineOperaPotteryAltarVO qrCodeScan(String potteryAltarNumber);
+
+    /**
+     * 取样审批结束后处理，审批通过或不通过
+     * @param busyId 业务id
+     */
+    void updateWineSampStatus(String busyId);
 }

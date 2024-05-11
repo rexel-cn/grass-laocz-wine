@@ -48,6 +48,12 @@ public class LaoczWineHistory extends BaseEntity {
     @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String tenantId;
     /**
+     * 审批结果：审批结果:1审批中，2审批通过，3审批不通过，4已取消
+     */
+    @Excel(name = "审批结果：审批结果:1审批中，2审批通过，3审批不通过，4已取消")
+    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
+    private Integer approvalResults;
+    /**
      * 申请的工单id
      */
     @Excel(name = "申请的工单id")

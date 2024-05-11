@@ -1,5 +1,6 @@
 package com.rexel.bpm.framework.flowable.core.util;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.rexel.bpm.framework.flowable.core.enums.BpmConstants;
 import com.rexel.tenant.context.TenantContextHolder;
 import org.flowable.common.engine.api.delegate.Expression;

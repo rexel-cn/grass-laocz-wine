@@ -13,7 +13,8 @@ public enum OperationTypeEnum {
     WINE_ENTRY(1L, "入酒"),
     WINE_OUT(2L, "出酒"),
     POUR_POT(3L, "倒坛"),
-    SAMPLING(4L, "取样");
+    SAMPLING(4L, "取样"),
+    NULL_ENUM(0L, "未知");
 
     private final Long value;
     private final String name;
@@ -32,5 +33,13 @@ public enum OperationTypeEnum {
         return null;
     }
 
+    public static OperationTypeEnum getByValue(Long value) {
+        for (OperationTypeEnum operationTypeEnum : OperationTypeEnum.values()) {
+            if (operationTypeEnum.getValue().equals(value)) {
+                return operationTypeEnum;
+            }
+        }
+        return NULL_ENUM;
+    }
 
 }

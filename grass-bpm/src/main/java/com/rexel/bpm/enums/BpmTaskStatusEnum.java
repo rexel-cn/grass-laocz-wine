@@ -59,4 +59,13 @@ public enum BpmTaskStatusEnum {
                 RETURN.getStatus(), APPROVING.getStatus());
     }
 
+
+    public static String getName(Integer status) {
+        for (BpmTaskStatusEnum value : BpmTaskStatusEnum.values()) {
+            if (value.getStatus().equals(status)) {
+                return value.getName();
+            }
+        }
+        return null;
+    }
 }

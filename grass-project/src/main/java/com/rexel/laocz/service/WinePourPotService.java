@@ -15,7 +15,6 @@ import com.rexel.laocz.domain.vo.WineOperaPotteryAltarVO;
  **/
 public interface WinePourPotService {
 
-
     /**
      * 倒坛申请
      *
@@ -39,7 +38,6 @@ public interface WinePourPotService {
      */
     Long winePourPotOut(Long wineDetailsId);
 
-
     /**
      * 倒坛入酒
      *
@@ -47,14 +45,12 @@ public interface WinePourPotService {
      */
     void winePourPotIn(Long wineDetailsId);
 
-
     /**
      * 倒坛入酒开始
      *
      * @param wineEntryDTO 酒入坛参数
      */
     void winePourPotInStart(WineEntryDTO wineEntryDTO);
-
 
     /**
      * 二维码扫描获取倒坛出酒陶坛信息
@@ -71,5 +67,11 @@ public interface WinePourPotService {
      * @return 陶坛信息
      */
     WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO potteryAltarNumber);
+
+    /**
+     * 倒坛审批结束后处理，审批通过或不通过
+     * @param busyId 业务id
+     */
+    void updateWinePourStatus(String busyId);
 
 }

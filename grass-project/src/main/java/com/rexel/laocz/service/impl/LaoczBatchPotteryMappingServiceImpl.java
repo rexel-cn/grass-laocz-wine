@@ -68,7 +68,6 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
             } finally {
                 PageUtils.clearPage();
             }
-            List<LaoczBatchPotteryMappingVO> laoczBatchPotteryMappingVOS1 = baseMapper.selectTableDataInfoReportActual(fireZoneId, liquorBatchId, potteryAltarNumber, liquorName, areaId);
             double totalActualWeight = laoczBatchPotteryMappingVOS.stream()
                     .filter(Objects::nonNull) // 排除VO对象为null的情况
                     .filter(mappingVO -> mappingVO.getActualWeight() != null) // 排除实际重量为null的记录
@@ -111,14 +110,12 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
      */
     @Override
     public OverviewVo getOverview(String potteryAltarNumber) {
-        OverviewVo overviewVo = baseMapper.selectOverviewVo(potteryAltarNumber);
-        return overviewVo;
+        return baseMapper.selectOverviewVo(potteryAltarNumber);
     }
 
     @Override
     public List<BatchInfoVo> getBatchInfo(String liquorBatchId) {
-        List<BatchInfoVo> batchInfoVos = baseMapper.selectBatchInfo(liquorBatchId);
-        return batchInfoVos;
+        return baseMapper.selectBatchInfo(liquorBatchId);
     }
 
     /**

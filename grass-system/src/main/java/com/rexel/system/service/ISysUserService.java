@@ -175,4 +175,5 @@ public interface ISysUserService extends IService<SysUser> {
      * @param ids 用户编号数组
      */
     void validateUserList(Collection<Long> ids);
+
 }

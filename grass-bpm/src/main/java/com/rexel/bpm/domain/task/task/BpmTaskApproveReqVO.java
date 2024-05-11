@@ -18,7 +18,6 @@ public class BpmTaskApproveReqVO {
     /**
      * 审批意见
      */
-    @NotEmpty(message = "审批意见不能为空")
     private String reason;
 
     /**

@@ -6,6 +6,7 @@ import com.rexel.laocz.domain.dto.WineHistoryDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
+import liquibase.pro.packaged.S;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -70,5 +71,18 @@ public interface LaoczWineDetailsMapper extends BaseMapper<LaoczWineDetails> {
     List<WineDetailPointVO> selectWineDetailPumpPointVOList(Long wineDetailsId);
 
 
+    /**
+     * 根据酒详情id查询酒详情相关的数据
+     * @param wineDetailsId 酒详情id
+     * @return  酒详情相关的数据
+     */
     WineHistoryDTO selectWineHistoryDTOList(Long wineDetailsId);
+
+
+    /**
+     * 根据业务id查询酒详情相关的数据
+     * @param busyId 业务id
+     * @return 酒详情相关的数据
+     */
+    List<WineHistoryDTO> selectWineHistoryListByBusyId(String busyId);
 }

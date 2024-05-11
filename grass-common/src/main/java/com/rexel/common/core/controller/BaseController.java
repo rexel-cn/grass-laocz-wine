@@ -123,6 +123,27 @@ public class BaseController {
         rspData.setRows(list == null ? new ArrayList<>() : list);
         return rspData;
     }
+    protected TableDataInfo getDataTable(List<?> list, String headerName,long total) {
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(org.springframework.http.HttpStatus.OK.value());
+        rspData.setMsg(org.springframework.http.HttpStatus.OK.getReasonPhrase());
+        //列表信息组装
+        //表头信息
+        if (StringUtils.isNotBlank(headerName)) {
+            SysHeaderMetadata headerMetadataPo = new SysHeaderMetadata();
+            headerMetadataPo.setHeaderName(headerName);
+            headerMetadataPo.setIsDelete(0L);
+            List<PageHeader> pageHeaders = headerMetadataService.selectSysHeaderMetadataList(headerMetadataPo);
+            if (null != pageHeaders) {
+                rspData.setTableColumnList(pageHeaders);
+            }
+        }
+        rspData.setTotal(total);
+        rspData.setRows(list == null ? new ArrayList<>() : list);
+        return rspData;
+    }
+
+
 
     /**
      * 响应请求分页数据

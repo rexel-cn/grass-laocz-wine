@@ -42,6 +42,7 @@ public class WineEntryController extends BaseController {
      * @return 申请结果
      */
     @PostMapping("/wineEntryApply")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult wineEntryApply(@RequestBody @Validated WineEntryApplyDTO wineEntryApplyDTO) {
         wineEntryApplyService.wineEntryApply(wineEntryApplyDTO);
         return AjaxResult.success();

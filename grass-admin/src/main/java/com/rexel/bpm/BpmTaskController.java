@@ -59,7 +59,6 @@ public class BpmTaskController extends BaseController {
         if (CollUtil.isEmpty(pageResult.getList())) {
             return getDataTable(pageResult.getList());
         }
-
         // 拼接数据
         Map<String, ProcessInstance> processInstanceMap = processInstanceService.getProcessInstanceMap(
                 convertSet(pageResult.getList(), Task::getProcessInstanceId));

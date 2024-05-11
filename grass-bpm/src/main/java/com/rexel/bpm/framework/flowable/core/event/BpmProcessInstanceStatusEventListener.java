@@ -13,7 +13,9 @@ public abstract class BpmProcessInstanceStatusEventListener
 
     @Override
     public final void onApplicationEvent(BpmProcessInstanceStatusEvent event) {
-        if (!StrUtil.equals(event.getProcessDefinitionKey(), getProcessDefinitionKey())) {
+        String processDefinitionKey = getProcessDefinitionKey();
+
+        if (!StrUtil.equals(event.getProcessDefinitionKey(), processDefinitionKey)) {
             return;
         }
         onEvent(event);

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczLiquorBatch;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 酒液批次相关信息Service接口
@@ -29,4 +30,10 @@ public interface ILaoczLiquorBatchService extends IService<LaoczLiquorBatch> {
      */
     List<LaoczLiquorBatch> wineOutLaoczLiquorBatchList();
 
+    /**
+     * 根据批次id，获取对应批次id的酒品名称
+     * @param liquorBatchIds
+     * @return
+     */
+    Map<String, String> getLiquorManagementNameMap(List<String> liquorBatchIds);
 }
