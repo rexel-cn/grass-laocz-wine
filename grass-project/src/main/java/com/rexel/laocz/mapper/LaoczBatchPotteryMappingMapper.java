@@ -59,4 +59,16 @@ public interface LaoczBatchPotteryMappingMapper extends BaseMapper<LaoczBatchPot
     OverviewVo selectOverviewVo(String potteryAltarNumber);
 
     List<BatchInfoVo> selectBatchInfo(String liquorBatchId);
+
+    /**
+     * 查询实际重量总和
+     *
+     * @param areaId        场区编号
+     * @param fireZoneId    防火区编号
+     * @param liquorBatchId 批次ID
+     * @return 实际重量总和
+     */
+    Double selectActualWeightSum(@Param("areaId") Long areaId,
+                                 @Param("fireZoneId") Long fireZoneId,
+                                 @Param("liquorBatchId") String liquorBatchId);
 }

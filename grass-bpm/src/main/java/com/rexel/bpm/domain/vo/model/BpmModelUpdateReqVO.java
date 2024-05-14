@@ -1,9 +1,6 @@
 package com.rexel.bpm.domain.vo.model;
 
-import com.rexel.bpm.enums.BpmModelFormTypeEnum;
-import com.rexel.common.validation.InEnum;
 import lombok.Data;
-import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -15,7 +12,7 @@ public class BpmModelUpdateReqVO {
 
     private String name;
 
-    @URL(message = "流程图标格式不正确")
+    //@URL(message = "流程图标格式不正确")
     private String icon;
 
     private String description;
@@ -24,8 +21,8 @@ public class BpmModelUpdateReqVO {
 
     private String bpmnXml;
 
-    @InEnum(BpmModelFormTypeEnum.class)
-    private Integer formType;
+    //@InEnum(BpmModelFormTypeEnum.class)
+    private Integer formType = 20;
     private Long formId;
     private String formCustomCreatePath;
     private String formCustomViewPath;

@@ -43,7 +43,13 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param workOrderId    工单Id
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistory(@Param("potteryAltarId") Long potteryAltarId, @Param("fromTime") String fromTime, @Param("endTime") String endTime, @Param("detailType") String detailType, @Param("workOrderId") String workOrderId);
+    List<LaoczWineHistoryVO> selectLaoczWineHistory(
+            @Param("approvalResults") Integer approvalResults,
+            @Param("potteryAltarId") Long potteryAltarId,
+            @Param("fromTime") String fromTime,
+            @Param("endTime") String endTime,
+            @Param("detailType") String detailType,
+            @Param("workOrderId") String workOrderId);
 
     /**
      * 数据报表-淘坛操作记录
@@ -56,7 +62,9 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param areaId             区域ID
      * @return
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(@Param("potteryAltarNumber") String potteryAltarNumber,
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryStatement(
+            @Param("approvalResults") Integer approvalResults,
+            @Param("potteryAltarNumber") String potteryAltarNumber,
                                                              @Param("fromTime") String fromTime,
                                                              @Param("endTime") String endTime,
                                                              @Param("liquorBatchId") String liquorBatchId,
@@ -71,7 +79,8 @@ public interface LaoczWineHistoryMapper extends BaseMapper<LaoczWineHistory> {
      * @param liquorBatchId 批次ID
      * @return 酒历史集合
      */
-    List<LaoczWineHistoryVO> selectLaoczWineHistoryLossList(@Param("liquorBatchId") String liquorBatchId,
+    List<LaoczWineHistoryVO> selectLaoczWineHistoryLossList(@Param("approvalResults") Integer approvalResults,
+                                                            @Param("liquorBatchId") String liquorBatchId,
                                                             @Param("potteryAltarNumber") String potteryAltarNumber,
                                                             @Param("fireZoneId") Long fireZoneId,
                                                             @Param("areaId") Long areaId);

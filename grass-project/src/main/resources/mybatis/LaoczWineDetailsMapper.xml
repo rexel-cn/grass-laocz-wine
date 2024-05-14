@@ -260,8 +260,8 @@
             llm.liquor_brewing_time,
             llm.liquor_content
         FROM
-            laocz_wine_operations lwo
-                INNER JOIN laocz_wine_details lwd ON lwd.busy_id = lwo.busy_id
+        laocz_wine_operations_his lwo
+        INNER JOIN laocz_wine_details_his lwd ON lwd.busy_id = lwo.busy_id
                 LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
                 LEFT JOIN laocz_fire_zone_info lfzi ON lfzi.fire_zone_id = lpam.fire_zone_id
                 LEFT JOIN laocz_area_info lai ON lai.area_id = lfzi.area_id

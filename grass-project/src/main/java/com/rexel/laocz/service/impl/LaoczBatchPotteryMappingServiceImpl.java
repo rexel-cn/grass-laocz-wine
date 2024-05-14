@@ -6,7 +6,6 @@ import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
 import com.rexel.common.exception.ServiceException;
-import com.rexel.common.utils.DateUtils;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
@@ -17,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 陶坛与批次实时关系Service业务层处理
@@ -68,11 +65,10 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
             } finally {
                 PageUtils.clearPage();
             }
-            double totalActualWeight = laoczBatchPotteryMappingVOS.stream()
-                    .filter(Objects::nonNull) // 排除VO对象为null的情况
-                    .filter(mappingVO -> mappingVO.getActualWeight() != null) // 排除实际重量为null的记录
-                    .mapToDouble(LaoczBatchPotteryMappingVO::getActualWeight)
-                    .sum();
+
+            Double totalActualWeight = baseMapper.selectActualWeightSum(areaId, fireZoneId, liquorBatchId);
+
+
             return getDataTable(totalActualWeight, laoczBatchPotteryMappingVOS, "LiquorStorage");
         } catch (Exception e) {
             log.error("查询失败", e);

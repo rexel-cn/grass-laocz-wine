@@ -15,7 +15,6 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum BpmModelFormTypeEnum implements IntArrayValuable {
 
-    NORMAL(10, "流程表单"), // 对应 BpmFormDO
     CUSTOM(20, "业务表单") // 业务自己定义的表单，自己进行数据的存储
     ;
 

@@ -2,6 +2,7 @@ package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.core.redis.RedisCache;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DateUtils;
@@ -145,6 +146,11 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void wineEntryApply(WineEntryApplyDTO wineEntryApplyDTO) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         //查询： 1：空罐子，2：可使用的
         //自动选择： 1：空罐子，可使用的，重量没问题
         //手动选择： 1：有没有这个罐子。空罐子，可使用的，每个罐子的重量没问题，总重量没问题。
@@ -267,6 +273,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         if (Objects.isNull(wineDetailsById)) {
             throw new CustomException("酒操作业务详情不存在");
         }
+        super.approvalCheck(wineDetailsById.getBusyId(), BpmTaskStatusEnum.APPROVE);
+
         checkDetailType(wineDetailsById.getDetailType(), WineDetailTypeEnum.IN_WINE);
         //入酒开始
         wineIn(wineEntryDTO);
@@ -604,6 +612,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateWineEntryStatus(String busyId) {
+        super.approvalCheck(busyId, BpmTaskStatusEnum.REJECT);
+
         //如果审批不通过
         // 陶坛与批次实时关系表删除
         //laocz_wine_details备份到his，然后删除
@@ -627,6 +637,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * @param laoczWineDetails 酒操作详情
      */
     private void finishCheck(LaoczWineDetails laoczWineDetails) {
+        super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
+
         //判断是否已经有了称重罐重量以及是否已经完成
         if (laoczWineDetails.getWeighingTankWeight() == null) {
             throw new CustomException("称重罐重量未获取");

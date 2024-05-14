@@ -2,7 +2,6 @@ package com.rexel.bpm;
 
 import cn.hutool.core.collection.CollUtil;
 import com.rexel.bpm.convert.definition.BpmModelConvert;
-import com.rexel.common.utils.PageResult;
 import com.rexel.bpm.domain.vo.model.*;
 import com.rexel.bpm.service.definition.BpmModelService;
 import com.rexel.bpm.service.definition.BpmProcessDefinitionService;
@@ -10,6 +9,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.common.utils.CollectionUtils;
+import com.rexel.common.utils.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,8 +41,8 @@ public class BpmModelController extends BaseController {
     private BpmProcessDefinitionService processDefinitionService;
 
     @GetMapping("/page")
-    public TableDataInfo list() {
-        PageResult<Model> modelPage = modelService.getModelPage(new BpmModelPageReqVO());
+    public TableDataInfo list(BpmModelPageReqVO bpmModelPageReqVO) {
+        PageResult<Model> modelPage = modelService.getModelPage(bpmModelPageReqVO);
         if (CollUtil.isEmpty(modelPage.getList())) {
             return getDataTable(modelPage.getList());
         }

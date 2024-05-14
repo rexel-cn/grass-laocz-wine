@@ -30,7 +30,6 @@ import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -77,7 +76,7 @@ public class LaoczBpmTaskServiceImpl implements LaoczBpmTaskService {
         }
         if (ObjectUtil.isNotNull(taskPageDTO.getBeginTime()) && ObjectUtil.isNotNull(taskPageDTO.getEndTime())) {
             taskQuery.taskCreatedAfter(taskPageDTO.getBeginTime());
-            taskQuery.taskCreatedAfter(taskPageDTO.getEndTime());
+            taskQuery.taskCreatedBefore(taskPageDTO.getEndTime());
         }
         long count = taskQuery.count();
 
@@ -148,7 +147,7 @@ public class LaoczBpmTaskServiceImpl implements LaoczBpmTaskService {
         }
         if (ObjectUtil.isNotNull(taskPageDTO.getBeginTime()) && ObjectUtil.isNotNull(taskPageDTO.getEndTime())) {
             taskQuery.taskCreatedAfter(taskPageDTO.getBeginTime());
-            taskQuery.taskCreatedAfter(taskPageDTO.getEndTime());
+            taskQuery.taskCreatedBefore(taskPageDTO.getEndTime());
         }
         // 执行查询
         long count = taskQuery.count();

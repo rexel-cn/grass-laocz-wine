@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczWineDetails;
@@ -17,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +57,8 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
      */
     @Override
     public void updateWineSampStatus(String busyId) {
+        //验证审核是否通过
+        super.approvalCheck(busyId, BpmTaskStatusEnum.REJECT);
         List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
         //如果审批不通过
         // 陶坛与批次实时关系表修改为存储状态
@@ -159,7 +161,8 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Transactional(rollbackFor = Exception.class)
     public void wineSampFinish(Long wineDetailsId) {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
-
+        //验证审核是否通过
+        super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）
         super.updatePotteryMappingState(laoczWineDetails.getPotteryAltarId(), "-",
                 laoczWineDetails.getPotteryAltarApplyWeight());

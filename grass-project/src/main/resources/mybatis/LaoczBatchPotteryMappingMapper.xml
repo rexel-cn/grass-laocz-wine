@@ -182,6 +182,28 @@
         </where>
         GROUP BY bpm.liquor_batch_id
     </select>
+    <select id="selectActualWeightSum" resultType="java.lang.Double">
+        SELECT
+        SUM(lpm.actual_weight)
+        FROM
+        laocz_batch_pottery_mapping lpm
+        LEFT JOIN laocz_liquor_batch lb ON lpm.liquor_batch_id = lb.liquor_batch_id
+        LEFT JOIN laocz_pottery_altar_management pam ON lpm.pottery_altar_id = pam.pottery_altar_id
+        LEFT JOIN laocz_fire_zone_info fz ON pam.fire_zone_id = fz.fire_zone_id
+        LEFT JOIN laocz_area_info tam ON fz.area_id = tam.area_id
+        <where>
+            <!-- 根据传入参数添加条件 -->
+            <if test="fireZoneId != null and fireZoneId != ''">
+                fz.fire_zone_id = #{fireZoneId}
+            </if>
+            <if test="liquorBatchId != null and liquorBatchId != ''">
+                AND lpm.liquor_batch_id LIKE CONCAT('%', #{liquorBatchId}, '%')
+            </if>
+            <if test="areaId != null and areaId != ''">
+                AND tam.area_id = #{areaId}
+            </if>
+        </where>
+    </select>
 
 
     <insert id="batchLaoczBatchPotteryMapping" parameterType="java.util.List"

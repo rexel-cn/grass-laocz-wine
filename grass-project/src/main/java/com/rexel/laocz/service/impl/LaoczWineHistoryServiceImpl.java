@@ -5,16 +5,20 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
+import com.rexel.bpm.enums.BpmProcessInstanceStatusEnum;
 import com.rexel.common.core.domain.SysHeaderMetadata;
 import com.rexel.common.core.page.PageHeader;
 import com.rexel.common.core.service.ISysHeaderMetadataService;
 import com.rexel.common.exception.ServiceException;
+import com.rexel.common.utils.DictUtils;
 import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
+import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczLiquorManagement;
 import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.vo.*;
+import com.rexel.laocz.enums.WineDetailTypeEnum;
 import com.rexel.laocz.mapper.LaoczLiquorManagementMapper;
 import com.rexel.laocz.mapper.LaoczWineHistoryMapper;
 import com.rexel.laocz.service.ILaoczBatchPotteryMappingService;
@@ -54,6 +58,15 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     }
 
     /**
+     * 转义detailType
+     *
+     * @param laoczWineHistoryVOS 酒历史列表
+     */
+    private static void buildDetailType(List<LaoczWineHistoryVO> laoczWineHistoryVOS) {
+        laoczWineHistoryVOS.forEach(laoczWineHistoryVO -> laoczWineHistoryVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, String.valueOf(laoczWineHistoryVO.getDetailType()))));
+    }
+
+    /**
      * 查询历史信息
      *
      * @param potteryAltarId 陶坛ID
@@ -66,7 +79,9 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
     @Override
     public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String workOrderId) {
-        return baseMapper.selectLaoczWineHistory(potteryAltarId, fromTime, endTime, detailType, workOrderId);
+        List<LaoczWineHistoryVO> laoczWineHistoryVOS = baseMapper.selectLaoczWineHistory(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), potteryAltarId, fromTime, endTime, detailType, workOrderId);
+        buildDetailType(laoczWineHistoryVOS);
+        return laoczWineHistoryVOS;
     }
 
     /**
@@ -95,28 +110,33 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
             try {
                 PageUtils.startPage();
-                laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+                laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
             } finally {
                 PageUtils.clearPage();
             }
-            List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
-            Long totalOperand = (long) laoczWineHistoryVOSList.size();
+            List<LaoczWineHistoryVO> laoczWineHistoryVOSList = baseMapper.selectLaoczWineHistoryStatement(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), potteryAltarNumber, fromTime, endTime, liquorBatchId, fireZoneId, areaId);
+
+            long totalOperand = laoczWineHistoryVOSList.size();
+
             long entryOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "入酒".equals(history.getDetailType()))
+                    .filter(history -> WineDetailTypeEnum.IN_WINE.getCode().equals(Long.parseLong(history.getDetailType())))
                     .count();
             long distillingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "出酒".equals(history.getDetailType()))
+                    .filter(history -> WineDetailTypeEnum.OUT_WINE.getCode().equals(Long.parseLong(history.getDetailType())))
                     .count();
             long invertedJarOperationIn = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "倒坛入".equals(history.getDetailType()))
+                    .filter(history -> WineDetailTypeEnum.POUR_IN.getCode().equals(Long.parseLong(history.getDetailType())))
                     .count();
             long invertedJarOperationOut = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "倒坛出".equals(history.getDetailType()))
+                    .filter(history -> WineDetailTypeEnum.POUR_OUT.getCode().equals(Long.parseLong(history.getDetailType())))
                     .count();
             long samplingOperation = laoczWineHistoryVOSList.stream()
-                    .filter(history -> "取样".equals(history.getDetailType()))
+                    .filter(history -> WineDetailTypeEnum.SAMPLING.getCode().equals(Long.parseLong(history.getDetailType())))
                     .count();
 
+
+            //转义detailType
+            buildDetailType(laoczWineHistoryVOS);
             return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperationIn, invertedJarOperationOut, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
         } catch (Exception e) {
             log.error("查询失败", e);
@@ -126,7 +146,9 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
     @Override
     public List<LaoczWineHistoryVO> getLaoczWineHistoryTable(String fromTime, String endTime, String liquorBatchId) {
-        return baseMapper.selectLaoczWineHistoryStatement(null, fromTime, endTime, liquorBatchId, null, null);
+        List<LaoczWineHistoryVO> laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryStatement(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), null, fromTime, endTime, liquorBatchId, null, null);
+        buildDetailType(laoczWineHistoryVOS);
+        return laoczWineHistoryVOS;
     }
 
     /**
@@ -171,21 +193,21 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
                     && StringUtils.isEmpty(potteryAltarNumber)) {
                 return getDataTableLoss(-1.0, -1.0, -1.0, -1.0, -1.0, laoczWineHistoryListVO, "lossStatement");
             }
-            Double totalApplications;
-            Double inventoryQuantity;
-            Double totalLiquorOutput;
-            Double totalSampling;
-            Double totalLoss;
-            List<LaoczWineHistoryVO> laoczWineHistoryList = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
+            double totalApplications;
+            double inventoryQuantity;
+            double totalLiquorOutput;
+            double totalSampling;
+            double totalLoss;
+            List<LaoczWineHistoryVO> laoczWineHistoryList = baseMapper.selectLaoczWineHistoryLossList(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
             try {
                 PageUtils.startPage();
-                laoczWineHistoryListVO = baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
+                laoczWineHistoryListVO = baseMapper.selectLaoczWineHistoryLossList(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), liquorBatchId, potteryAltarNumber, fireZoneId, areaId);
             } finally {
                 PageUtils.clearPage();
             }
             if (CollectionUtil.isEmpty(laoczWineHistoryList)) {
                 TableDataInfoDataReportLossVO tableDataInfoDataReportLossVO = new TableDataInfoDataReportLossVO();
-                return Optional.ofNullable(tableDataInfoDataReportLossVO).orElseGet(TableDataInfoDataReportLossVO::new);
+                return Optional.of(tableDataInfoDataReportLossVO).orElseGet(TableDataInfoDataReportLossVO::new);
             }
             //申请总重量
             totalApplications = laoczWineHistoryList.stream()
@@ -201,15 +223,16 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
                     .filter(batchPottery -> batchPottery.getActualWeight() != null)
                     .mapToDouble(LaoczBatchPotteryMapping::getActualWeight)
                     .sum();
+
             //出酒总量
             totalLiquorOutput = laoczWineHistoryList.stream()
-                    .filter(history -> history.getDetailType().equals("出酒"))
+                    .filter(history -> WineDetailTypeEnum.OUT_WINE.getCode().equals(Long.parseLong(history.getDetailType())))
                     .filter(history -> history.getWeighingTankWeight() != null)
                     .mapToDouble(LaoczWineHistoryVO::getWeighingTankWeight)
                     .sum();
             //取样总量
             totalSampling = laoczWineHistoryList.stream()
-                    .filter(history -> history.getDetailType().equals("取样"))
+                    .filter(history -> WineDetailTypeEnum.SAMPLING.getCode().equals(Long.parseLong(history.getDetailType())))
                     .filter(history -> history.getSamplingWeight() != null)
                     .mapToDouble(LaoczWineHistoryVO::getSamplingWeight)
                     .sum();
@@ -218,6 +241,9 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
                     .filter(history -> history.getLossWeight() != null)
                     .mapToDouble(LaoczWineHistoryVO::getLossWeight)
                     .sum();
+
+
+            buildDetailType(laoczWineHistoryListVO);
             return getDataTableLoss(totalApplications, inventoryQuantity, totalLiquorOutput, totalSampling, totalLoss, laoczWineHistoryListVO, "lossStatement");
         } catch (Exception e) {
             log.error("查询失败", e);
@@ -234,7 +260,9 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
      */
     @Override
     public List<LaoczWineHistoryVO> batchLossReportExport(String liquorBatchId) {
-        return baseMapper.selectLaoczWineHistoryLossList(liquorBatchId, null, null, null);
+        List<LaoczWineHistoryVO> laoczWineHistoryVOS = baseMapper.selectLaoczWineHistoryLossList(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), liquorBatchId, null, null, null);
+        buildDetailType(laoczWineHistoryVOS);
+        return laoczWineHistoryVOS;
     }
 
     @Override

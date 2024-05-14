@@ -196,7 +196,7 @@
         lwh.work_order_id,
         lwh.liquor_batch_id,
         lwh.pottery_altar_id,
-        sdd.dict_label AS detail_type,
+        lwh.detail_type,
         lwh.pottery_altar_apply_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
@@ -225,8 +225,10 @@
         lwh.update_time,
         lwh.remark
         from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
         <where>
+            <if test="approvalResults != null">
+                and lwh.approval_results =#{approvalResults}
+            </if>
             <if test="potteryAltarId != null and potteryAltarId != ''">
                 and lwh.pottery_altar_id = #{potteryAltarId}
             </if>
@@ -251,7 +253,7 @@
         lwh.liquor_batch_id,
         lwh.pottery_altar_id,
         lwh.operation_type,
-        sdd.dict_label AS detail_type,
+        lwh.detail_type,
         lwh.pottery_altar_apply_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
@@ -283,8 +285,10 @@
         lwh.update_time,
         lwh.remark
         from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
         <where>
+            <if test="approvalResults != null">
+                and lwh.approval_results =#{approvalResults}
+            </if>
             <if test="liquorBatchId != null  and liquorBatchId != ''">
                 and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>
@@ -349,7 +353,7 @@
         lwh.work_order_id,
         lwh.liquor_batch_id,
         lwh.pottery_altar_id,
-        sdd.dict_label AS detailType,
+        lwh.detail_type,
         lwh.pottery_altar_apply_weight,
         lwh.remaining_weight,
         lwh.loss_weight,
@@ -380,8 +384,10 @@
         lwh.update_time,
         lwh.remark
         from laocz_wine_history lwh
-        LEFT JOIN sys_dict_data sdd ON lwh.detail_type = sdd.dict_value AND sdd.dict_type = 'detail_type'
         <where>
+            <if test="approvalResults != null">
+                and lwh.approval_results =#{approvalResults}
+            </if>
             <if test="liquorBatchId != null and liquorBatchId != ''">
                 and lwh.liquor_batch_id like concat('%', #{liquorBatchId}, '%')
             </if>

@@ -1,6 +1,7 @@
 package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.laocz.domain.LaoczBatchPotteryMapping;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
@@ -102,7 +103,10 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     @Override
     public LaoczWineDetails winePourPotOutStart(WineOutStartDTO wineOutStartDTO) {
         LaoczWineDetails wineDetailsById = getWineDetailsById(wineOutStartDTO.getWineDetailsId());
+        //验证是否是倒坛出酒
         checkDetailType(wineDetailsById.getDetailType(), WineDetailTypeEnum.POUR_IN);
+        //验证审核是否通过
+        super.approvalCheck(wineDetailsById.getBusyId(), BpmTaskStatusEnum.APPROVE);
         return wineOutService.wineOutStart(wineOutStartDTO);
     }
 
@@ -116,6 +120,8 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     public Long winePourPotOut(Long wineDetailsId) {
         //查询同一个业务id下的倒坛入的酒，如果出酒成功就把id返回给前端
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWineDetailsId, wineDetailsId).one();
+        //验证审核是否通过
+        super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
         LaoczWineDetails inWine = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getBusyId, laoczWineDetails.getBusyId())
                 .eq(LaoczWineDetails::getDetailType, WineDetailTypeEnum.POUR_IN.getCode()).one();
         wineOutService.wineOutFinish(wineDetailsId);
@@ -272,6 +278,8 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
      */
     @Override
     public void updateWinePourStatus(String busyId) {
+        //验证审核是否通过
+        super.approvalCheck(busyId, BpmTaskStatusEnum.REJECT);
         List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
         if (CollectionUtil.isNotEmpty(list)) {
             LaoczWineDetails pourIn = list.stream().filter(laoczWineDetails -> laoczWineDetails.getDetailType().equals(WineDetailTypeEnum.POUR_IN.getCode())).findFirst().orElseThrow(() -> new CustomException("倒坛审核不通过后，处理数据异常"));
@@ -302,6 +310,8 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
         if (Objects.isNull(wineDetailsById)) {
             throw new CustomException("酒操作业务详情不存在");
         }
+        //验证审核是否通过
+        super.approvalCheck(wineDetailsById.getBusyId(), BpmTaskStatusEnum.APPROVE);
         checkDetailType(wineDetailsById.getDetailType(), WineDetailTypeEnum.POUR_IN);
         Integer count = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getBusyId, wineDetailsById.getBusyId()).count();
         if (count >= 2) {

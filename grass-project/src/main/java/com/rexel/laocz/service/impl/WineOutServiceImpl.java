@@ -2,6 +2,7 @@ package com.rexel.laocz.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.laocz.constant.WineConstants;
 import com.rexel.laocz.constant.WinePointConstants;
@@ -12,7 +13,6 @@ import com.rexel.laocz.domain.dto.WineOutStartDTO;
 import com.rexel.laocz.domain.vo.WineDetailPointVO;
 import com.rexel.laocz.dview.DviewUtils;
 import com.rexel.laocz.enums.*;
-import com.rexel.laocz.service.ILaoczLiquorBatchService;
 import com.rexel.laocz.service.WineAbstract;
 import com.rexel.laocz.service.WineOutService;
 import org.jetbrains.annotations.NotNull;
@@ -115,6 +115,8 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         if (wineDetails == null) {
             throw new CustomException("请刷新后重试");
         }
+        super.approvalCheck(wineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
+
         //查询称重罐测点
         List<WineDetailPointVO> weighingTankPointVOList = laoczWineDetailsMapper.selectWineDetailWeighingTankPointVOList(wineDetailsId);
         WineDetailPointVO zlOut = getZlOut(weighingTankPointVOList);
@@ -195,6 +197,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
      */
     @Override
     public void updateWineOutStatus(String busyId) {
+        super.approvalCheck(busyId, BpmTaskStatusEnum.REJECT);
         //如果审批不通过
         // 陶坛与批次实时关系表修改为存储状态
         List<LaoczWineDetails> list  = super.getDetailsInBusyId(busyId);
@@ -234,6 +237,7 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
         if (laoczWineDetails.getWeighingTankWeight() == null) {
             throw new CustomException("称重罐重量未获取");
         }
+        super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
     }
 
     /**

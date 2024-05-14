@@ -62,4 +62,5 @@ public interface ILaoczBatchPotteryMappingService extends IService<LaoczBatchPot
     OverviewVo getOverview(String potteryAltarNumber);
 
     List<BatchInfoVo> getBatchInfo(String liquorBatchId);
+
 }

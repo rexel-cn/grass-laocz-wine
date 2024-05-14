@@ -2,6 +2,7 @@ package com.rexel.laocz.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.rexel.bpm.domain.task.BpmProcessInstanceCreateReqDTO;
 import com.rexel.bpm.enums.BpmTaskStatusEnum;
@@ -568,4 +569,21 @@ public abstract class WineAbstract {
     protected List<LaoczWineDetails> getDetailsInBusyId(String busyId) {
         return iLaoczWineDetailsService.lambdaQuery().in(LaoczWineDetails::getBusyId, busyId).list();
     }
+
+    /**
+     *
+     */
+    protected void approvalCheck(String busyId, BpmTaskStatusEnum bpmTaskStatusEnum) {
+        if (StrUtil.isEmpty(busyId)) {
+            throw new CustomException("业务异常，请联系管理员");
+        }
+        LaoczWineOperations operations = iLaoczWineOperationsService.lambdaQuery().eq(LaoczWineOperations::getBusyId, busyId).one();
+        if (operations == null) {
+            throw new CustomException("业务异常，请联系管理员");
+        }
+        if (!bpmTaskStatusEnum.getStatus().equals(operations.getApprovalResults())) {
+            throw new CustomException("请在{}后操作", bpmTaskStatusEnum.getName());
+        }
+    }
+
 }
