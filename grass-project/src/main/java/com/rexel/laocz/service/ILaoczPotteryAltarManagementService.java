@@ -3,6 +3,7 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
@@ -58,10 +59,12 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
     CurrentWineIndustryVO selectCurrentWineIndustry(Long potteryAltarId) throws ParseException;
 
     List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
+
     /**
      * 编辑回显,通过Id查询陶坛管理详情
      */
     PotteryAltarVo selectLaoczPotteryAltarManagement(Long potteryAltarId);
+
     /**
      * 新增陶坛
      *
@@ -69,6 +72,7 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      * @return
      */
     boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement);
+
     /**
      * 修改陶坛
      *
@@ -80,6 +84,7 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
 
     /**
      * 删除陶坛管理
+     *
      * @param potteryAltarId 陶坛Id
      * @return 返回标识
      */
@@ -191,4 +196,11 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
     boolean importPotteryAltar(List<PotteryAltarVo> potteryAltarVos);
 
 
+    WaitPotteryVO getPotteryByWorkOrderId(String workOrderId);
+
+    List<WaitPotteryVO> getOutPotteryByWorkOrderId(String workOrderId,String detailType);
+
+    WaitPotteryVO getFinishPotteryByWorkOrderId(String workOrderId);
+
+    List<WaitPotteryVO> getFinishOutPotteryByWorkOrderId(String workOrderId,String detailType);
 }

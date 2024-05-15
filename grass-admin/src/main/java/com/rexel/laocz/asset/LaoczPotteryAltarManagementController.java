@@ -10,6 +10,7 @@ import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.PotteryAltarVo;
+import com.rexel.laocz.domain.vo.WaitPotteryVO;
 import com.rexel.laocz.service.ILaoczPotteryAltarManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -202,4 +203,52 @@ public class LaoczPotteryAltarManagementController extends BaseController {
         List<PotteryAltarVo> potteryAltarVos = util.importExcel(file.getInputStream());
         return AjaxResult.success(iLaoczPotteryAltarManagementService.importPotteryAltar(potteryAltarVos));
     }
+
+    /**
+     * 待办事宜入酒申请获取陶坛信息,倒坛入酒查询陶坛信息
+     *
+     * @param workOrderId 工单Id
+     * @return 陶坛信息集合
+     */
+    @GetMapping("/getPotteryByWorkOrderId")
+    public AjaxResult getPotteryByWorkOrderId(String workOrderId) {
+        WaitPotteryVO waitPotteryVO = iLaoczPotteryAltarManagementService.getPotteryByWorkOrderId(workOrderId);
+        return AjaxResult.success(waitPotteryVO);
+    }
+
+    /**
+     * 待办事宜倒坛出酒坛,出酒，取样
+     *
+     * @param workOrderId 工单Id
+     * @return 陶坛信息
+     */
+    @GetMapping("/getOutPotteryByWorkOrderId")
+    public AjaxResult getOutPotteryByWorkOrderId(String workOrderId,String detailType) {
+        List<WaitPotteryVO> waitPotteryVO = iLaoczPotteryAltarManagementService.getOutPotteryByWorkOrderId(workOrderId,detailType);
+        return AjaxResult.success(waitPotteryVO);
+    }
+
+    /**
+     * 已办任务入酒申请获取陶坛信息,倒坛入酒查询陶坛信息
+     * @param workOrderId 工单Id
+     * @return 信息
+     */
+    @GetMapping("/getFinishPotteryByWorkOrderId")
+    public AjaxResult getFinishPotteryByWorkOrderId(String workOrderId) {
+        WaitPotteryVO waitPotteryVO = iLaoczPotteryAltarManagementService.getFinishPotteryByWorkOrderId(workOrderId);
+        return AjaxResult.success(waitPotteryVO);
+    }
+
+    /**
+     * 已办任务出酒申请获取陶坛信息,倒坛入酒查询陶坛信息
+     * @param workOrderId 工单Id
+     * @param detailType '操作详细类型：1:入酒，2出酒，3倒坛入，4倒坛出，5取样'
+     * @return 信息
+     */
+    @GetMapping("/getFinishOutPotteryByWorkOrderId")
+    public AjaxResult getFinishOutPotteryByWorkOrderId(String workOrderId,String detailType) {
+        List<WaitPotteryVO> waitPotteryVO = iLaoczPotteryAltarManagementService.getFinishOutPotteryByWorkOrderId(workOrderId,detailType);
+        return AjaxResult.success(waitPotteryVO);
+    }
+
 }

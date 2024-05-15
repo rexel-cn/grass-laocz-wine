@@ -60,6 +60,21 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     @Autowired
     private TinciPdfUtils pdfUtils;
 
+    @Autowired
+    private ILaoczWineDetailsService iLaoczWineDetailsService;
+
+    @Autowired
+    private ILaoczWineDetailsHisService iLaoczWineDetailsHisService;
+
+    @Autowired
+    private ILaoczLiquorBatchService iLaoczLiquorBatchService;
+
+    @Autowired
+    private ILaoczWineHistoryService laoczWineHistoryService;
+
+    @Autowired
+    private ILaoczWeighingTankService laoczWeighingTankService;
+
 
     /**
      * 查询陶坛管理列表
@@ -177,7 +192,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public boolean addPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
-        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0){
+        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0) {
             throw new ServiceException("满坛重量应大于0");
         }
 
@@ -209,7 +224,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public boolean updateByIdWithPotteryAltar(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
-        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0){
+        if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0) {
             throw new ServiceException("满坛重量应大于0");
         }
 
@@ -448,7 +463,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     public AjaxResult getPotteryAltarManagementQrCodePdf() {
         // 查询陶坛列表
         List<LaoczPotteryAltarManagement> list = baseMapper.selectLaoczPotteryAltarManagementList(null);
-        if (CollectionUtil.isEmpty(list)){
+        if (CollectionUtil.isEmpty(list)) {
             throw new ServiceException("没有二维码可以导出");
         }
         // 生成图片集合
@@ -496,10 +511,10 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         //导入
         for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
-            if (!potteryAltarVo.getPotteryAltarState().equals("1")&&!potteryAltarVo.getPotteryAltarState().equals("2")){
+            if (!potteryAltarVo.getPotteryAltarState().equals("1") && !potteryAltarVo.getPotteryAltarState().equals("2")) {
                 throw new ServiceException("陶坛状态值必须为1或2");
             }
-            if (potteryAltarVo.getPotteryAltarFullAltarWeight()<=0){
+            if (potteryAltarVo.getPotteryAltarFullAltarWeight() <= 0) {
                 throw new ServiceException("满坛重量应大于0");
             }
             // 获取防火区Id
@@ -522,6 +537,257 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             laoczPotteryAltarManagements.add(laoczPotteryAltarManagement);
         }
         return saveBatch(laoczPotteryAltarManagements);
+    }
+
+    @Override
+    public WaitPotteryVO getPotteryByWorkOrderId(String workOrderId) {
+        WaitPotteryVO waitPotteryVO = new WaitPotteryVO();
+
+        // 获取工单申请重量
+        QueryWrapper<LaoczLiquorBatch> wrapper = new QueryWrapper<>();
+        wrapper.eq("work_order_id", workOrderId);
+        LaoczLiquorBatch one = iLaoczLiquorBatchService.getOne(wrapper);
+        if (one == null) {
+            return new WaitPotteryVO();
+        }
+
+        // 酒液批次
+        waitPotteryVO.setLiquorBatchId(one.getLiquorBatchId());
+        // 申请的重量
+        waitPotteryVO.setApplyWeight(one.getApplyWeight());
+
+        // 酒品信息
+        LaoczLiquorManagement liquorManagement = iLaoczLiquorManagementService.getById(one.getLiquorManagementId());
+        waitPotteryVO.setLaoczLiquorManagement(liquorManagement);
+
+        // 根据工单Id在操作业务详情实时表中查询所有的陶坛Id
+        QueryWrapper<LaoczWineDetails> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("work_order_id", workOrderId);
+        // 拿到该工单下所有陶坛Id
+        List<LaoczWineDetails> laoczWineDetails = iLaoczWineDetailsService.list(queryWrapper);
+        // 酒批次Id查询酒品信息
+        List<WaitPotteryAltarVO> list = laoczWineDetails.stream().map((item) -> {
+            //创建陶坛对象
+            WaitPotteryAltarVO waitPotteryAltarVO = new WaitPotteryAltarVO();
+            // 申请重量
+            waitPotteryAltarVO.setPotteryAltarApplyWeight(item.getPotteryAltarApplyWeight());
+            // 陶坛信息
+            PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(item.getPotteryAltarId());
+            BeanUtil.copyProperties(potteryAltarInformationVO, waitPotteryAltarVO);
+            waitPotteryAltarVO.setCreateBy("---");
+            waitPotteryAltarVO.setOperationTime(null);
+            waitPotteryAltarVO.setWeighingTankNumber("---");
+            return waitPotteryAltarVO;
+        }).collect(Collectors.toList());
+
+        waitPotteryVO.setWaitPotteryAltarVOS(list);
+        return waitPotteryVO;
+    }
+
+    @Override
+    public List<WaitPotteryVO> getOutPotteryByWorkOrderId(String workOrderId,String detailType) {
+
+        List<WaitPotteryVO> waitPotteryVOS = new ArrayList<>();
+
+        // 根据工单Id在操作业务详情实时表中查询所有的陶坛Id,出酒时，里面有多个酒品批次，每个酒品信息对应多个陶坛
+        QueryWrapper<LaoczWineDetails> queryWrapper = new QueryWrapper<>();
+        if (detailType.isEmpty()){
+            queryWrapper.eq("work_order_id", workOrderId);
+        }else {
+            queryWrapper.eq("work_order_id", workOrderId).eq("detail_type",detailType);
+        }
+        // 拿到该工单下所有陶坛Id
+        List<LaoczWineDetails> laoczWineDetails = iLaoczWineDetailsService.list(queryWrapper);
+        if (CollectionUtil.isNotEmpty(laoczWineDetails)) {
+            // 酒批次Id查询陶坛信息
+            List<WaitPotteryAltarVO> list = laoczWineDetails.stream().map((item) -> {
+                // 创建陶坛对象
+                WaitPotteryAltarVO waitPotteryAltarVO = new WaitPotteryAltarVO();
+                // 申请重量
+                waitPotteryAltarVO.setPotteryAltarApplyWeight(item.getPotteryAltarApplyWeight());
+                // 陶坛信息
+                LaoczPotteryAltarManagement laoczPotteryAltarManagement = this.getById(item.getPotteryAltarId());
+                OverviewVo overview = iLaoczBatchPotteryMappingService.getOverview(laoczPotteryAltarManagement.getPotteryAltarNumber());
+                // 获取陶坛状态
+                PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(item.getPotteryAltarId());
+                BeanUtil.copyProperties(overview, waitPotteryAltarVO);
+                waitPotteryAltarVO.setPotteryAltarState(potteryAltarInformationVO.getPotteryAltarState());
+                waitPotteryAltarVO.setCreateBy("---");
+                waitPotteryAltarVO.setOperationTime(null);
+                waitPotteryAltarVO.setWeighingTankNumber("---");
+                return waitPotteryAltarVO;
+            }).collect(Collectors.toList());
+            // 相同酒品信息的在一组
+            Map<String, List<WaitPotteryAltarVO>> collect = list.stream().collect(Collectors.groupingBy(WaitPotteryAltarVO::getLiquorBatchId));
+
+            for (Map.Entry<String, List<WaitPotteryAltarVO>> longListEntry : collect.entrySet()) {
+                WaitPotteryVO waitPotteryVO = new WaitPotteryVO();
+                // 陶坛信息
+                waitPotteryVO.setWaitPotteryAltarVOS(longListEntry.getValue());
+                // 酒液批次Id
+                waitPotteryVO.setLiquorBatchId(longListEntry.getKey());
+                // 酒品信息
+                QueryWrapper<LaoczLiquorBatch> wrapper = new QueryWrapper<>();
+                wrapper.eq("liquor_batch_id", longListEntry.getKey());
+                LaoczLiquorBatch one = iLaoczLiquorBatchService.getOne(wrapper);
+                LaoczLiquorManagement liquorManagement = iLaoczLiquorManagementService.getById(one.getLiquorManagementId());
+                waitPotteryVO.setLaoczLiquorManagement(liquorManagement);
+                waitPotteryVOS.add(waitPotteryVO);
+            }
+        }
+        return waitPotteryVOS;
+    }
+
+    @Override
+    public WaitPotteryVO getFinishPotteryByWorkOrderId(String workOrderId) {
+
+        WaitPotteryVO waitPotteryVO = this.getPotteryByWorkOrderId(workOrderId);
+        QueryWrapper<LaoczWineDetailsHis> hisWrapper = new QueryWrapper<>();
+        hisWrapper.eq("work_order_id", workOrderId);
+        List<LaoczWineDetailsHis> laoczWineDetailsHis = iLaoczWineDetailsHisService.list(hisWrapper);
+        // 拿到历史表下所有的陶坛Id
+        List<WaitPotteryAltarVO> collect = laoczWineDetailsHis.stream().map((item) -> {
+            // 创建陶坛对象
+            WaitPotteryAltarVO waitPotteryAltarVO = new WaitPotteryAltarVO();
+            // 申请重量
+            waitPotteryAltarVO.setPotteryAltarApplyWeight(item.getPotteryAltarApplyWeight());
+            // 陶坛Id
+            Long potteryAltarId = item.getPotteryAltarId();
+            //称重罐编号
+            if (item.getWeighingTank()!= null){
+                LaoczWeighingTank weighingTank = laoczWeighingTankService.getById(item.getWeighingTank());
+                waitPotteryAltarVO.setWeighingTankNumber(weighingTank.getWeighingTankNumber());
+            }
+            // 酒液重量
+            QueryWrapper<LaoczBatchPotteryMapping> wrapper = new QueryWrapper<>();
+            wrapper.eq("pottery_altar_id",potteryAltarId).eq("liquor_batch_id",waitPotteryVO.getLiquorBatchId());
+            LaoczBatchPotteryMapping potteryMapping = iLaoczBatchPotteryMappingService.getOne(wrapper);
+            // 可能倒坛后，该陶坛就不存在该批次的酒了
+            if (potteryMapping != null){
+                waitPotteryAltarVO.setActualWeight(potteryMapping.getActualWeight());
+            }else {
+                waitPotteryAltarVO.setActualWeight(0.0);
+            }
+            // 封装参数查询陶坛信息
+            LaoczWineHistory laoczWineHistory = new LaoczWineHistory();
+            laoczWineHistory.setWorkOrderId(workOrderId);
+            laoczWineHistory.setPotteryAltarId(potteryAltarId);
+            List<LaoczWineHistory> laoczWineHistories = laoczWineHistoryService.selectDetailByWorkId(laoczWineHistory);
+            LaoczWineHistory wineHistory = new LaoczWineHistory();
+            if (CollectionUtil.isNotEmpty(laoczWineHistories)) {
+                wineHistory = laoczWineHistories.get(0);
+            }
+            // 获取陶坛状态
+            PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(item.getPotteryAltarId());
+            BeanUtil.copyProperties(potteryAltarInformationVO, waitPotteryAltarVO);
+            BeanUtil.copyProperties(wineHistory, waitPotteryAltarVO);
+            return waitPotteryAltarVO;
+        }).collect(Collectors.toList());
+
+        waitPotteryVO.getWaitPotteryAltarVOS().addAll(collect);
+
+        return waitPotteryVO;
+    }
+
+    @Override
+    public List<WaitPotteryVO> getFinishOutPotteryByWorkOrderId(String workOrderId,String detailType) {
+        List<WaitPotteryVO> outPottery = this.getOutPotteryByWorkOrderId(workOrderId,detailType);
+        if (CollectionUtil.isNotEmpty(outPottery)) {
+            for (WaitPotteryVO waitPotteryVO : outPottery) {
+                QueryWrapper<LaoczWineDetailsHis> hisWrapper = new QueryWrapper<>();
+                if (detailType.isEmpty()){
+                    hisWrapper.eq("work_order_id", workOrderId);
+                }else {
+                    hisWrapper.eq("work_order_id", workOrderId).eq("detail_type",detailType);
+                }
+                List<LaoczWineDetailsHis> laoczWineDetailsHis = iLaoczWineDetailsHisService.list(hisWrapper);
+                // 拿到历史表下所有的陶坛Id
+                List<WaitPotteryAltarVO> collect = laoczWineDetailsHis.stream().map((item) -> {
+                    // 创建陶坛对象
+                    WaitPotteryAltarVO waitPotteryAltarVO = new WaitPotteryAltarVO();
+                    //开始之前重量
+                    waitPotteryAltarVO.setBeforeWeight(item.getBeforeWeight());
+                    //结束之后重量
+                    waitPotteryAltarVO.setAfterWeight(item.getAfterWeight());
+                    //操作时间
+                    waitPotteryAltarVO.setOperationTime(item.getOperationTime());
+                    //称重罐编号
+                    if (item.getWeighingTank()!= null){
+                        LaoczWeighingTank weighingTank = laoczWeighingTankService.getById(item.getWeighingTank());
+                        waitPotteryAltarVO.setWeighingTankNumber(weighingTank.getWeighingTankNumber());
+                     }
+                    // 申请重量
+                    waitPotteryAltarVO.setPotteryAltarApplyWeight(item.getPotteryAltarApplyWeight());
+                    // 陶坛Id
+                    Long potteryAltarId = item.getPotteryAltarId();
+                    // 陶坛信息
+                    LaoczPotteryAltarManagement laoczPotteryAltarManagement = this.getById(potteryAltarId);
+                    OverviewVo overview = iLaoczBatchPotteryMappingService.getOverview(laoczPotteryAltarManagement.getPotteryAltarNumber());
+                    // 获取陶坛状态
+                    PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(potteryAltarId);
+                    BeanUtil.copyProperties(overview, waitPotteryAltarVO);
+                    waitPotteryAltarVO.setPotteryAltarState(potteryAltarInformationVO.getPotteryAltarState());
+                    return waitPotteryAltarVO;
+                }).collect(Collectors.toList());
+                waitPotteryVO.getWaitPotteryAltarVOS().addAll(collect);
+            }
+        } else {
+            List<WaitPotteryVO> waitPotteryVOS = new ArrayList<>();
+            QueryWrapper<LaoczWineDetailsHis> hisWrapper = new QueryWrapper<>();
+            if (detailType.isEmpty()){
+                hisWrapper.eq("work_order_id", workOrderId);
+            }else {
+                hisWrapper.eq("work_order_id", workOrderId).eq("detail_type",detailType);
+            }
+            List<LaoczWineDetailsHis> laoczWineDetailsHis = iLaoczWineDetailsHisService.list(hisWrapper);
+            // 拿到历史表下所有的陶坛Id
+            List<WaitPotteryAltarVO> list = laoczWineDetailsHis.stream().map((item) -> {
+                // 创建陶坛对象
+                WaitPotteryAltarVO waitPotteryAltarVO = new WaitPotteryAltarVO();
+                //开始之前重量
+                waitPotteryAltarVO.setBeforeWeight(item.getBeforeWeight());
+                //结束之后重量
+                waitPotteryAltarVO.setAfterWeight(item.getAfterWeight());
+                //操作时间
+                waitPotteryAltarVO.setOperationTime(item.getOperationTime());
+                //称重罐编号
+                if (item.getWeighingTank()!= null){
+                    LaoczWeighingTank weighingTank = laoczWeighingTankService.getById(item.getWeighingTank());
+                    waitPotteryAltarVO.setWeighingTankNumber(weighingTank.getWeighingTankNumber());
+                }
+                // 申请重量
+                waitPotteryAltarVO.setPotteryAltarApplyWeight(item.getPotteryAltarApplyWeight());
+                // 陶坛Id
+                Long potteryAltarId = item.getPotteryAltarId();
+                // 陶坛信息
+                LaoczPotteryAltarManagement laoczPotteryAltarManagement = this.getById(potteryAltarId);
+                OverviewVo overview = iLaoczBatchPotteryMappingService.getOverview(laoczPotteryAltarManagement.getPotteryAltarNumber());
+                // 获取陶坛状态
+                PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(potteryAltarId);
+                BeanUtil.copyProperties(overview, waitPotteryAltarVO);
+                waitPotteryAltarVO.setPotteryAltarState(potteryAltarInformationVO.getPotteryAltarState());
+                return waitPotteryAltarVO;
+            }).collect(Collectors.toList());
+            // 相同酒品信息的在一组
+            Map<String, List<WaitPotteryAltarVO>> collect = list.stream().collect(Collectors.groupingBy(WaitPotteryAltarVO::getLiquorBatchId));
+
+            for (Map.Entry<String, List<WaitPotteryAltarVO>> longListEntry : collect.entrySet()) {
+                WaitPotteryVO waitPotteryVO = new WaitPotteryVO();
+                // 陶坛信息
+                waitPotteryVO.setWaitPotteryAltarVOS(longListEntry.getValue());
+                // 酒液批次Id
+                waitPotteryVO.setLiquorBatchId(longListEntry.getKey());
+                // 酒品信息
+                QueryWrapper<LaoczLiquorBatch> wrapper = new QueryWrapper<>();
+                wrapper.eq("liquor_batch_id", longListEntry.getKey());
+                LaoczLiquorBatch one = iLaoczLiquorBatchService.getOne(wrapper);
+                LaoczLiquorManagement liquorManagement = iLaoczLiquorManagementService.getById(one.getLiquorManagementId());
+                waitPotteryVO.setLaoczLiquorManagement(liquorManagement);
+                waitPotteryVOS.add(waitPotteryVO);
+            }
+            outPottery = waitPotteryVOS;
+        }
+        return outPottery;
     }
 
     private void check(List<PotteryAltarVo> potteryAltarVos) {
