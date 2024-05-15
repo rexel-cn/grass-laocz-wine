@@ -1,5 +1,6 @@
 package com.rexel.laocz.wine;
 
+import com.rexel.common.annotation.RateLimiter;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.dto.MatterDetailDTO;
@@ -62,6 +63,7 @@ public class WineController extends BaseController {
      * @return
      */
     @PostMapping("/setWeighingTank")
+    @RateLimiter(time = 1, count = 1)
     public AjaxResult setWeighingTank(@RequestBody WineEntryApplyParamDTO weighingTank) {
         return AjaxResult.success(iLaoczWineOperationsService.setWeighingTank(weighingTank));
     }
@@ -74,6 +76,7 @@ public class WineController extends BaseController {
      * @return
      */
     @PostMapping("/confirmApprovalFailed")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult confirmApprovalFailed(@RequestBody MatterDetailDTO matterDetailDTO) {
         return AjaxResult.success(iLaoczWineOperationsService.confirmApprovalFailed(matterDetailDTO.getWineOperationsId()));
     }

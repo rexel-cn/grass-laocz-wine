@@ -1,5 +1,6 @@
 package com.rexel.laocz.wine;
 
+import com.rexel.common.annotation.RateLimiter;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.dto.WinBaseDTO;
 import com.rexel.laocz.domain.dto.WineSampApplyDTO;
@@ -25,6 +26,7 @@ public class WineSampController {
      * @param wineSampApplyDTO 酒取样申请
      */
     @PostMapping("/apply")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult wineSampApply(@RequestBody WineSampApplyDTO wineSampApplyDTO) {
         wineSampService.wineSampApply(wineSampApplyDTO);
         return AjaxResult.success();
@@ -36,6 +38,7 @@ public class WineSampController {
      * @param winBaseDTO 酒操作业务详情id
      */
     @PostMapping("/finish")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult wineSampFinish(@RequestBody WinBaseDTO winBaseDTO) {
         wineSampService.wineSampFinish(winBaseDTO.getWineDetailsId());
         return AjaxResult.success();

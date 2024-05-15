@@ -293,6 +293,11 @@ public class DviewUtils {
                 dViewVarInfo.setValue(dviewPointDTO.getPointValue());
                 dViewVarInfo.setType(type);
                 if (!reversedIndexMap.containsKey(type) || !reversedIndexMap.get(type).containsKey(pointId)) {
+                    try {
+                        cachePointIndex();
+                    } catch (IOException e) {
+                        log.error("缓存测点索引失败", e);
+                    }
                     throw new CustomException("此类型{}在测点下标不存在", type);
                 }
                 dViewVarInfo.setIndex(reversedIndexMap.get(type).get(pointId));

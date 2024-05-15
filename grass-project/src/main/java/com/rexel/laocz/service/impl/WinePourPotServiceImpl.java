@@ -292,6 +292,8 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
             outMapping.setRealStatus(RealStatusEnum.STORAGE.getCode());
             iLaoczBatchPotteryMappingService.updateById(outMapping);
             iLaoczBatchPotteryMappingService.removeById(inMapping.getMappingId());
+            //备份酒操作业务表
+            super.backupWineDetails(list);
         }
         //laocz_wine_operations备份到his，然后删除
         taskVerify(busyId);

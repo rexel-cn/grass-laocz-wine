@@ -1,16 +1,11 @@
 package com.rexel.bpm.convert.task;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.rexel.bpm.domain.dal.BpmFormDO;
 import com.rexel.bpm.domain.task.instance.BpmProcessInstanceRespVO;
 import com.rexel.bpm.domain.task.task.BpmTaskRespVO;
 import com.rexel.bpm.framework.flowable.core.util.FlowableUtils;
 import com.rexel.common.core.domain.entity.SysUser;
-import com.rexel.common.utils.BeanUtils;
-import com.rexel.common.utils.CollectionUtils;
-import com.rexel.common.utils.NumberUtils;
-import com.rexel.common.utils.PageResult;
+import com.rexel.common.utils.*;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
@@ -92,8 +87,12 @@ public interface BpmTaskConvert {
             if (ownerUser != null) {
                 taskVO.setOwnerUser(BeanUtils.toBean(ownerUser, BpmProcessInstanceRespVO.User.class));
             }
+            if (StrUtil.isNotEmpty(taskVO.getDurationInMillis())) {
+                taskVO.setDurationInMillis(DateUtils.getDateLongPoor(Long.parseLong(taskVO.getDurationInMillis())));
+            }
             return taskVO;
         });
+
 
         // 拼接父子关系
         Map<String, List<BpmTaskRespVO>> childrenTaskMap = convertMultiMap(

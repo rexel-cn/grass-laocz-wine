@@ -1,5 +1,6 @@
 package com.rexel.laocz.wine;
 
+import com.rexel.common.annotation.RateLimiter;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.dto.*;
 import com.rexel.laocz.service.WinePourPotService;
@@ -24,6 +25,7 @@ public class WinePourPotController {
      * @param winePourPotApplyDTO 倒坛申请参数：申请重量，出酒陶坛罐ID，入酒陶坛罐ID
      */
     @PostMapping("/apply")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult winePourPotApply(@RequestBody WinePourPotApplyDTO winePourPotApplyDTO) {
         winePourPotService.winePourPotApply(winePourPotApplyDTO);
         return AjaxResult.success();
@@ -36,6 +38,7 @@ public class WinePourPotController {
      * @return 重量
      */
     @PostMapping("/outStart")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult winePourPotOutStart(@RequestBody WineOutStartDTO wineOutStartDTO) {
         return AjaxResult.success(winePourPotService.winePourPotOutStart(wineOutStartDTO));
     }
@@ -47,6 +50,7 @@ public class WinePourPotController {
      * @return 出酒重量
      */
     @PostMapping("/out")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult winePourPotOut(@RequestBody WinBaseDTO winBaseDTO) {
         Long outPotteryAltarId = winePourPotService.winePourPotOut(winBaseDTO.getWineDetailsId());
         return AjaxResult.success(outPotteryAltarId);
@@ -60,6 +64,7 @@ public class WinePourPotController {
      * @return 入酒的id
      */
     @PostMapping("/inStart")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult winePourPotInStart(@RequestBody WineEntryDTO wineEntryDTO) {
         winePourPotService.winePourPotInStart(wineEntryDTO);
         return AjaxResult.success();
@@ -73,6 +78,7 @@ public class WinePourPotController {
      */
 
     @PostMapping("/in")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult winePourPotIn(@RequestBody WinBaseDTO winBaseDTO) {
         winePourPotService.winePourPotIn(winBaseDTO.getWineDetailsId());
         return AjaxResult.success();

@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class WineOutServiceImpl extends WineAbstract implements WineOutService {
-
     /**
      * 出酒申请
      *
@@ -54,9 +53,10 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
 
         //生成busy_id
         String busyId = super.getBusyId();
+
         //新增流程实例
         String processInstanceId = saveProcessInstancesService(busyId, super.getVariables(
-                batchPotteryMappings.stream().map(LaoczBatchPotteryMapping::getLiquorBatchId).collect(Collectors.toList())
+                batchPotteryMappings.stream().map(LaoczBatchPotteryMapping::getLiquorBatchId).collect(Collectors.joining(","))
                 , OperationTypeEnum.WINE_OUT.getValue(),liquorNames), WineProcessDefinitionKeyEnum.OUT_WINE);
         //新增laocz_wine_operations
         saveLaoczWineOperations(busyId, processInstanceId, OperationTypeEnum.WINE_OUT);

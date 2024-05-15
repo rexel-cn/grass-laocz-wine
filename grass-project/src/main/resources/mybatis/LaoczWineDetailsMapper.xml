@@ -129,6 +129,7 @@
         lwd.weighing_tank_weight,
         lwd.before_weight,
         lwd.after_weight,
+        lwd.work_order_id,
         lpam.pottery_altar_number,
         lpam.pottery_altar_full_altar_weight,
         lfzi.fire_zone_id,

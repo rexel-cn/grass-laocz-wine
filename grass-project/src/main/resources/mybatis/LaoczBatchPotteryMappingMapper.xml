@@ -82,9 +82,10 @@
         LEFT JOIN laocz_fire_zone_info fz ON pam.fire_zone_id = fz.fire_zone_id
         LEFT JOIN laocz_area_info tam ON fz.area_id = tam.area_id
         <where>
+            lpm.real_status='1'
             <!-- 根据传入参数添加条件 -->
             <if test="fireZoneId != null and fireZoneId != ''">
-                fz.fire_zone_id = #{fireZoneId}
+                and fz.fire_zone_id = #{fireZoneId}
             </if>
             <if test="liquorBatchId != null and liquorBatchId != ''">
                 AND lpm.liquor_batch_id LIKE CONCAT('%', #{liquorBatchId}, '%')
@@ -131,6 +132,7 @@
             </if>
             AND pam.pottery_altar_state = 1
         </where>
+        ORDER BY pam.create_time,pam.pottery_altar_number
     </select>
     <select id="selectOverviewVo" resultType="com.rexel.laocz.domain.vo.OverviewVo">
         SELECT

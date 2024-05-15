@@ -81,6 +81,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
     public List<LaoczWineHistoryVO> selectLaoczWineHistory(Long potteryAltarId, String fromTime, String endTime, String detailType, String workOrderId) {
         List<LaoczWineHistoryVO> laoczWineHistoryVOS = baseMapper.selectLaoczWineHistory(BpmProcessInstanceStatusEnum.APPROVE.getStatus(), potteryAltarId, fromTime, endTime, detailType, workOrderId);
         buildDetailType(laoczWineHistoryVOS);
+        buildOperationType(laoczWineHistoryVOS);
         return laoczWineHistoryVOS;
     }
 
@@ -137,11 +138,16 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
             //转义detailType
             buildDetailType(laoczWineHistoryVOS);
+            buildOperationType(laoczWineHistoryVOS);
             return getDataTable(totalOperand, entryOperation, distillingOperation, invertedJarOperationIn, invertedJarOperationOut, samplingOperation, laoczWineHistoryVOS, "PotteryReport");
         } catch (Exception e) {
             log.error("查询失败", e);
             throw new ServiceException("查询失败");
         }
+    }
+
+    private void buildOperationType(List<LaoczWineHistoryVO> laoczWineHistoryVOS) {
+        laoczWineHistoryVOS.forEach(laoczWineHistoryVO -> laoczWineHistoryVO.setOperationType(DictUtils.getDictLabel(WineDictConstants.OPERATION_TYPE, String.valueOf(laoczWineHistoryVO.getOperationType()))));
     }
 
     @Override
@@ -244,6 +250,7 @@ public class LaoczWineHistoryServiceImpl extends ServiceImpl<LaoczWineHistoryMap
 
 
             buildDetailType(laoczWineHistoryListVO);
+            buildOperationType(laoczWineHistoryListVO);
             return getDataTableLoss(totalApplications, inventoryQuantity, totalLiquorOutput, totalSampling, totalLoss, laoczWineHistoryListVO, "lossStatement");
         } catch (Exception e) {
             log.error("查询失败", e);

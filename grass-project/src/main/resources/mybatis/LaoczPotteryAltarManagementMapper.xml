@@ -186,6 +186,9 @@
         LEFT JOIN laocz_liquor_batch AS llb ON lbpm.liquor_batch_id=llb.liquor_batch_id
         <where>
             lbpm.pottery_altar_id IS NOT NULL
+            <if test="liquorBatchId!=null and liquorBatchId!=''">
+                AND lbpm.liquor_batch_id =#{liquorBatchId}
+            </if>
             <if test="fireZoneId!=null and fireZoneId!=''">
                 AND lpam.fire_zone_id = #{fireZoneId}
             </if>

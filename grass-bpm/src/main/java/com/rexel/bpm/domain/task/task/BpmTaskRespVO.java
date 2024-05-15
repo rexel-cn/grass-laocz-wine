@@ -1,5 +1,6 @@
 package com.rexel.bpm.domain.task.task;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rexel.bpm.domain.task.instance.BpmProcessInstanceRespVO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -30,12 +31,13 @@ public class BpmTaskRespVO {
     /**
      * 结束时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     /**
      * 持续时间
      */
-    private Long durationInMillis;
+    private String durationInMillis;
 
     /**
      * 任务状态
@@ -120,7 +122,7 @@ public class BpmTaskRespVO {
         /**
          * 提交时间
          */
-        private LocalDateTime createTime;
+        private LocalDateTime startTime;
 
         /**
          * 流程定义的编号

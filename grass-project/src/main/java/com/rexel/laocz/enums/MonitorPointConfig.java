@@ -19,7 +19,7 @@ public enum MonitorPointConfig {
     RUN("2", "run", CheckType.EQUALS, "1", "运行状态"),
     CL_FAULT("1", "cl_fault", CheckType.EQUALS, "1", "关故障"),
     OP_FAULT("1", "op_fault", CheckType.EQUALS, "1", "开故障"),
-    ZL_OUT("1", "zl_out", CheckType.LESS_THAN, null, "秤超上限");
+    ZL_OUT("1", "zl_out", CheckType.GREATER_THAN, null, "秤超上限");
 
     /**
      * 1.称重罐，2泵

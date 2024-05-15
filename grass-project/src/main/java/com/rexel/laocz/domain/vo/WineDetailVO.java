@@ -1,8 +1,5 @@
 package com.rexel.laocz.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.rexel.common.annotation.Excel;
 import lombok.Data;
 
 /**
@@ -86,5 +83,10 @@ public class WineDetailVO {
      * 结束之后重量
      */
     private Double afterWeight;
+
+    /**
+     * 审批流程id
+     */
+    private String workOrderId;
 
 }

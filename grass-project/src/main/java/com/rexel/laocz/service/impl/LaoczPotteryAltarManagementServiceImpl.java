@@ -196,6 +196,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             throw new ServiceException("满坛重量应大于0");
         }
 
+        validatePotteryAltarNumber(laoczPotteryAltarManagement.getPotteryAltarNumber());
+
+
         laoczPotteryAltarManagement.setPotteryAltarQrCodeAddress(" ");
 
         QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
@@ -227,6 +230,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0) {
             throw new ServiceException("满坛重量应大于0");
         }
+        validatePotteryAltarNumber(laoczPotteryAltarManagement.getPotteryAltarNumber());
 
         QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
 
@@ -240,6 +244,23 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
             throw new ServiceException("陶坛编号已存在");
         } else {
             return updateById(laoczPotteryAltarManagement);
+        }
+    }
+
+    /**
+     * 验证陶坛编号 只能是数字并且是6位
+     *
+     * @param potteryAltarNumber 陶坛编号
+     */
+    private void validatePotteryAltarNumber(String potteryAltarNumber) {
+        if (StrUtil.isEmpty(potteryAltarNumber)) {
+            throw new ServiceException("陶坛编号不能为空");
+        }
+        if (!potteryAltarNumber.matches("^[0-9]*$")) {
+            throw new ServiceException("陶坛编号只能是数字");
+        }
+        if (potteryAltarNumber.length() != 6) {
+            throw new ServiceException("陶坛编号只能是6位");
         }
     }
 
@@ -750,6 +771,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
                 waitPotteryAltarVO.setAfterWeight(item.getAfterWeight());
                 //操作时间
                 waitPotteryAltarVO.setOperationTime(item.getOperationTime());
+
                 //称重罐编号
                 if (item.getWeighingTank()!= null){
                     LaoczWeighingTank weighingTank = laoczWeighingTankService.getById(item.getWeighingTank());
@@ -765,6 +787,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
                 // 获取陶坛状态
                 PotteryAltarInformationVO potteryAltarInformationVO = this.selectPotteryAltarInformation(potteryAltarId);
                 BeanUtil.copyProperties(overview, waitPotteryAltarVO);
+                //todo 虎卫注意 已经出酒的陶坛可能存在于laocz_batch_pottery_mapping，也可能不存在，取决于是否出完酒。所以OverviewVo查询有问题，导致批号查询有问题
+                waitPotteryAltarVO.setLiquorBatchId(item.getLiquorBatchId());
+
                 waitPotteryAltarVO.setPotteryAltarState(potteryAltarInformationVO.getPotteryAltarState());
                 return waitPotteryAltarVO;
             }).collect(Collectors.toList());

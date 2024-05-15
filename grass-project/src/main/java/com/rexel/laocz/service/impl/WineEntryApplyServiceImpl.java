@@ -146,11 +146,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void wineEntryApply(WineEntryApplyDTO wineEntryApplyDTO) {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         //查询： 1：空罐子，2：可使用的
         //自动选择： 1：空罐子，可使用的，重量没问题
         //手动选择： 1：有没有这个罐子。空罐子，可使用的，每个罐子的重量没问题，总重量没问题。
@@ -772,17 +767,14 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
             DViewVarInfo dViewVarInfo = pointValues.get(map.get(value.getUseMark()));
             //判断这次遍历是 ZL_OUT
             if (value.name().equals(MonitorPointConfig.ZL_OUT.name())) {
-//                //判断是否上限
-//                //称重罐上限
-//                String fullTankUpperLimit = weighingTank.getFullTankUpperLimit();
 //                //申请重量
-//                Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
+                Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
 //                //查询已有的重量
-//                Double value1 = Double.parseDouble(dViewVarInfo.getValue().toString());
-//                //判断申请重量+已有重量>称重罐上限就报错
-//                if (!value.getCheck().checkValue(String.valueOf(potteryAltarApplyWeight + value1), fullTankUpperLimit)) {
-//                    throw new CustomException("申请重量:{},已有重量:{},称重罐上限:{}", potteryAltarApplyWeight, value1, fullTankUpperLimit);
-//                }
+                Double value1 = Double.parseDouble(dViewVarInfo.getValue().toString());
+//                //判断申请重量>已有重量 就报错   因为入酒是从称重罐往陶坛里面出，所以说事先称重罐得有酒
+                if (value.getCheck().checkValue(String.valueOf(potteryAltarApplyWeight), String.valueOf(value1))) {
+                    throw new CustomException("申请重量:{},称重罐已有重量:{},因称重罐重量小于申请重量，操作失败", potteryAltarApplyWeight, value1);
+                }
                 continue;
             }
             //object 1.0 转换为整型
@@ -792,13 +784,10 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
                 throw new CustomException(value.getException());
             }
         }
-
         //称重罐编号
         String about = weighingTank.getAbout();
-
         //申请重量
         Double potteryAltarApplyWeight = wineDetails.getPotteryAltarApplyWeight();
-
         //申请重量测点
         WineDetailPointVO weightPoint = pumpMap.get(WinePointConstants.WEIGHT_POINT);
         if (weightPoint == null) {

@@ -19,4 +19,8 @@ public class WineDictConstants {
      * 操作类型详情
      */
     public static final String DETAIL_TYPE = "detail_type";
+    /**
+     * 操作类型
+     */
+    public static final String OPERATION_TYPE = "operation_type";
 }

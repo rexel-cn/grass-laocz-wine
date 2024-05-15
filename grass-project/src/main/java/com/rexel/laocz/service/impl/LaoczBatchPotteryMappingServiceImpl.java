@@ -66,8 +66,11 @@ public class LaoczBatchPotteryMappingServiceImpl extends ServiceImpl<LaoczBatchP
                 PageUtils.clearPage();
             }
 
-            Double totalActualWeight = baseMapper.selectActualWeightSum(areaId, fireZoneId, liquorBatchId);
-
+            Double totalActualWeight = 0.0;
+            Double v = baseMapper.selectActualWeightSum(areaId, fireZoneId, liquorBatchId);
+            if (v != null) {
+                totalActualWeight = v;
+            }
 
             return getDataTable(totalActualWeight, laoczBatchPotteryMappingVOS, "LiquorStorage");
         } catch (Exception e) {
