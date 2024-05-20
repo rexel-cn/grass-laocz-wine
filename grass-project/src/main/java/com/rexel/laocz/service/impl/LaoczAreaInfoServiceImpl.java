@@ -43,21 +43,11 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
 
     @Override
     public List<AreaVo> dropDown() {
-
-        ArrayList<AreaVo> list = new ArrayList<>();
-
         List<LaoczAreaInfo> laoczAreaInfos = this.selectLaoczAreaInfoList(null);
-
         if (laoczAreaInfos.isEmpty()) {
-            return list;
+            return new ArrayList<>();
         }
-
-        for (LaoczAreaInfo laoczAreaInfo : laoczAreaInfos) {
-            AreaVo areaVo = new AreaVo();
-            BeanUtil.copyProperties(laoczAreaInfo,areaVo);
-            list.add(areaVo);
-        }
-        return list;
+        return BeanUtil.copyToList(laoczAreaInfos, AreaVo.class);
     }
 
     @Override
@@ -65,8 +55,7 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
         LambdaQueryWrapper<LaoczFireZoneInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(LaoczFireZoneInfo::getAreaId,id);
         queryWrapper.orderByAsc(LaoczFireZoneInfo::getDispalyOrder);
-        List<LaoczFireZoneInfo> list = iLaoczFireZoneInfoService.list(queryWrapper);
-        return list;
+        return iLaoczFireZoneInfoService.list(queryWrapper);
     }
 
     /**
@@ -86,11 +75,58 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
         }
         return this.save(laoczAreaInfo);
     }
+
+    /**
+     * 修改场区
+     *
+     * @param laoczAreaInfo 场区信息
+     * @return 返回
+     */
+    @Override
+    public Boolean updateLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo) {
+        //判断场区是否存在
+        LaoczAreaInfo byId = this.getById(laoczAreaInfo.getAreaId());
+        if (byId == null) {
+            throw new ServiceException("场区不存在");
+        }
+        //判断场区编号是否已存在,排除自己
+        QueryWrapper<LaoczAreaInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("area_name", laoczAreaInfo.getAreaName());
+        wrapper.ne("area_id", laoczAreaInfo.getAreaId());
+
+        int count = this.count(wrapper);
+        if (count > 0) {
+            throw new ServiceException("场区编号已存在");
+        }
+        return this.updateById(laoczAreaInfo);
+    }
+
     /**
      * 联查全部防火区+场区
      */
     @Override
     public List<FireZoneInfoVo> getAreaFire() {
-        return  baseMapper.selectAreaFire();
+        return baseMapper.selectAreaFire();
+    }
+
+    /**
+     * 根据id删除
+     *
+     * @param areaId 场区id
+     * @return 返回
+     */
+    @Override
+    public Boolean deleteLaoczAreaInfoById(Long areaId) {
+        //判断场区是否存在
+        LaoczAreaInfo byId = this.getById(areaId);
+        if (byId == null) {
+            throw new ServiceException("场区不存在");
+        }
+        //判断是否有防火区
+        Integer count = iLaoczFireZoneInfoService.lambdaQuery().eq(LaoczFireZoneInfo::getAreaId, areaId).count();
+        if (count > 0) {
+            throw new ServiceException("该场区下有防火区，无法删除");
+        }
+        return this.removeById(areaId);
     }
 }

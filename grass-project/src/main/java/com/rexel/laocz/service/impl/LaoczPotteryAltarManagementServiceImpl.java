@@ -16,6 +16,7 @@ import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineSamplePotteryAltarDTO;
 import com.rexel.laocz.domain.vo.*;
+import com.rexel.laocz.enums.PotteryAltarStateEnum;
 import com.rexel.laocz.mapper.LaoczPotteryAltarManagementMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.laocz.utils.TinciPdfUtils;
@@ -112,8 +113,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
     public PotteryAltarInformationVO selectPotteryAltarInformation(Long potteryAltarId) {
         PotteryAltarInformationVO potteryAltarInformationVO = baseMapper.setPotteryAltarInformation(potteryAltarId);
         if (ObjectUtil.isEmpty(potteryAltarInformationVO)) {
-            PotteryAltarInformationVO potteryAltarInformationVO1 = new PotteryAltarInformationVO();
-            return potteryAltarInformationVO1;
+            return new PotteryAltarInformationVO();
         }
         return potteryAltarInformationVO;
     }
@@ -156,8 +156,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<PotteryAltarVo> selectLaoczPotteryAltarManagementListDetail(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
-        List<PotteryAltarVo> list = baseMapper.selectLaoczPotteryAltarManagementListDetail(laoczPotteryAltarManagement);
-        return list;
+        return baseMapper.selectLaoczPotteryAltarManagementListDetail(laoczPotteryAltarManagement);
     }
 
     /**
@@ -230,21 +229,24 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         if (laoczPotteryAltarManagement.getPotteryAltarFullAltarWeight() <= 0) {
             throw new ServiceException("满坛重量应大于0");
         }
-        validatePotteryAltarNumber(laoczPotteryAltarManagement.getPotteryAltarNumber());
+        //validatePotteryAltarNumber(laoczPotteryAltarManagement.getPotteryAltarNumber());
 
-        QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
-
-        queryWrapper.eq("pottery_altar_number", laoczPotteryAltarManagement.getPotteryAltarNumber());
-
-        int count = this.count(queryWrapper);
-
+//        QueryWrapper<LaoczPotteryAltarManagement> queryWrapper = new QueryWrapper<>();
+//
+//        queryWrapper.eq("pottery_altar_number", laoczPotteryAltarManagement.getPotteryAltarNumber());
+//
+//        int count = this.count(queryWrapper);
+//
         LaoczPotteryAltarManagement altarManagement = this.getById(laoczPotteryAltarManagement.getPotteryAltarId());
-
-        if (count > 0 && !altarManagement.getPotteryAltarNumber().equals(laoczPotteryAltarManagement.getPotteryAltarNumber())) {
-            throw new ServiceException("陶坛编号已存在");
-        } else {
-            return updateById(laoczPotteryAltarManagement);
-        }
+//
+//        if (count > 0 && !altarManagement.getPotteryAltarNumber().equals(laoczPotteryAltarManagement.getPotteryAltarNumber())) {
+//            throw new ServiceException("陶坛编号已存在");
+//        } else {
+//
+//        }
+        //不允许修改
+        laoczPotteryAltarManagement.setPotteryAltarNumber(altarManagement.getPotteryAltarNumber());
+        return updateById(laoczPotteryAltarManagement);
     }
 
     /**
@@ -532,7 +534,8 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
         //导入
         for (PotteryAltarVo potteryAltarVo : potteryAltarVos) {
-            if (!potteryAltarVo.getPotteryAltarState().equals("1") && !potteryAltarVo.getPotteryAltarState().equals("2")) {
+            if (!PotteryAltarStateEnum.USE.getCode().toString().equals(potteryAltarVo.getPotteryAltarState())
+                    && !PotteryAltarStateEnum.SEAL.getCode().toString().equals(potteryAltarVo.getPotteryAltarState())) {
                 throw new ServiceException("陶坛状态值必须为1或2");
             }
             if (potteryAltarVo.getPotteryAltarFullAltarWeight() <= 0) {

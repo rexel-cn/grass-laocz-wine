@@ -1,22 +1,19 @@
 package com.rexel.laocz.config;
 
 
-import java.util.Arrays;
-import java.util.List;
-
-
+import com.rexel.common.annotation.Log;
+import com.rexel.common.core.controller.BaseController;
+import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.common.enums.BusinessType;
 import com.rexel.laocz.domain.LaoczLiquorDict;
 import com.rexel.laocz.service.ILaoczLiquorDictService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.rexel.common.annotation.Log;
-import com.rexel.common.core.controller.BaseController;
-import com.rexel.common.core.domain.AjaxResult;
-import com.rexel.common.enums.BusinessType;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * 酒品字典Controller
@@ -39,7 +36,6 @@ public class LaoczLiquorDictController extends BaseController {
         List<LaoczLiquorDict> list = laoczLiquorDictService.selectLaoczLiquorDictList(laoczLiquorDict);
         return AjaxResult.success(list);
     }
-
     /**
      * 获取酒品字典详细信息
      */
@@ -47,37 +43,15 @@ public class LaoczLiquorDictController extends BaseController {
     public AjaxResult getInfo(@PathVariable("liquorDictId") Long liquorDictId) {
         return AjaxResult.success(laoczLiquorDictService.getById(liquorDictId));
     }
-
     /**
      * 新增酒品字典
      */
     @Log(title = "酒品字典", businessType = BusinessType.INSERT)
     @Transactional(rollbackFor = Exception.class)
     @PostMapping
-
-    public AjaxResult add(@RequestBody   @Valid  List<  LaoczLiquorDict> laoczLiquorDicts) {
-
+    public AjaxResult add(@RequestBody @Valid List<LaoczLiquorDict> laoczLiquorDicts) {
         return toAjax(laoczLiquorDictService.addLiquorDict(laoczLiquorDicts));
     }
-
-    /**
-     * 修改酒品字典
-     */
-    @Log(title = "酒品字典", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody LaoczLiquorDict laoczLiquorDict) {
-        return toAjax(laoczLiquorDictService.updateById(laoczLiquorDict));
-    }
-
-    /**
-     * 删除酒品字典
-     */
-    @Log(title = "酒品字典", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{liquorDictIds}")
-    public AjaxResult remove(@PathVariable Long[] liquorDictIds) {
-        return toAjax(laoczLiquorDictService.removeByIds(Arrays.asList(liquorDictIds)));
-    }
-
     /**
      * 酒液等级 香型名称 下拉
      *

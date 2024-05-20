@@ -52,7 +52,7 @@ public class DviewUtils {
      * 是否自动启动 dview采集、DCS状态刷新、输送监控
      * true:自动启动，false:不自动启动
      */
-    private static final boolean IS_AUTO_RUNNING = true;
+    private static final boolean IS_AUTO_RUNNING = false;
     private static final String DVIEW_ADDRESS = "dview_address";
     private static final String DVIEW_IP = "ip";
     private static final String DVIEW_PORT = "port";
@@ -293,11 +293,6 @@ public class DviewUtils {
                 dViewVarInfo.setValue(dviewPointDTO.getPointValue());
                 dViewVarInfo.setType(type);
                 if (!reversedIndexMap.containsKey(type) || !reversedIndexMap.get(type).containsKey(pointId)) {
-                    try {
-                        cachePointIndex();
-                    } catch (IOException e) {
-                        log.error("缓存测点索引失败", e);
-                    }
                     throw new CustomException("此类型{}在测点下标不存在", type);
                 }
                 dViewVarInfo.setIndex(reversedIndexMap.get(type).get(pointId));

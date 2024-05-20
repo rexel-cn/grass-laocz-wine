@@ -34,8 +34,24 @@ public interface ILaoczAreaInfoService extends IService<LaoczAreaInfo> {
      * @return 返回
      */
     boolean addLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo);
+
+    /**
+     * 修改场区
+     *
+     * @param laoczAreaInfo 场区信息
+     * @return 返回
+     */
+    Boolean updateLaoczAreaInfo(LaoczAreaInfo laoczAreaInfo);
     /**
      * 联查全部防火区+场区
      */
     List<FireZoneInfoVo> getAreaFire();
+
+    /**
+     * 根据id删除
+     *
+     * @param fireZoneId 防火区id
+     * @return 返回
+     */
+    Boolean deleteLaoczAreaInfoById(Long fireZoneId);
 }

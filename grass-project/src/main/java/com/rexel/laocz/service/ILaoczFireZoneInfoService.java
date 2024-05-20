@@ -24,6 +24,22 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
     List<FireZoneInfoVo> selectLaoczFireZoneInfoList(LaoczFireZoneInfo laoczFireZoneInfo);
 
     /**
+     * 保存防火区信息
+     *
+     * @param laoczFireZoneInfo 防火区信息
+     * @return 返回
+     */
+    Boolean saveFireZoneInfo(LaoczFireZoneInfo laoczFireZoneInfo);
+
+    /**
+     * 修改防火区信息
+     *
+     * @param laoczFireZoneInfo 防火区信息
+     * @return 返回
+     */
+    Boolean updateFireZoneInfo(LaoczFireZoneInfo laoczFireZoneInfo);
+
+    /**
      * 树状下拉框
      *
      * @return
@@ -31,4 +47,12 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
     List<TreePullDownVO> selectTreePullDown();
 
     Long findFireZoneId(String areaName, String fireZoneName);
+
+    /**
+     * 删除防火区信息
+     *
+     * @param fireZoneId 防火区id
+     * @return 返回
+     */
+    Boolean deleteLaoczFireZoneInfoById(Long fireZoneId);
 }

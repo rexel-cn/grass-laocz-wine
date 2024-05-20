@@ -11,7 +11,6 @@ import com.rexel.laocz.service.ILaoczFireZoneInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,7 +51,7 @@ public class LaoczFireZoneInfoController extends BaseController {
     @Log(title = "防火区信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody LaoczFireZoneInfo laoczFireZoneInfo) {
-        return toAjax(laoczFireZoneInfoService.save(laoczFireZoneInfo));
+        return toAjax(laoczFireZoneInfoService.saveFireZoneInfo(laoczFireZoneInfo));
     }
 
     /**
@@ -61,16 +60,16 @@ public class LaoczFireZoneInfoController extends BaseController {
     @Log(title = "防火区信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody LaoczFireZoneInfo laoczFireZoneInfo) {
-        return toAjax(laoczFireZoneInfoService.updateById(laoczFireZoneInfo));
+        return toAjax(laoczFireZoneInfoService.updateFireZoneInfo(laoczFireZoneInfo));
     }
 
     /**
      * 删除防火区信息
      */
     @Log(title = "防火区信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{fireZoneIds}")
-    public AjaxResult remove(@PathVariable Long[] fireZoneIds) {
-        return toAjax(laoczFireZoneInfoService.removeByIds(Arrays.asList(fireZoneIds)));
+    @DeleteMapping("/{fireZoneId}")
+    public AjaxResult remove(@PathVariable("fireZoneId") Long fireZoneId) {
+        return toAjax(laoczFireZoneInfoService.deleteLaoczFireZoneInfoById(fireZoneId));
     }
 
     /**
