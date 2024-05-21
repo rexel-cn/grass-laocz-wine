@@ -34,5 +34,5 @@ public interface LaoczPumpMapper extends BaseMapper<LaoczPump> {
 
     List<LaoczPumpVo> selectPumpDetails(Long pumpId);
 
-    List<PointInfo> getPointInfo();
+    List<PointInfo> getPointInfo(Long pumpId);
 }

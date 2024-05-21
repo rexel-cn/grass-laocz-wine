@@ -23,4 +23,24 @@ public interface ILaoczLiquorManagementService extends IService<LaoczLiquorManag
     List<LaoczLiquorManagement> selectLaoczLiquorManagementList(LaoczLiquorManagement laoczLiquorManagement);
 
     boolean importPoint(List<LiquorVo> liquorVos);
+
+    boolean deleteLaoczLiquorManagementById(Long liquorManagementId);
+
+
+    /**
+     * 新增酒品
+     *
+     * @param laoczLiquorManagement 酒品
+     * @return 结果
+     */
+    Boolean saveLaoczLiquorManagement(LaoczLiquorManagement laoczLiquorManagement);
+
+    /**
+     * 修改酒品
+     *
+     * @param laoczLiquorManagement 酒品
+     * @return 结果
+     */
+    Boolean updateLaoczLiquorManagement(LaoczLiquorManagement laoczLiquorManagement);
+
 }

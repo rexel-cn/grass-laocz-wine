@@ -10,18 +10,13 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.dto.PumpImportDto;
-import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.mapper.LaoczPumpMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.system.domain.GrassPointInfo;
-import com.rexel.system.domain.vo.PointQueryVO;
-import com.rexel.system.mapper.GrassPointInfoMapper;
 import com.rexel.system.service.IGrassPointService;
-import com.rexel.system.service.ISysDictTypeService;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -232,8 +227,7 @@ public class LaoczPumpServiceImpl extends ServiceImpl<LaoczPumpMapper, LaoczPump
     @Override
     public List<PointInfo> getPointInfo(Long pumpId) {
         // 获取所有的测点并根据测点获取测点信息
-        List<PointInfo> pointInfos = baseMapper.getPointInfo();
-        return pointInfos;
+        return baseMapper.getPointInfo(pumpId);
     }
 
     @Override
