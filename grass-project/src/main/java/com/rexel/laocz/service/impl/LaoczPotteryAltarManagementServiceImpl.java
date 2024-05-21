@@ -111,6 +111,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public PotteryAltarInformationVO selectPotteryAltarInformation(Long potteryAltarId) {
+        if (potteryAltarId == null) {
+            return new PotteryAltarInformationVO();
+        }
         PotteryAltarInformationVO potteryAltarInformationVO = baseMapper.setPotteryAltarInformation(potteryAltarId);
         if (ObjectUtil.isEmpty(potteryAltarInformationVO)) {
             return new PotteryAltarInformationVO();
@@ -120,6 +123,9 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
 
     @Override
     public CurrentWineIndustryVO selectCurrentWineIndustry(Long potteryAltarId) throws ParseException {
+        if (potteryAltarId == null) {
+            return new CurrentWineIndustryVO();
+        }
         // 定义一个与字符串日期格式相匹配的SimpleDateFormat对象
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         CurrentWineIndustryVO currentWineIndustryVO = baseMapper.setCurrentWineIndustry(potteryAltarId);

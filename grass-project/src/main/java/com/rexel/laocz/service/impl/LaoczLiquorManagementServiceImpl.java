@@ -176,8 +176,8 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
         }
     }
 
-    public void checkLiquorContent(Long LiquorContent) {
-        if (LiquorContent < 1 || LiquorContent > 100) {
+    public void checkLiquorContent(Double LiquorContent) {
+        if (LiquorContent < 1.0 || LiquorContent > 100.0) {
             throw new CustomException("酒精度数不正确，请合理设置酒精度数");
         }
     }
@@ -186,6 +186,6 @@ public class LaoczLiquorManagementServiceImpl extends ServiceImpl<LaoczLiquorMan
         //验证酒品名称是否重复
         checkLiquorName(liquorManagement.getLiquorName(), liquorManagement.getLiquorManagementId());
         //验证酒精度数是否正确
-        checkLiquorContent(Long.parseLong(liquorManagement.getLiquorContent()));
+        checkLiquorContent(Double.parseDouble(liquorManagement.getLiquorContent()));
     }
 }
