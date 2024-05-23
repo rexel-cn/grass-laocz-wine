@@ -3,6 +3,7 @@ package com.rexel.laocz.wine;
 import com.rexel.common.annotation.RateLimiter;
 import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.dto.MatterDetailDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
 import com.rexel.laocz.domain.dto.WineOperationDTO;
@@ -29,9 +30,9 @@ public class WineController extends BaseController {
      * @return 我的事项列表
      */
     @PostMapping("/getMatterVOList")
-    public AjaxResult getMatterVOList(@RequestBody WineOperationDTO wineOperationDTO) {
+    public TableDataInfo getMatterVOList(@RequestBody WineOperationDTO wineOperationDTO) {
         startPage();
-        return AjaxResult.success(iLaoczWineOperationsService.getMatterVOList(wineOperationDTO));
+        return getDataTable(iLaoczWineOperationsService.getMatterVOList(wineOperationDTO));
     }
 
     /**
@@ -41,8 +42,8 @@ public class WineController extends BaseController {
      * @return
      */
     @PostMapping("/getMatterDetailVOList")
-    public AjaxResult getMatterDetailVOList(@RequestBody MatterDetailDTO matterDetailDTO) {
-        return AjaxResult.success(iLaoczWineOperationsService.getMatterDetailVOList(matterDetailDTO));
+    public TableDataInfo getMatterDetailVOList(@RequestBody MatterDetailDTO matterDetailDTO) {
+        return getDataTable(iLaoczWineOperationsService.getMatterDetailVOList(matterDetailDTO));
     }
 
     /**

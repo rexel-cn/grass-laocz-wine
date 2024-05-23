@@ -632,6 +632,9 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * @param laoczWineDetails 酒操作详情
      */
     private void finishCheck(LaoczWineDetails laoczWineDetails) {
+        if (laoczWineDetails == null) {
+            throw new CustomException("已保存完成，请退出刷新重试");
+        }
         super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
 
         //判断是否已经有了称重罐重量以及是否已经完成

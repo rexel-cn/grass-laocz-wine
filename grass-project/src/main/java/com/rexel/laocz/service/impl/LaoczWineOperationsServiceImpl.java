@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.bpm.enums.BpmTaskStatusEnum;
 import com.rexel.common.exception.CustomException;
 import com.rexel.common.utils.DictUtils;
+import com.rexel.common.utils.PageUtils;
 import com.rexel.laocz.constant.WineDictConstants;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.MatterDetailDTO;
@@ -92,7 +93,13 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
             throw new CustomException("事项详情不存在，请刷新页面重试");
         }
         String busyId = operations.getBusyId();
-        List<MatterDetailVO> matterDetailVOS = laoczWineDetailsMapper.selectMatterDetailVOList(busyId, wineOperationsId.getAreaId(), wineOperationsId.getFireZoneId());
+        List<MatterDetailVO> matterDetailVOS;
+        try {
+            PageUtils.startPage();
+            matterDetailVOS = laoczWineDetailsMapper.selectMatterDetailVOList(busyId, wineOperationsId.getAreaId(), wineOperationsId.getFireZoneId());
+        } finally {
+            PageUtils.clearPage();
+        }
         for (MatterDetailVO matterDetailVO : matterDetailVOS) {
             matterDetailVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, matterDetailVO.getDetailType()));
         }

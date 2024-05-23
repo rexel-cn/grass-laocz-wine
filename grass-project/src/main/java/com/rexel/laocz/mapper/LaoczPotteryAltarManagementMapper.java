@@ -112,4 +112,13 @@ public interface LaoczPotteryAltarManagementMapper extends BaseMapper<LaoczPotte
      */
     List<WineOperaPotteryAltarVO> wineSamplePotteryAltarList(WineSamplePotteryAltarDTO wineSamplePotteryAltarDTO);
 
+
+    /**
+     * 倒坛入
+     *
+     * @param wineOutPotteryAltarDTO
+     * @return
+     */
+    List<WineOperaPotteryAltarVO> pourTankInPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO);
+
 }

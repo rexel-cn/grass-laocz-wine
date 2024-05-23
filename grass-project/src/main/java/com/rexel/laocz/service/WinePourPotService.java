@@ -61,7 +61,7 @@ public interface WinePourPotService {
     WineOperaPotteryAltarVO qrOutCodeScan(String potteryAltarNumber);
 
     /**
-     * 二维码扫描获取倒坛出酒陶坛信息
+     * 二维码扫描获取倒坛入酒陶坛信息
      *
      * @param potteryAltarNumber 陶坛编号，出酒陶坛id，出酒重量
      * @return 陶坛信息

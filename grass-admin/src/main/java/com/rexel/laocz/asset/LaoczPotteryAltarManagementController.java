@@ -139,8 +139,9 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * @return 筛选陶坛罐列表
      */
     @PostMapping("/wineEntryPotteryAltarList")
-    public AjaxResult wineEntryPotteryAltarList(@RequestBody WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
-        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO));
+    public TableDataInfo wineEntryPotteryAltarList(@RequestBody WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
+        startPage();
+        return getDataTable(iLaoczPotteryAltarManagementService.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO));
     }
 
     /**
@@ -150,8 +151,8 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * @return 筛选陶坛罐列表
      */
     @PostMapping("/wineOutPotteryAltarList")
-    public AjaxResult wineOutPotteryAltarList(@RequestBody WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
-        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO));
+    public TableDataInfo wineOutPotteryAltarList(@RequestBody WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
+        return getDataTable(iLaoczPotteryAltarManagementService.wineOutPotteryAltarList(wineOutPotteryAltarDTO));
     }
 
     /**
@@ -161,8 +162,9 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * @return 筛选陶坛罐列表
      */
     @PostMapping("/wineSamplePotteryAltarList")
-    public AjaxResult wineSamplePotteryAltarList(@RequestBody WineSamplePotteryAltarDTO WineSamplePotteryAltarDTO) {
-        return AjaxResult.success(iLaoczPotteryAltarManagementService.wineSamplePotteryAltarList(WineSamplePotteryAltarDTO));
+    public TableDataInfo wineSamplePotteryAltarList(@RequestBody WineSamplePotteryAltarDTO WineSamplePotteryAltarDTO) {
+        startPage();
+        return getDataTable(iLaoczPotteryAltarManagementService.wineSamplePotteryAltarList(WineSamplePotteryAltarDTO));
     }
 
     /**
@@ -172,8 +174,8 @@ public class LaoczPotteryAltarManagementController extends BaseController {
      * @return 筛选陶坛罐列表
      */
     @PostMapping("/winePourPotteryAltarList")
-    public AjaxResult winePourPotteryAltarList(@RequestBody WinePourPotteryAltarDTO winePourPotteryAltarDTO) {
-        return AjaxResult.success(iLaoczPotteryAltarManagementService.winePourPotteryAltarList(winePourPotteryAltarDTO));
+    public TableDataInfo winePourPotteryAltarList(@RequestBody WinePourPotteryAltarDTO winePourPotteryAltarDTO) {
+        return getDataTable(iLaoczPotteryAltarManagementService.winePourPotteryAltarList(winePourPotteryAltarDTO));
     }
 
     /**

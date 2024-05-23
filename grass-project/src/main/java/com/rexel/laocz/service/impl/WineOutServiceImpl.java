@@ -234,6 +234,9 @@ public class WineOutServiceImpl extends WineAbstract implements WineOutService {
      * @param laoczWineDetails 酒操作业务详情
      */
     private void winOutfinishCheck(LaoczWineDetails laoczWineDetails) {
+        if (laoczWineDetails == null) {
+            throw new CustomException("已保存完成，请退出刷新重试");
+        }
         if (laoczWineDetails.getWeighingTankWeight() == null) {
             throw new CustomException("称重罐重量未获取");
         }

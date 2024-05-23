@@ -161,6 +161,9 @@ public class WineSampServiceImpl extends WineAbstract implements WineSampService
     @Transactional(rollbackFor = Exception.class)
     public void wineSampFinish(Long wineDetailsId) {
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.getById(wineDetailsId);
+        if (laoczWineDetails == null) {
+            throw new CustomException("已保存完成，请退出刷新重试");
+        }
         //验证审核是否通过
         super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
         //更新陶坛实时关系表，入酒，更新为存储，更新实际重量（为称重罐的实际重量）

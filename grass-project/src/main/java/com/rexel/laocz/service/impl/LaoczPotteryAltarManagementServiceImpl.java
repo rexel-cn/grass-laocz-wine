@@ -7,8 +7,10 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.common.exception.CustomException;
 import com.rexel.common.exception.ServiceException;
 import com.rexel.common.utils.DateUtils;
+import com.rexel.common.utils.PageUtils;
 import com.rexel.common.utils.StringUtils;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
@@ -342,9 +344,7 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<WineOperaPotteryAltarVO> wineEntryPotteryAltarList(WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO) {
-        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
-        wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(wineEntryPotteryAltarDTO.getPotteryAltarIds(), wineOperaPotteryAltarVOS);
-        return wineOperaPotteryAltarVOS;
+        return baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
     }
 
     /**
@@ -368,8 +368,13 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<WineOperaPotteryAltarVO> wineOutPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
-        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
-        wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(wineOutPotteryAltarDTO.getPotteryAltarIds(), wineOperaPotteryAltarVOS);
+        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS;
+        try {
+            PageUtils.startPage();
+            wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+        } finally {
+            PageUtils.clearPage();
+        }
         //存储时长
         for (WineOperaPotteryAltarVO potteryAltarVo : wineOperaPotteryAltarVOS) {
             if (potteryAltarVo.getStoringTime() != null) {
@@ -458,34 +463,46 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<WineOperaPotteryAltarVO> winePourPotteryAltarList(WinePourPotteryAltarDTO winePourPotteryAltarDTO) {
-        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = new ArrayList<>();
-
         //如果不等于空，就是倒坛入酒
         boolean isPout = winePourPotteryAltarDTO.getPotteryAltarId() != null;
 
         //true 是倒坛入酒，false是倒坛出酒
         if (isPout) {
             LaoczBatchPotteryMapping one = iLaoczBatchPotteryMappingService.lambdaQuery().eq(LaoczBatchPotteryMapping::getPotteryAltarId, winePourPotteryAltarDTO.getPotteryAltarId()).one();
-
-            //空罐子，满坛重量要大于等于申请重量
-            WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO = BeanUtil.copyProperties(winePourPotteryAltarDTO, WineEntryPotteryAltarDTO.class);
-            List<WineOperaPotteryAltarVO> wineEntryPotteryAltarList = baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
-            List<WineOperaPotteryAltarVO> list = wineEntryPotteryAltarList.stream().filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight() >= winePourPotteryAltarDTO.getWineWeight()).collect(Collectors.toList());
-            wineOperaPotteryAltarVOS.addAll(list);
-            //有酒的罐子，必须是同一批次，并且剩余重量要大于等于申请重量
+            if (one == null) {
+                //不可能查询不出来，因为传入的参数是出酒时选中的
+                throw new CustomException("系统异常，请联系管理员");
+            }
             WineOutPotteryAltarDTO wineOutPotteryAltarDTO = BeanUtil.copyProperties(winePourPotteryAltarDTO, WineOutPotteryAltarDTO.class);
-            List<WineOperaPotteryAltarVO> wineOutPotteryAltarList = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
-            List<WineOperaPotteryAltarVO> list1 = wineOutPotteryAltarList.stream()
-                    .filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight() - wineOperaPotteryAltarVO.getActualWeight() >= winePourPotteryAltarDTO.getWineWeight())
-                    .filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getLiquorBatchId().equals(one.getLiquorBatchId()))
-                    .collect(Collectors.toList());
-            wineOperaPotteryAltarVOS.addAll(list1);
+            //如果为空的情况下:倒坛出酒对应批次在
+            try {
+                PageUtils.startPage();
+                return baseMapper.pourTankInPotteryAltarList(wineOutPotteryAltarDTO);
+            } finally {
+                PageUtils.clearPage();
+            }
+            //空罐子，满坛重量要大于等于申请重量
+//            WineEntryPotteryAltarDTO wineEntryPotteryAltarDTO = BeanUtil.copyProperties(winePourPotteryAltarDTO, WineEntryPotteryAltarDTO.class);
+//            List<WineOperaPotteryAltarVO> wineEntryPotteryAltarList = baseMapper.wineEntryPotteryAltarList(wineEntryPotteryAltarDTO);
+//            List<WineOperaPotteryAltarVO> list = wineEntryPotteryAltarList.stream().filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight() >= winePourPotteryAltarDTO.getWineWeight()).collect(Collectors.toList());
+//            wineOperaPotteryAltarVOS.addAll(list);
+//            //有酒的罐子，必须是同一批次，并且剩余重量要大于等于申请重量
+//            WineOutPotteryAltarDTO wineOutPotteryAltarDTO = BeanUtil.copyProperties(winePourPotteryAltarDTO, WineOutPotteryAltarDTO.class);
+//            List<WineOperaPotteryAltarVO> wineOutPotteryAltarList = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+//            List<WineOperaPotteryAltarVO> list1 = wineOutPotteryAltarList.stream()
+//                    .filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getPotteryAltarFullAltarWeight() - wineOperaPotteryAltarVO.getActualWeight() >= winePourPotteryAltarDTO.getWineWeight())
+//                    .filter(wineOperaPotteryAltarVO -> wineOperaPotteryAltarVO.getLiquorBatchId().equals(one.getLiquorBatchId()))
+//                    .collect(Collectors.toList());
+//            wineOperaPotteryAltarVOS.addAll(list1);
         } else {
             WineOutPotteryAltarDTO wineOutPotteryAltarDTO = BeanUtil.copyProperties(winePourPotteryAltarDTO, WineOutPotteryAltarDTO.class);
-            wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+            try {
+                PageUtils.startPage();
+                return baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+            } finally {
+                PageUtils.clearPage();
+            }
         }
-        wineOperaPotteryAltarVOS = filterWinOperaPotteryAltar(new ArrayList<>(Collections.singletonList(winePourPotteryAltarDTO.getPotteryAltarId())), wineOperaPotteryAltarVOS);
-        return wineOperaPotteryAltarVOS;
     }
 
     @Override

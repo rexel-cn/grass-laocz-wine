@@ -120,6 +120,9 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     public Long winePourPotOut(Long wineDetailsId) {
         //查询同一个业务id下的倒坛入的酒，如果出酒成功就把id返回给前端
         LaoczWineDetails laoczWineDetails = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getWineDetailsId, wineDetailsId).one();
+        if (laoczWineDetails == null) {
+            throw new CustomException("已保存完成，请退出刷新重试");
+        }
         //验证审核是否通过
         super.approvalCheck(laoczWineDetails.getBusyId(), BpmTaskStatusEnum.APPROVE);
         LaoczWineDetails inWine = iLaoczWineDetailsService.lambdaQuery().eq(LaoczWineDetails::getBusyId, laoczWineDetails.getBusyId())
@@ -310,7 +313,7 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     private void wineIncheck(Long wineDetailsId) {
         LaoczWineDetails wineDetailsById = getWineDetailsById(wineDetailsId);
         if (Objects.isNull(wineDetailsById)) {
-            throw new CustomException("酒操作业务详情不存在");
+            throw new CustomException("已保存完成，请退出刷新重试");
         }
         //验证审核是否通过
         super.approvalCheck(wineDetailsById.getBusyId(), BpmTaskStatusEnum.APPROVE);
