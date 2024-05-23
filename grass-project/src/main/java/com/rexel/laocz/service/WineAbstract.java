@@ -72,7 +72,7 @@ public abstract class WineAbstract {
      *
      * @param laoczPotteryAltarManagement 陶坛罐
      */
-    protected void AltarStateCheck(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
+    protected void altarStateCheck(LaoczPotteryAltarManagement laoczPotteryAltarManagement) {
         if (!Objects.equals(PotteryAltarStateEnum.USE.getCode(), laoczPotteryAltarManagement.getPotteryAltarState())) {
             throw new CustomException("陶坛罐已被封存");
         }
@@ -468,13 +468,9 @@ public abstract class WineAbstract {
      * @param isUse 是否使用（有没有酒） true 使用 false 不使用
      */
     protected void potteryAltarNumberCheck(String potteryAltarNumber, boolean isUse) {
-        LaoczPotteryAltarManagement laoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery()
-                .eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
-        if (laoczPotteryAltarManagement == null) {
-            throw new CustomException("陶坛罐不存在");
-        }
+        LaoczPotteryAltarManagement laoczPotteryAltarManagement = getLaoczPotteryAltarManagementByPotteryAltarNumber(potteryAltarNumber);
         //验证陶坛是否可以使用，有没有被封存
-        AltarStateCheck(laoczPotteryAltarManagement);
+        altarStateCheck(laoczPotteryAltarManagement);
 
         LaoczBatchPotteryMapping batchPotteryMapping = iLaoczBatchPotteryMappingService.lambdaQuery()
                 .eq(LaoczBatchPotteryMapping::getPotteryAltarId, laoczPotteryAltarManagement.getPotteryAltarId()).one();
@@ -584,6 +580,18 @@ public abstract class WineAbstract {
         if (!bpmTaskStatusEnum.getStatus().equals(operations.getApprovalResults())) {
             throw new CustomException("请在{}后操作", bpmTaskStatusEnum.getName());
         }
+    }
+
+
+    protected LaoczPotteryAltarManagement getLaoczPotteryAltarManagementByPotteryAltarNumber(String potteryAltarNumber) {
+        if (StrUtil.isEmpty(potteryAltarNumber)) {
+            throw new CustomException("陶坛编号为空");
+        }
+        LaoczPotteryAltarManagement altarManagement = iLaoczPotteryAltarManagementService.lambdaQuery().eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
+        if (altarManagement == null) {
+            throw new CustomException("此陶坛不存在");
+        }
+        return altarManagement;
     }
 
 }

@@ -199,12 +199,12 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
             throw new CustomException("出酒陶坛不存在");
         }
         //出酒验证是否可以使用
-        AltarStateCheck(outLaoczPotteryAltarManagement);
+        altarStateCheck(outLaoczPotteryAltarManagement);
         if (inLaoczPotteryAltarManagement == null) {
             throw new CustomException("入酒陶坛不存在");
         }
         //入酒验证是否可以使用
-        AltarStateCheck(inLaoczPotteryAltarManagement);
+        altarStateCheck(inLaoczPotteryAltarManagement);
 
         //查询陶坛是否存在
         List<LaoczBatchPotteryMapping> list = iLaoczBatchPotteryMappingService.lambdaQuery()
@@ -248,10 +248,7 @@ public class WinePourPotServiceImpl extends WineAbstract implements WinePourPotS
     @Override
     public WineOperaPotteryAltarVO qrInCodeScan(QrInCodeScanDTO qrInCodeScanDTO) {
         String potteryAltarNumber = qrInCodeScanDTO.getPotteryAltarNumber();
-        LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = iLaoczPotteryAltarManagementService.lambdaQuery().eq(LaoczPotteryAltarManagement::getPotteryAltarNumber, potteryAltarNumber).one();
-        if (inLaoczPotteryAltarManagement == null) {
-            throw new CustomException("此陶坛不存在，请重新扫描");
-        }
+        LaoczPotteryAltarManagement inLaoczPotteryAltarManagement = getLaoczPotteryAltarManagementByPotteryAltarNumber(potteryAltarNumber);
         boolean inMappingIsNull = check(qrInCodeScanDTO.getOutPotteryAltarId(), qrInCodeScanDTO.getOutWeight(), inLaoczPotteryAltarManagement.getPotteryAltarId());
         //查询陶坛是否有酒，如果有酒就比较批次和重量
         //如果没有酒就没事了

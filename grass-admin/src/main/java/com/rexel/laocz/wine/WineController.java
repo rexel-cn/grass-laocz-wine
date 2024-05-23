@@ -5,6 +5,7 @@ import com.rexel.common.core.controller.BaseController;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.common.core.page.TableDataInfo;
 import com.rexel.laocz.domain.dto.MatterDetailDTO;
+import com.rexel.laocz.domain.dto.QrCodeScanMatterDetailDTO;
 import com.rexel.laocz.domain.dto.WineEntryApplyParamDTO;
 import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.service.ILaoczWineOperationsService;
@@ -44,6 +45,17 @@ public class WineController extends BaseController {
     @PostMapping("/getMatterDetailVOList")
     public TableDataInfo getMatterDetailVOList(@RequestBody MatterDetailDTO matterDetailDTO) {
         return getDataTable(iLaoczWineOperationsService.getMatterDetailVOList(matterDetailDTO));
+    }
+
+    /**
+     * 二维码扫描根据事项id和陶坛编号进行查询事项进而快速开始任务
+     *
+     * @param qrCodeScanMatterDetailDTO 事项id 陶坛编号
+     * @return 事项详情id
+     */
+    @PostMapping("qrCodeScanMatterDetail")
+    public AjaxResult qrCodeScanMatterDetail(@RequestBody QrCodeScanMatterDetailDTO qrCodeScanMatterDetailDTO) {
+        return AjaxResult.success(iLaoczWineOperationsService.qrCodeScanMatterDetail(qrCodeScanMatterDetailDTO.getWineOperationsId(), qrCodeScanMatterDetailDTO.getPotteryAltarNumber()));
     }
 
     /**

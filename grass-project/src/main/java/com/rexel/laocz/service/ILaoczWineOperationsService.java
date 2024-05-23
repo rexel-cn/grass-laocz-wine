@@ -8,7 +8,6 @@ import com.rexel.laocz.domain.dto.WineOperationDTO;
 import com.rexel.laocz.domain.vo.MatterDetailVO;
 import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
-import liquibase.pro.packaged.B;
 
 import java.util.List;
 
@@ -33,6 +32,16 @@ public interface ILaoczWineOperationsService extends IService<LaoczWineOperation
      * @return 我的事项详情列表
      */
     List<MatterDetailVO> getMatterDetailVOList(MatterDetailDTO wineOperationsId);
+
+    /**
+     * 根据事项和陶坛编号获取对应事项详情
+     *
+     * @param wineOperationsId   事项id
+     * @param potteryAltarNumber 陶坛编号
+     * @return 事项详情Id
+     */
+    MatterDetailVO qrCodeScanMatterDetail(Long wineOperationsId, String potteryAltarNumber);
+
 
     /**
      * 获取入酒详情

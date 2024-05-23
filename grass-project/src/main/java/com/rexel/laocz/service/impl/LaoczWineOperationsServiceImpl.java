@@ -17,6 +17,7 @@ import com.rexel.laocz.domain.vo.MatterVO;
 import com.rexel.laocz.domain.vo.WineDetailVO;
 import com.rexel.laocz.enums.OperationTypeEnum;
 import com.rexel.laocz.enums.WineBusyStatusEnum;
+import com.rexel.laocz.enums.WineDetailTypeEnum;
 import com.rexel.laocz.mapper.LaoczWineDetailsMapper;
 import com.rexel.laocz.mapper.LaoczWineOperationsMapper;
 import com.rexel.laocz.service.*;
@@ -104,6 +105,39 @@ public class LaoczWineOperationsServiceImpl extends ServiceImpl<LaoczWineOperati
             matterDetailVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, matterDetailVO.getDetailType()));
         }
         return matterDetailVOS;
+    }
+
+    /**
+     * 根据事项和陶坛编号获取对应事项详情
+     *
+     * @param wineOperationsId   事项id
+     * @param potteryAltarNumber 陶坛编号
+     * @return 事项详情
+     */
+    @Override
+    public MatterDetailVO qrCodeScanMatterDetail(Long wineOperationsId, String potteryAltarNumber) {
+        LaoczWineOperations operations = getById(wineOperationsId);
+        if (operations == null) {
+            throw new CustomException("事项详情不存在，请刷新页面重试");
+        }
+        String busyId = operations.getBusyId();
+        if (StrUtil.isEmpty(busyId)) {
+            throw new CustomException("系统异常，请联系管理员");
+        }
+        MatterDetailVO matterDetailVO = laoczWineDetailsMapper.selectMatterDetailByBusyIdAndpotteryAltarNumber(busyId, potteryAltarNumber);
+        if (matterDetailVO == null) {
+            throw new CustomException("当前事项下，找不到陶坛编号为:{}的事项任务", potteryAltarNumber);
+        }
+
+        //如果是倒坛则肯定有倒坛入和倒坛出，那么如果是倒坛入并且数量还是2的情况下就报错，因为需要先倒坛出才能倒坛入
+        if (OperationTypeEnum.POUR_POT.getValue().equals(operations.getOperationType())) {
+            Integer count = lambdaQuery().eq(LaoczWineOperations::getBusyId, busyId).count();
+            if (WineDetailTypeEnum.POUR_IN.getCode().toString().equals(matterDetailVO.getDetailType()) && count > 2) {
+                throw new CustomException("倒坛需要先扫描出酒的陶坛罐");
+            }
+        }
+        matterDetailVO.setDetailType(DictUtils.getDictLabel(WineDictConstants.DETAIL_TYPE, matterDetailVO.getDetailType()));
+        return matterDetailVO;
     }
 
     /**

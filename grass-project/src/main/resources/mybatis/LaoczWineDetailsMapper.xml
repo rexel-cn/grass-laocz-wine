@@ -270,8 +270,26 @@
                 LEFT JOIN laocz_liquor_management llm ON llm.liquor_management_id = llb.liquor_management_id
         <where>
             <choose>
-                <when test="busyId!=null">
+                <when test="busyId!=null and busyId!='' ">
                     lwo.busy_id=#{busyId}
+                </when>
+                <otherwise>1=2</otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="selectMatterDetailByBusyIdAndpotteryAltarNumber" resultType="com.rexel.laocz.domain.vo.MatterDetailVO">
+        SELECT
+        lwd.wine_details_id,
+        lpam.pottery_altar_number,
+        lwd.detail_type
+        FROM
+        laocz_wine_details lwd
+        LEFT JOIN laocz_pottery_altar_management lpam ON lwd.pottery_altar_id = lpam.pottery_altar_id
+        <where>
+            <choose>
+                <when test="(busyId!=null and busyId!='') and  (potteryAltarNumber!=null and potteryAltarNumber!='')  ">
+                    lwd.busy_id=#{busyId}
+                    AND lpam.pottery_altar_number=#{potteryAltarNumber}
                 </when>
                 <otherwise>1=2</otherwise>
             </choose>
