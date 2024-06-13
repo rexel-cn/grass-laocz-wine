@@ -173,7 +173,8 @@ public abstract class WineAbstract {
      * @param wineProcessDefinitionKeyEnum 流程定义key 参考{@link WineProcessDefinitionKeyEnum}
      * @return 流程实例id
      */
-    protected String saveProcessInstancesService(String businessKey, Map<String, Object> variables, WineProcessDefinitionKeyEnum wineProcessDefinitionKeyEnum) {
+    protected String saveProcessInstancesService(String businessKey, Map<String, Object> variables,
+                                                 WineProcessDefinitionKeyEnum wineProcessDefinitionKeyEnum) {
         //创建流程实例
         return processInstanceService.createProcessInstance(
                 new BpmProcessInstanceCreateReqDTO()

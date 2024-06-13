@@ -368,6 +368,32 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
      */
     @Override
     public List<WineOperaPotteryAltarVO> wineOutPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
+        List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS = baseMapper.wineOutPotteryAltarList(wineOutPotteryAltarDTO);
+        buildWinOutPotteryAltar(wineOperaPotteryAltarVOS);
+        return wineOperaPotteryAltarVOS;
+    }
+
+    /**
+     * 出酒时，陶坛列表
+     * 1：查询条件如下：
+     * 1：酒液批次id（可以根据酒液批次查询在酒的信息）  必须是有酒并且存储   可选
+     * 2：防火区id 可选
+     * 3：陶坛编号 可选 过滤用
+     * 4：已选陶坛 可选
+     * 5：陶坛状态 必须是使用状态
+     * 6：陶坛有酒
+     * 7：陶坛目前没有进行其他任务，目前是存储状态
+     * 2:返回参数如下：
+     * 1：陶坛管理主键id （用来出酒时带入，选择的那个陶坛）
+     * 2：陶坛管理编号 用来显示
+     * 3：区域名称
+     * 4：防火区名称
+     * 5: 酒液重量
+     * 6: 存储时长
+     * 7: 酒品相关信息
+     */
+    @Override
+    public List<WineOperaPotteryAltarVO> wineOutPotteryAltarListPage(WineOutPotteryAltarDTO wineOutPotteryAltarDTO) {
         List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS;
         try {
             PageUtils.startPage();
@@ -375,14 +401,22 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
         } finally {
             PageUtils.clearPage();
         }
+        buildWinOutPotteryAltar(wineOperaPotteryAltarVOS);
+        return wineOperaPotteryAltarVOS;
+    }
+
+    /**
+     * 出酒时，陶坛列表
+     *
+     * @param wineOperaPotteryAltarVOS 陶坛列表
+     */
+    private void buildWinOutPotteryAltar(List<WineOperaPotteryAltarVO> wineOperaPotteryAltarVOS) {
         //存储时长
         for (WineOperaPotteryAltarVO potteryAltarVo : wineOperaPotteryAltarVOS) {
             if (potteryAltarVo.getStoringTime() != null) {
                 potteryAltarVo.setStorageTime(DateUtils.daysBetween(potteryAltarVo.getStoringTime(), new Date()));
             }
         }
-
-
         //酒品相关
         List<Long> liquorManagementIds = wineOperaPotteryAltarVOS.stream().map(WineOperaPotteryAltarVO::getLiquorManagementId).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(liquorManagementIds)) {
@@ -395,7 +429,6 @@ public class LaoczPotteryAltarManagementServiceImpl extends ServiceImpl<LaoczPot
                 }
             }
         }
-        return wineOperaPotteryAltarVOS;
     }
 
     /**

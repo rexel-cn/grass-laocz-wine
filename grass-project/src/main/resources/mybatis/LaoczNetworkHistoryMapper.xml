@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczNetworkHistoryMapper">
+
+    <resultMap type="com.rexel.laocz.domain.LaoczNetworkHistory" id="LaoczNetworkHistoryResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="networkName" column="network_name"/>
+        <result property="ipAddr" column="ip_addr"/>
+        <result property="content" column="content"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczNetworkHistoryVo">
+        select id,
+               tenant_id,
+               network_name,
+               ip_addr,
+               content,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_network_history
+    </sql>
+
+    <select id="selectLaoczNetworkHistoryList" parameterType="com.rexel.laocz.domain.dto.LaoczNetworkHistoryDTO"
+            resultMap="LaoczNetworkHistoryResult">
+        <include refid="selectLaoczNetworkHistoryVo"/>
+        <where>
+            <if test="networkName != null  and networkName != ''">
+                and network_name like concat('%', #{networkName}, '%')
+            </if>
+            <if test="ipAddr != null  and ipAddr != ''">
+                and ip_addr like concat('%', #{ipAddr}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''"><!-- 开始时间检索 -->
+                AND date_format(create_time,'%Y%m%d%H%i%s') &gt;= date_format(#{startTime},'%Y%m%d%H%i%s')
+            </if>
+            <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(create_time,'%Y%m%d%H%i%s') &lt;= date_format(#{endTime},'%Y%m%d%H%i%s')
+            </if>
+        </where>
+    </select>
+
+    <insert id="batchLaoczNetworkHistory" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into laocz_network_history
+        ( id , tenant_id , network_name , ip_addr , content , create_by , create_time , update_by , update_time ,
+        remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.tenantId}, #{item.networkName}, #{item.ipAddr}, #{item.content}, #{item.createBy},
+            #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+    <insert id="insertLaoczNetworkHistory" useGeneratedKeys="true" keyProperty="id">
+        insert into laocz_network_history
+        (tenant_id, network_name, ip_addr, content, create_by, create_time, update_by, update_time,
+         remark)
+        values (#{tenantId}, #{networkName}, #{ipAddr}, #{content}, #{createBy}, #{createTime}, #{updateBy},
+                #{updateTime}, #{remark})
+    </insert>
+
+</mapper>

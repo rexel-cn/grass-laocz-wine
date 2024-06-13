@@ -3,7 +3,6 @@ package com.rexel.laocz.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.common.core.domain.AjaxResult;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
-import com.rexel.laocz.domain.LaoczWineHistory;
 import com.rexel.laocz.domain.dto.WineEntryPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WineOutPotteryAltarDTO;
 import com.rexel.laocz.domain.dto.WinePourPotteryAltarDTO;
@@ -129,6 +128,27 @@ public interface ILaoczPotteryAltarManagementService extends IService<LaoczPotte
      * 7: 酒品相关信息
      */
     List<WineOperaPotteryAltarVO> wineOutPotteryAltarList(WineOutPotteryAltarDTO wineOutPotteryAltarDTO);
+
+    /**
+     * 出酒时，陶坛列表
+     * 1：查询条件如下：
+     * 1：酒液批次id（可以根据酒液批次查询在酒的信息）  必须是有酒并且存储   可选
+     * 2：防火区id 可选
+     * 3：陶坛编号 可选 过滤用
+     * 4：已选陶坛 可选
+     * 5：陶坛状态 必须是使用状态
+     * 6：陶坛有酒
+     * 7：陶坛目前没有进行其他任务，目前是存储状态
+     * 2:返回参数如下：
+     * 1：陶坛管理主键id （用来出酒时带入，选择的那个陶坛）
+     * 2：陶坛管理编号 用来显示
+     * 3：区域名称
+     * 4：防火区名称
+     * 5: 酒液重量
+     * 6: 存储时长
+     * 7: 酒品相关信息
+     */
+    List<WineOperaPotteryAltarVO> wineOutPotteryAltarListPage(WineOutPotteryAltarDTO wineOutPotteryAltarDTO);
 
     /**
      * 取样时，陶坛列表

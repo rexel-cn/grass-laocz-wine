@@ -164,7 +164,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
         //新增流程实例
         String processInstanceId = saveProcessInstancesService(
                 busyId
-                , super.getVariables(wineEntryApplyDTO.getLiquorBatchId(), OperationTypeEnum.WINE_ENTRY.getValue(), liquorManagement.getLiquorName())
+                , super.getVariables(wineEntryApplyDTO.getLiquorBatchId(), OperationTypeEnum.WINE_ENTRY.getValue(),
+                        liquorManagement.getLiquorName())
                 , WineProcessDefinitionKeyEnum.IN_WINE);
         //新增    laocz_liquor_batch
         saveLiquorBatch(wineEntryApplyDTO, processInstanceId);
@@ -727,7 +728,8 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * @throws IOException          io网络异常，测点-dview交互异常
      * @throws InterruptedException 打断异常
      */
-    private void startPlc(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap, Map<String, WineDetailPointVO> pumpMap, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
+    private void startPlc(LaoczWineDetails wineDetails, Map<String, WineDetailPointVO> wineDetailPointVOMap,
+                          Map<String, WineDetailPointVO> pumpMap, LaoczWeighingTank weighingTank) throws IOException, InterruptedException {
         /*
          【监控测点】
           DJ_SEX_TTK_B1_ES 陶坛库1号泵急停（1为急停状态）          泵单位

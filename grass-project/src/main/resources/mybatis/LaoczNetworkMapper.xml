@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rexel.laocz.mapper.LaoczNetworkMapper">
+
+    <resultMap type="com.rexel.laocz.domain.LaoczNetwork" id="LaoczNetworkResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="networkName" column="network_name"/>
+        <result property="ipAddr" column="ip_addr"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLaoczNetworkVo">
+        select id,
+               tenant_id,
+               network_name,
+               ip_addr,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from laocz_network
+    </sql>
+
+    <select id="selectLaoczNetworkList" parameterType="com.rexel.laocz.domain.LaoczNetwork"
+            resultMap="LaoczNetworkResult">
+        <include refid="selectLaoczNetworkVo"/>
+        <where>
+            <if test="tenantId != null  and tenantId != ''">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="networkName != null  and networkName != ''">
+                and network_name like concat('%', #{networkName}, '%')
+            </if>
+            <if test="ipAddr != null  and ipAddr != ''">
+                and ip_addr like concat('%', #{ipAddr}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="selectAllLaoczNetwork" resultType="com.rexel.laocz.domain.LaoczNetwork">
+        <include refid="selectLaoczNetworkVo"/>
+    </select>
+
+    <insert id="batchLaoczNetwork" parameterType="java.util.List"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into laocz_network
+        ( id , tenant_id , network_name , ip_addr , create_by , create_time , update_by , update_time , remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.tenantId}, #{item.networkName}, #{item.ipAddr}, #{item.createBy}, #{item.createTime},
+            #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+</mapper>

@@ -42,7 +42,7 @@
         <include refid="selectSysHeaderMetadataVo"/>
         <where>
             <if test="headerName != null  and headerName != ''">
-                and header_name like concat('%', #{headerName}, '%')
+                and header_name = #{headerName}
             </if>
             <if test="prop != null  and prop != ''">
                 and prop = #{prop}
