@@ -51,27 +51,27 @@ public class SysLoginService {
     @Autowired
     private ISysTenantServiceFrameworkApi tenantService;
 
-    public String login(String phoneNumber, String password) {
-        return authentication(phoneNumber, password);
+    public String login(String userName, String password) {
+        return authentication(userName, password);
     }
 
 
     /**
      * 登录验证
      *
-     * @param phoneNumber 手机号
+     * @param username 用户名
      * @param password    密码
      * @param code        验证码
      * @param uuid        唯一标识
      * @return 结果
      */
-    public String login(String phoneNumber, String password, String code, String uuid) {
+    public String login(String username, String password, String code, String uuid) {
         boolean captchaOnOff = configService.selectCaptchaOnOff();
         // 验证码开关
         if (captchaOnOff) {
-            validateCaptcha(phoneNumber, code, uuid);
+            validateCaptcha(username, code, uuid);
         }
-        return authentication(phoneNumber, password);
+        return authentication(username, password);
     }
 
 
@@ -79,21 +79,21 @@ public class SysLoginService {
     /**
      * 校验验证码
      *
-     * @param phoneNumber 用户名
+     * @param username 用户名
      * @param code        验证码
      * @param uuid        唯一标识
      * @return 结果
      */
-    public void validateCaptcha(String phoneNumber, String code, String uuid) {
+    public void validateCaptcha(String username, String code, String uuid) {
         String verifyKey = Constants.CAPTCHA_CODE_KEY + uuid;
         String captcha = redisCache.getCacheObject(verifyKey);
         redisCache.deleteObject(verifyKey);
         if (captcha == null) {
-            AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, null, null, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
+            AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(null, username, null, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
             throw new CaptchaExpireException();
         }
         if (!code.equalsIgnoreCase(captcha)) {
-            AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, null, null, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
+            AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(null, username, null, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
             throw new CaptchaException();
         }
     }
@@ -107,7 +107,7 @@ public class SysLoginService {
         userService.updateUserLogin(userId, IpUtils.getIpAddr(ServletUtils.getRequest()));
     }
 
-    private String authentication(String phoneNumber, String password) {
+    private String authentication(String userName, String password) {
         // 用户验证
         Authentication authentication;
         try {
@@ -121,7 +121,7 @@ public class SysLoginService {
 //            }
             //该方法会去调用 UserDetailsServiceImpl.loadUserByUsername
             authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(phoneNumber, password));
+                    .authenticate(new UsernamePasswordAuthenticationToken(userName, password));
             // 该方法会去调用 GrassAuthenticationProvider.authenticate
 //            authentication = authenticationManager
 //                    .authenticate(new GrassAuthenticationToken(userPrincipal, password));
@@ -129,15 +129,16 @@ public class SysLoginService {
             if (e instanceof TenantException) {
                 throw e;
             } else if (e instanceof BadCredentialsException) {
-                AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, null, null, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
+                AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(null, userName, null, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
                 throw new ServiceException(MessageUtils.message("user.password.not.match"));
             }else {
-                AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, null, null, Constants.LOGIN_FAIL, e.getMessage()));
+                AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(null, userName, null, Constants.LOGIN_FAIL, e.getMessage()));
                 throw new ServiceException(e.getMessage());
             }
         }
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        String userName = userService.selectUserNameByPhoneNumber(phoneNumber);
+        //String userName = userService.selectUserNameByPhoneNumber(phoneNumber);
+        String phoneNumber = userService.selectPhoneNumberByuserName(userName);
         AsyncTtlManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, userName, loginUser.getUserId(), Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
         recordLoginInfo(loginUser.getUserId());
         // 生成token

@@ -22,8 +22,8 @@ public class TenantCreateReqDTO extends TenantBase {
     /**
      * 电话
      */
-    @NotBlank(message = "手机号码不能为空")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
+    //@NotBlank(message = "手机号码不能为空")
+    //@Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
     private String phoneNumber;
 
 

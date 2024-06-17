@@ -369,14 +369,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                                      String deptId, Set<Long> postIds) {
         // 校验用户存在
         checkUserExists(userId);
+        // 校验用户名唯一
+        checkUserNameUnique(userId, username);
         // 校验手机号唯一
-        checkMobileUnique(userId, mobile);
+        //checkMobileUnique(userId, mobile);
         // 校验邮箱唯一
         checkEmailUnique(userId, email);
         // 校验部门处于开启状态
         //deptService.validDepts(CollectionUtils.singleton(deptId));
         // 校验岗位处于开启状态
         //postService.validPosts(postIds);
+    }
+
+    private void checkUserNameUnique(Long userId, String username) {
+        SysUser user = this.selectUserByUserName(username);
+        if (user == null){
+            return;
+        }
+        if (!user.getUserId().equals(userId)) {
+            throw new ServiceException("用户名已经存在");
+        }
+    }
+
+    private SysUser selectUserByUserName(String username) {
+        SysUser user = baseMapper.selectUserByUserName(username);
+        return user;
     }
 
     public void checkUserExists(Long id) {

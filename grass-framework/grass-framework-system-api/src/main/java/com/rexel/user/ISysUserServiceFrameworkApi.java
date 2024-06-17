@@ -26,11 +26,13 @@ public interface ISysUserServiceFrameworkApi extends IService<SysUser> {
     SysUser selectUserById(Long valueOf);
 
 
-    String selectTenantIdByPhoneNumber(String phoneNumber);
+    String selectTenantIdByUserName(String userName);
 
 
-    SysUser selectUserByPhoneNumber(String phoneNumber);
+    SysUser selectUserByUserName(String userName);
 
 
     String selectUserNameByPhoneNumber(String phoneNumber);
+
+    String selectPhoneNumberByuserName(String userName);
 }

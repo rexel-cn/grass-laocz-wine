@@ -56,22 +56,22 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
 
     /**
-     * 根据电话号查询租户id  登录校验使用
+     * 根据用户名查询租户id  登录校验使用
      *
-     * @param phoneNumber
+     * @param userName
      * @return
      */
     @InterceptorIgnore(tenantLine = "true")
-    String selectTenantIdByPhoneNumber(String phoneNumber);
+    String selectTenantIdByUserName(String userName);
 
     /**
-     * 根据电话号查询用户
+     * 根据用户名查询用户
      *
-     * @param phoneNumber
+     * @param userName
      * @return
      */
     @InterceptorIgnore(tenantLine = "true")
-    SysUser selectUserByPhoneNumber(String phoneNumber);
+    SysUser selectUserByUserName(String userName);
 
 
     /**
@@ -85,4 +85,20 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     @InterceptorIgnore(tenantLine = "true")
     List<SysUser> selectSysUser(@Param("tenantIds") List<String> tenantIds);
+
+    /**
+     * 根据电话号查询租户id  登录校验使用
+     *
+     * @param phoneNumber
+     * @return
+     */
+    @InterceptorIgnore(tenantLine = "true")
+    String selectTenantIdByPhoneNumber(String phoneNumber);
+
+    /**
+     * 根据用户名查电话号码
+     * @param userName
+     * @return
+     */
+    String selectPhoneNumberByuserName(String userName);
 }

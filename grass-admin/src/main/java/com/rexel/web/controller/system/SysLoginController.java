@@ -52,7 +52,7 @@ public class SysLoginController {
     public AjaxResult login(@RequestBody @Validated LoginBody loginBody) {
         AjaxResult ajax = AjaxResult.success();
         // 生成令牌
-        String token = loginService.login( loginBody.getPhoneNumber(), loginBody.getPassword(), loginBody.getCode(),
+        String token = loginService.login( loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
         ajax.put(Constants.TOKEN, token);
         return ajax;
@@ -67,7 +67,7 @@ public class SysLoginController {
     public AjaxResult getToken(@RequestBody @Validated LoginBody loginBody){
         AjaxResult ajax = AjaxResult.success();
         // 生成令牌
-        String token = loginService.login( loginBody.getPhoneNumber(), loginBody.getPassword());
+        String token = loginService.login( loginBody.getUsername(), loginBody.getPassword());
         ajax.put(Constants.TOKEN, token);
         return ajax;
     }

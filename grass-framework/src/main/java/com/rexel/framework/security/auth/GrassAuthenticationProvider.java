@@ -79,8 +79,8 @@ public class GrassAuthenticationProvider implements AuthenticationProvider {
         String value = userPrincipal.getValue();
         //密码
         String passWord = (String) authentication.getCredentials();
-        //根据电话查询企业id
-        String tenantId = userService.selectTenantIdByPhoneNumber(value);
+        //根据用户名查询企业id
+        String tenantId = userService.selectTenantIdByUserName(value);
         //根据企业id查询企业信息
         SysTenant tenant = tenantService.lambdaQuery().eq(SysTenant::getTenantId, tenantId).one();
 

@@ -21,7 +21,7 @@ public class TenantUpdateReqDTO extends TenantBase {
     /**
      * 手机号(现登录账号)
      */
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
+   // @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
     private String phoneNumber;
 
 //    private String mobile;

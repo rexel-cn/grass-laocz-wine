@@ -32,8 +32,8 @@ public class UserBase {
     @Size(max = 50, message = "邮箱长度不能超过 50 个字符")
     private String email;
 
-    @NotBlank(message = "电话号码不能为空")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
+    //@NotBlank(message = "电话号码不能为空")
+    //@Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
     private String phoneNumber;
 
     private Integer sex;

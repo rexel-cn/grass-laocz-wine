@@ -42,21 +42,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        SysUser user = userService.selectUserByPhoneNumber(phoneNumber);
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        SysUser user = userService.selectUserByUserName(userName);
         if (StringUtils.isNull(user)) {
-            log.info("登录用户：{} 不存在.", phoneNumber);
-            throw new ServiceException("登录用户：" + phoneNumber + " 不存在");
+            log.info("登录用户：{} 不存在.", userName);
+            throw new ServiceException("登录用户：" + userName + " 不存在");
         } else if (UserStatus.DELETED.getCode().equals(user.getDelFlag())) {
-            log.info("登录用户：{} 已被删除.", phoneNumber);
-            throw new ServiceException("对不起，您的账号：" + phoneNumber + " 已被删除");
+            log.info("登录用户：{} 已被删除.", userName);
+            throw new ServiceException("对不起，您的账号：" + userName + " 已被删除");
         } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
-            log.info("登录用户：{} 已被停用.", phoneNumber);
-            throw new ServiceException("对不起，您的账号：" + phoneNumber + " 已停用");
+            log.info("登录用户：{} 已被停用.", userName);
+            throw new ServiceException("对不起，您的账号：" + userName + " 已停用");
         }
 
-        //根据电话查询企业id
-        String tenantId = userService.selectTenantIdByPhoneNumber(phoneNumber);
+        //根据用户名查询企业id
+        String tenantId = userService.selectTenantIdByUserName(userName);
         //根据企业id查询企业信息
         SysTenant tenant = tenantService.lambdaQuery().eq(SysTenant::getTenantId, tenantId).one();
         //验证企业

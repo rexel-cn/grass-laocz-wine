@@ -61,21 +61,21 @@ public class ISysUserServiceFrameworkApiImpl extends ServiceImpl<SysUserMapper, 
 
 
     /**
-     * @param phoneNumber
+     * @param userName
      * @return
      */
     @Override
-    public String selectTenantIdByPhoneNumber(String phoneNumber) {
-        return baseMapper.selectTenantIdByPhoneNumber(phoneNumber);
+    public String selectTenantIdByUserName(String userName) {
+        return baseMapper.selectTenantIdByUserName(userName);
     }
 
 
     /**
-     * @param phoneNumber
+     * @param userName
      * @return
      */
-    public SysUser selectUserByPhoneNumber(String phoneNumber) {
-        return baseMapper.selectUserByPhoneNumber(phoneNumber);
+    public SysUser selectUserByUserName(String userName) {
+        return baseMapper.selectUserByUserName(userName);
     }
 
 
@@ -85,5 +85,10 @@ public class ISysUserServiceFrameworkApiImpl extends ServiceImpl<SysUserMapper, 
      */
     public String selectUserNameByPhoneNumber(String phoneNumber) {
         return baseMapper.selectUserNameByPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public String selectPhoneNumberByuserName(String userName) {
+        return baseMapper.selectPhoneNumberByuserName(userName);
     }
 }

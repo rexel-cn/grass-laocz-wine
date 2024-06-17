@@ -90,17 +90,17 @@
     </select>
 
 
-    <select id="selectTenantIdByPhoneNumber" resultType="java.lang.String">
+    <select id="selectTenantIdByUserName" resultType="java.lang.String">
         select tenant_id
         from sys_user
-        where phone_number = #{phoneNumber}
+        where user_name = #{userName}
     </select>
 
-    <select id="selectUserByPhoneNumber" resultMap="SysUserResult">
+    <select id="selectUserByUserName" resultMap="SysUserResult">
         <include refid="user"/>
         <where>
-            <if test="phoneNumber!=null and phoneNumber!='' ">
-                and u.phone_number = #{phoneNumber}
+            <if test="userName!=null and userName!='' ">
+                and u.user_name = #{userName}
             </if>
         </where>
     </select>
@@ -122,6 +122,16 @@
         <foreach item="tenantId" collection="tenantIds" open="(" separator="," close=")">
             #{tenantId}
         </foreach>
+    </select>
+    <select id="selectTenantIdByPhoneNumber" resultType="java.lang.String">
+        select tenant_id
+        from sys_user
+        where phone_number = #{phoneNumber}
+    </select>
+    <select id="selectPhoneNumberByuserName" resultType="java.lang.String">
+        select phone_number
+        from sys_user
+        where user_name = #{userName}
     </select>
 
 

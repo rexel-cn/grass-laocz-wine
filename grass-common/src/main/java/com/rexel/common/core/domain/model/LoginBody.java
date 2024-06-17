@@ -21,13 +21,13 @@ public class LoginBody implements Serializable {
     /**
      * 用户名
      */
-//    @NotBlank(message = "用户名称不能为空")
-//    private String username;
+    @NotBlank(message = "用户名称不能为空")
+    private String username;
     /**
      * 用户密码
      */
-    @NotBlank(message = "电话号不能为空")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
+   // @NotBlank(message = "电话号不能为空")
+    //@Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
     private String phoneNumber;
 
     /**
