@@ -2,8 +2,10 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczWeighingTank;
+import com.rexel.laocz.domain.vo.LaoczWeighingTankPointInfo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,4 +37,12 @@ public interface LaoczWeighingTankMapper extends BaseMapper<LaoczWeighingTank> {
     List<PointInfo> getPointInfo(Long weighingTankId);
 
     List<WeighingTankVo> selectLaoczWeighingTankListDetail(LaoczWeighingTank laoczWeighingTank);
+
+    /**
+     * 根据测点主键查询称重罐测点信息
+     *
+     * @param pointPrimaryKeys 测点主键
+     * @return 称重罐测点信息
+     */
+    List<LaoczWeighingTankPointInfo> selectLaoczWeighingTankPointInfoByPointPrimaryKeys(@Param("pointPrimaryKeys") List<Long> pointPrimaryKeys);
 }

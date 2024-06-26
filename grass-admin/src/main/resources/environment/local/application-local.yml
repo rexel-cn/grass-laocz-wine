@@ -6,10 +6,10 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://101.132.242.90:33308/laocz_wine?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
+        url: jdbc:mysql://127.0.0.1:3306/laocz_wine_xc?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowMultiQueries=true
         username: root
-        password: RexelMySql998866 #本机数据库
-        #password: 123456 #本机数据库
+        #password: RexelMySql998866 #本机数据库
+        password: 123456 #本机数据库
       # 从库数据源
       slave:
         # 从数据源开关/默认关闭
@@ -59,13 +59,13 @@ spring:
   # redis 配置
   redis:
     # 地址
-    host: 101.132.242.90
+    host: 127.0.0.1
     # 端口，默认为6379
-    port: 36369
+    port: 6379
     # 数据库索引
     database: 1
     # 密码
-    password: 123456
+    #password: 123456
     # 连接超时时间
     timeout: 10s
     lettuce:

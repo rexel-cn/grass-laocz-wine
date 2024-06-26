@@ -2,6 +2,8 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.dto.AreaFireZoneNameDTO;
+import com.rexel.laocz.domain.vo.AreaFireZoneInfo;
 import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import org.springframework.stereotype.Repository;
 
@@ -32,4 +34,13 @@ public interface LaoczFireZoneInfoMapper extends BaseMapper<LaoczFireZoneInfo> {
     int batchLaoczFireZoneInfo(List<LaoczFireZoneInfo> laoczFireZoneInfoList);
 
     List<FireZoneInfoVo> selectLaoczFireZoneInfoListWithArea(LaoczFireZoneInfo laoczFireZoneInfo);
+
+    /**
+     * 根据防火区，场区名称查询防火区信息
+     *
+     * @param areaFireZoneNameDTO 防火区，场区名称
+     * @return 防火区信息
+     */
+    List<AreaFireZoneInfo> selectAreaFireZoneInfoList(List<AreaFireZoneNameDTO> areaFireZoneNameDTO);
+
 }

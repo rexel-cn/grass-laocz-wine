@@ -76,6 +76,27 @@
         </where>
         ORDER BY fzi.dispaly_order
     </select>
+    <select id="selectAreaFireZoneInfoList" resultType="com.rexel.laocz.domain.vo.AreaFireZoneInfo">
+        SELECT
+        lfzi.fire_zone_id,
+        lfzi.fire_zone_name,
+        lai.area_name,
+        COALESCE(COUNT(lp.pump_id), 1) AS pump_count
+        FROM
+        laocz_area_info lai
+        INNER JOIN laocz_fire_zone_info lfzi ON lai.area_id = lfzi.area_id
+        LEFT JOIN laocz_pump lp ON lfzi.fire_zone_id = lp.fire_zone_id
+        <where>
+            (lai.area_name, lfzi.fire_zone_name) IN
+            <foreach collection="list" item="item" separator="," open="(" close=")">
+                (#{item.areaName}, #{item.fireZoneName})
+            </foreach>
+        </where>
+        GROUP BY
+        lfzi.fire_zone_id,
+        lfzi.fire_zone_name,
+        lai.area_name
+    </select>
 
     <insert id="batchLaoczFireZoneInfo" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="fireZoneId">

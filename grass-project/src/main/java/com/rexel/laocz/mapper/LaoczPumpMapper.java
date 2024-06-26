@@ -2,8 +2,10 @@ package com.rexel.laocz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rexel.laocz.domain.LaoczPump;
+import com.rexel.laocz.domain.vo.LaoczPumpPointInfo;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,4 +37,14 @@ public interface LaoczPumpMapper extends BaseMapper<LaoczPump> {
     List<LaoczPumpVo> selectPumpDetails(Long pumpId);
 
     List<PointInfo> getPointInfo(Long pumpId);
+
+    /**
+     * 根据测点主键查询泵测点信息
+     *
+     * @param pointPrimaryKeys 测点主键
+     * @return 泵测点信息
+     */
+    List<LaoczPumpPointInfo> selectLaoczPumpPointInfoByPointPrimaryKeys(@Param("pointPrimaryKeys") List<Long> pointPrimaryKeys);
+
+
 }

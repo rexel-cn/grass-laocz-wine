@@ -98,8 +98,8 @@ public class LaoczAreaInfoController extends BaseController {
     /**
      * 通过场区Id查询防火区信息
      */
-    @GetMapping("/get/{id}")
-    public AjaxResult get(@PathVariable Long id) {
+    @GetMapping({"/get/{id}", "/get"})
+    public AjaxResult get(@PathVariable(value = "id", required = false) Long id) {
         List<LaoczFireZoneInfo> laoczFireZoneInfos = laoczAreaInfoService.getByIdWithfireZoneName(id);
         return AjaxResult.success(laoczFireZoneInfos);
     }

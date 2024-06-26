@@ -2,6 +2,8 @@ package com.rexel.laocz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
+import com.rexel.laocz.domain.dto.AreaFireZoneNameDTO;
+import com.rexel.laocz.domain.vo.AreaFireZoneInfo;
 import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import com.rexel.laocz.domain.vo.TreePullDownVO;
 
@@ -55,4 +57,12 @@ public interface ILaoczFireZoneInfoService extends IService<LaoczFireZoneInfo> {
      * @return 返回
      */
     Boolean deleteLaoczFireZoneInfoById(Long fireZoneId);
+
+    /**
+     * 根据防火区，场区名称查询防火区信息
+     *
+     * @param areaFireZoneNameDTO 防火区，场区名称
+     * @return 防火区信息
+     */
+    List<AreaFireZoneInfo> selectAreaFireZoneInfoList(List<AreaFireZoneNameDTO> areaFireZoneNameDTO);
 }

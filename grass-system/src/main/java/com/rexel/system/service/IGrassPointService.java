@@ -112,4 +112,12 @@ public interface IGrassPointService extends IService<GrassPointInfo> {
      * @return
      */
     NumberCountVO pointStatisticalByTenantId();
+
+    /**
+     * 根据测点表主键id查询
+     *
+     * @param ids 测点表主键id
+     * @return 测点信息
+     */
+    List<GrassPointInfo> selectGrassPointInfoByIds(List<Long> ids);
 }

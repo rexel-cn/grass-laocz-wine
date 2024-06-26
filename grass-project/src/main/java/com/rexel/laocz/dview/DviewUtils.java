@@ -363,7 +363,7 @@ public class DviewUtils {
         } else {
             ip = DictUtils.getDictValue(DVIEW_ADDRESS, DVIEW_IP);
         }
-        return ip;
+        return "127.0.0.1";
     }
 
     private static String getPort() {

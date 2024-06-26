@@ -90,6 +90,27 @@
         </where>
         order by lwt.create_time desc
     </select>
+    <select id="selectLaoczWeighingTankPointInfoByPointPrimaryKeys"
+            resultType="com.rexel.laocz.domain.vo.LaoczWeighingTankPointInfo">
+        SELECT
+        lwt.weighing_tank_id,
+        lwt.weighing_tank_number,
+        lwtp.point_primary_key
+        FROM
+        laocz_weighing_tank lwt
+        INNER JOIN laocz_weighing_tank_point lwtp ON lwt.weighing_tank_id = lwtp.weighing_tank_id
+        <choose>
+            <when test="pointPrimaryKeys != null and pointPrimaryKeys.size() > 0">
+                AND lwtp.point_primary_key IN
+                <foreach collection="pointPrimaryKeys" item="pointPrimaryKey" open="(" close=")" separator=",">
+                    #{pointPrimaryKey}
+                </foreach>
+            </when>
+            <otherwise>
+                AND 1=2
+            </otherwise>
+        </choose>
+    </select>
 
     <insert id="batchLaoczWeighingTank" parameterType="java.util.List"
             useGeneratedKeys="true" keyProperty="weighingTankId">

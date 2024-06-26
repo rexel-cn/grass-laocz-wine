@@ -30,7 +30,7 @@
         from laocz_pump
     </sql>
 
-    <select id="selectLaoczPumpList"  resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
+    <select id="selectLaoczPumpList" resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
         SELECT
         lp.pump_id,
         lp.pump_number,
@@ -56,7 +56,9 @@
                 AND lfzi.area_id = #{areaId}
             </if>
         </where>
-        order by lp.create_time desc
+        ORDER BY
+        CAST(REGEXP_SUBSTR(lp.pump_number, '[0-9]+') AS UNSIGNED),
+        lp.create_time DESC
     </select>
     <select id="selectPumpDetails" resultType="com.rexel.laocz.domain.vo.LaoczPumpVo">
         SELECT
@@ -98,6 +100,26 @@
                 and lp.pump_id = #{pumpId}
             </if>
         </where>
+    </select>
+    <select id="selectLaoczPumpPointInfoByPointPrimaryKeys"
+            resultType="com.rexel.laocz.domain.vo.LaoczPumpPointInfo">
+        SELECT
+        lp.pump_id,
+        lp.pump_number,
+        lpp.point_primary_key
+        FROM laocz_pump lp
+        INNER JOIN laocz_pump_point lpp ON lp.pump_id=lpp.pump_id
+        <choose>
+            <when test="pointPrimaryKeys != null and pointPrimaryKeys.size() > 0">
+                AND lpp.point_primary_key IN
+                <foreach collection="pointPrimaryKeys" item="pointPrimaryKey" open="(" close=")" separator=",">
+                    #{pointPrimaryKey}
+                </foreach>
+            </when>
+            <otherwise>
+                AND 1=2
+            </otherwise>
+        </choose>
     </select>
 
     <insert id="batchLaoczPump" parameterType="java.util.List"

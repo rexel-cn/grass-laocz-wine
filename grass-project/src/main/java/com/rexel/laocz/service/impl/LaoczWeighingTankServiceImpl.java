@@ -11,20 +11,17 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.*;
 import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
+import com.rexel.laocz.domain.vo.LaoczWeighingTankPointInfo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
 import com.rexel.laocz.mapper.LaoczWeighingTankMapper;
 import com.rexel.laocz.service.*;
 import com.rexel.system.domain.GrassPointInfo;
-import com.rexel.system.domain.dto.PulsePointQueryDTO;
 import com.rexel.system.domain.vo.PointQueryVO;
 import com.rexel.system.mapper.GrassPointInfoMapper;
 import com.rexel.system.service.IGrassPointService;
-import com.rexel.system.service.ISysDictDataService;
 import com.rexel.system.service.ISysDictTypeService;
-import com.rexel.system.service.impl.IGrassPointServiceImpl;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 称重罐管理Service业务层处理
@@ -360,6 +356,15 @@ public class LaoczWeighingTankServiceImpl extends ServiceImpl<LaoczWeighingTankM
         //获取全部分页数据已经选择的测点过滤，自己不过滤
         List<PointQueryVO> list = pointInfoMapper.getFilterList(deviceId, pointId, pointName, pointPrimaryKey);
         return list;
+    }
+
+    /**
+     * @param pointPrimaryKeys
+     * @return
+     */
+    @Override
+    public List<LaoczWeighingTankPointInfo> selectLaoczWeighingTankPointInfoByPointPrimaryKeys(List<Long> pointPrimaryKeys) {
+        return baseMapper.selectLaoczWeighingTankPointInfoByPointPrimaryKeys(pointPrimaryKeys);
     }
 
     private void check(List<WeighingTankDto> weighingTankDtos) {

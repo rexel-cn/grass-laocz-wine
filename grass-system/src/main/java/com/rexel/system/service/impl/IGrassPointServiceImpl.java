@@ -375,6 +375,21 @@ public class IGrassPointServiceImpl extends ServiceImpl<GrassPointInfoMapper, Gr
         numberCountVO.setOfflineNumber(offlineCount.get());
         return numberCountVO;
     }
+
+    /**
+     * 根据测点表主键id查询
+     *
+     * @param ids 测点表主键id
+     * @return 测点信息
+     */
+    @Override
+    public List<GrassPointInfo> selectGrassPointInfoByIds(List<Long> ids) {
+        if (CollectionUtil.isNotEmpty(ids)) {
+            return lambdaQuery().in(GrassPointInfo::getId, ids).list();
+        }
+        return null;
+    }
+
     /**
      * 检查并转换导入测点的type,和unit
      *

@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.dto.PumpImportDto;
+import com.rexel.laocz.domain.vo.LaoczPumpPointInfo;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
-import com.rexel.system.domain.vo.PointQueryVO;
 
 import java.util.List;
 
@@ -44,4 +44,12 @@ public interface ILaoczPumpService extends IService<LaoczPump> {
      * @return 布尔
      */
     boolean importPump(List<PumpImportDto> pumpImportDtos);
+
+    /**
+     * 根据测点主键查询泵测点信息
+     *
+     * @param pointPrimaryKeys 测点主键
+     * @return 泵测点信息
+     */
+    List<LaoczPumpPointInfo> selectLaoczPumpPointInfoByPointPrimaryKeys(List<Long> pointPrimaryKeys);
 }

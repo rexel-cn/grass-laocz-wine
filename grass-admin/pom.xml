@@ -35,6 +35,13 @@
                 <environment>prd</environment>
             </properties>
         </profile>
+        <!-- 本地环境 -->
+        <profile>
+            <id>local</id>
+            <properties>
+                <environment>local</environment>
+            </properties>
+        </profile>
     </profiles>
 
     <dependencies>
@@ -165,6 +172,7 @@
                 <excludes><!--打包是排除的节点-->
                     <exclude>environment/dev/*</exclude>
                     <exclude>environment/prd/*</exclude>
+                    <exclude>environment/local/*</exclude>
                 </excludes>
             </resource>
             <!-- 不同环境的资源文件 -->

@@ -1,28 +1,26 @@
 package com.rexel.laocz.asset;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
+import com.rexel.common.annotation.Log;
+import com.rexel.common.annotation.RateLimiter;
+import com.rexel.common.core.controller.BaseController;
+import com.rexel.common.core.domain.AjaxResult;
+import com.rexel.common.core.page.TableDataInfo;
+import com.rexel.common.enums.BusinessType;
+import com.rexel.common.utils.poi.ExcelUtil;
 import com.rexel.laocz.domain.LaoczPump;
 import com.rexel.laocz.domain.dto.PumpAddDto;
 import com.rexel.laocz.domain.dto.PumpImportDto;
-import com.rexel.laocz.domain.dto.WeighingTankDto;
 import com.rexel.laocz.domain.vo.LaoczPumpVo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.service.ILaoczPumpService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.rexel.common.annotation.Log;
-import com.rexel.common.core.controller.BaseController;
-import com.rexel.common.core.domain.AjaxResult;
-import com.rexel.common.enums.BusinessType;
-import com.rexel.common.utils.poi.ExcelUtil;
-import com.rexel.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 泵管理Controller
@@ -113,6 +111,7 @@ public class LaoczPumpController extends BaseController {
      * 导入泵管理列表
      */
     @PostMapping("/import")
+    @RateLimiter(time = 2, count = 1)
     public AjaxResult importWeighingTank(@RequestParam("file") MultipartFile file) throws Exception {
         ExcelUtil<PumpImportDto> util = new ExcelUtil<>(PumpImportDto.class);
         List<PumpImportDto> PumpImportDtos = util.importExcel(file.getInputStream());

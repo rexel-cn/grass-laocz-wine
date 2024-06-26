@@ -6,6 +6,8 @@ import com.rexel.common.exception.ServiceException;
 import com.rexel.laocz.domain.LaoczAreaInfo;
 import com.rexel.laocz.domain.LaoczFireZoneInfo;
 import com.rexel.laocz.domain.LaoczPotteryAltarManagement;
+import com.rexel.laocz.domain.dto.AreaFireZoneNameDTO;
+import com.rexel.laocz.domain.vo.AreaFireZoneInfo;
 import com.rexel.laocz.domain.vo.FireZoneInfoVo;
 import com.rexel.laocz.domain.vo.TreePullDownChildrenVO;
 import com.rexel.laocz.domain.vo.TreePullDownVO;
@@ -137,5 +139,17 @@ public class LaoczFireZoneInfoServiceImpl extends ServiceImpl<LaoczFireZoneInfoM
         }
         return this.removeById(fireZoneId);
     }
+
+    /**
+     * 根据防火区，场区名称查询防火区信息
+     *
+     * @param areaFireZoneNameDTO 防火区，场区名称
+     * @return 防火区信息
+     */
+    @Override
+    public List<AreaFireZoneInfo> selectAreaFireZoneInfoList(List<AreaFireZoneNameDTO> areaFireZoneNameDTO) {
+        return baseMapper.selectAreaFireZoneInfoList(areaFireZoneNameDTO);
+    }
+
 
 }

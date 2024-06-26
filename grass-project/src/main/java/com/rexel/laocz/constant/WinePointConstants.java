@@ -60,4 +60,13 @@ public class WinePointConstants {
      * 完成测点   泵为单位
      */
     public static final String FINISH_POINT = "finish_point";
+
+    /**
+     * 泵标识
+     */
+    public static final String PUMP_MARK = "pump_mark";
+    /**
+     * 称重罐标识
+     */
+    public static final String WEIGHT_MARK = "weight_mark";
 }

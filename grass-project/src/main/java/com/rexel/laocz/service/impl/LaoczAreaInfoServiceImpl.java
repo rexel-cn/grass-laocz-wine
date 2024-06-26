@@ -52,6 +52,9 @@ public class LaoczAreaInfoServiceImpl extends ServiceImpl<LaoczAreaInfoMapper, L
 
     @Override
     public List<LaoczFireZoneInfo> getByIdWithfireZoneName(Long id) {
+        if (id == null) {
+            return null;
+        }
         LambdaQueryWrapper<LaoczFireZoneInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(LaoczFireZoneInfo::getAreaId,id);
         queryWrapper.orderByAsc(LaoczFireZoneInfo::getDispalyOrder);

@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.rexel.laocz.domain.LaoczWeighingTank;
 import com.rexel.laocz.domain.dto.WeighingTankAddDto;
 import com.rexel.laocz.domain.dto.WeighingTankDto;
+import com.rexel.laocz.domain.vo.LaoczWeighingTankPointInfo;
 import com.rexel.laocz.domain.vo.PointInfo;
 import com.rexel.laocz.domain.vo.WeighingTankAddVo;
 import com.rexel.laocz.domain.vo.WeighingTankVo;
-import com.rexel.system.domain.dto.PulsePointQueryDTO;
 import com.rexel.system.domain.vo.PointQueryVO;
 
 import java.util.List;
@@ -60,4 +60,7 @@ public interface ILaoczWeighingTankService extends IService<LaoczWeighingTank> {
      * @return
      */
     List<PointQueryVO> getListPageNoChoice(String deviceId, String pointId,String pointName,String pointPrimaryKey);
+
+    List<LaoczWeighingTankPointInfo> selectLaoczWeighingTankPointInfoByPointPrimaryKeys(List<Long> pointPrimaryKeys);
+
 }

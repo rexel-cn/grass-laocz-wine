@@ -824,10 +824,6 @@ public class WineEntryApplyServiceImpl extends WineAbstract implements WineEntry
      * @param pumpPointMap 泵测点
      */
     private void pausePlc(Map<String, WineDetailPointVO> pumpPointMap) {
-        /*
-            【下发测点】
-            以泵为单位急停信号（待提供）
-         */
         if (!pumpPointMap.containsKey(WinePointConstants.EMERGENCY_STOP)) {
             throw new CustomException("急停测点不存在");
         }
